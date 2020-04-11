@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS 时光书馆 iOS开发 方法的本质 底层探索" />
+
+
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="探索iOS底层探索系列--方法的本质，一个对象是如果调用自己的方法，以及方法转发。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS底层探索系列--方法的本质">
+<meta property="og:url" content="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="探索iOS底层探索系列--方法的本质，一个对象是如果调用自己的方法，以及方法转发。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-14T02:39:50.000Z">
+<meta property="article:modified_time" content="2020-01-14T02:39:50.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="iOS 时光书馆 iOS开发 方法的本质 底层探索">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false,"padding":18},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.ericlife.top/iOS底层探索系列-方法的本质.html"/>
+
+
+
+
+
+  <title>iOS底层探索系列--方法的本质 | 时光书馆</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '[object Object]', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/%5Bobject%20Object%5D">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">iOS底层探索系列--方法的本质</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-01-14T10:39:50+08:00">
+                2020-01-14
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Post modified&#58;</span>
+              
+              <time title="Post modified" itemprop="dateModified" datetime="2020-01-14T10:39:50+08:00">
+                2020-01-14
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS底层探索系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  探索iOS底层探索系列--方法的本质，一个对象是如果调用自己的方法，以及方法转发。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>有下面一份代码：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"FLYPerson.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    NSLog(@<span class="string">"%s"</span>, __func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">       </span><br><span class="line">        FLYPerson * person = [FLYPerson alloc];</span><br><span class="line">        [person walk];</span><br><span class="line">        [FLYPerson say];</span><br><span class="line">        <span class="built_in">run</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用clang编译之后，提取我们想要的部分</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> run() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSLog</span>((<span class="built_in">NSString</span> *)&amp;__NSConstantStringImpl__var_folders_dq_mwrk2yjx1b18hws5lc3pb7g80000gn_T_main_11652b_mi_0, __func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="comment">/* @autoreleasepool */</span> &#123; __AtAutoreleasePool __autoreleasepool; </span><br><span class="line"></span><br><span class="line">        FLYPerson * person = ((FLYPerson *(*)(<span class="keyword">id</span>, SEL))(<span class="keyword">void</span> *)objc_msgSend)((<span class="keyword">id</span>)objc_getClass(<span class="string">"FLYPerson"</span>), sel_registerName(<span class="string">"alloc"</span>));</span><br><span class="line">        ((<span class="keyword">void</span> (*)(<span class="keyword">id</span>, SEL))(<span class="keyword">void</span> *)objc_msgSend)((<span class="keyword">id</span>)person, sel_registerName(<span class="string">"walk"</span>));</span><br><span class="line">        ((<span class="keyword">void</span> (*)(<span class="keyword">id</span>, SEL))(<span class="keyword">void</span> *)objc_msgSend)((<span class="keyword">id</span>)objc_getClass(<span class="string">"FLYPerson"</span>), sel_registerName(<span class="string">"say"</span>));</span><br><span class="line">        run();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="一、runtime"><a href="#一、runtime" class="headerlink" title="一、runtime"></a>一、runtime</h2><p>定义 : 一套由c、c++和汇编编写能够为oc提供运行时功能的api。<br>runtime有两个版本，分别是modern’ 和 ‘legacy’， legacy是老版本中的runtime，Objective-C 2.0 以及后续版本中用的都是modern版本的runtime（参考官方文档）。</p>
+<p>使用方式可以归纳为三种：<br>1、Objective-C code @selector()<br>2、NSObject的方法    NSSelectorFromString()<br>3、sel_registerName 函数api</p>
+<h2 id="一、objc-msgSend"><a href="#一、objc-msgSend" class="headerlink" title="一、objc_msgSend"></a>一、objc_msgSend</h2><p>首先，objc_msgSend是用汇编写的，那么为什么会选用汇编写呢？原因有如下两点</p>
+<ul>
+<li>1、因为在C语言中不可能通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。C语言没有足够做这件事的必要特性。</li>
+<li>2、因为objc_msgSend执行的频率是想当非常之高，所以必须保证执行的足够快，这里汇编也就必然是首选。</li>
+</ul>
+<p>objc_msgSend可以分为快速路径，慢速路径，都是用C实现的。</p>
+<p>作用流程：<br>1：ENTRY _objc_msgSend<br>2: 对消息接受者（id self, sel _cmd） 判断处理<br>3：taggedPointer判断处理<br>4：‘GetClassFromlsa_p16 isa’ 指针处理 - class<br>5：CacheLoopup 查找缓存<br>6：‘cache_t’ 处理 ’bucket’ 以及内存哈希处理<br>   6.1: 找不到递归下一个 ‘bucket’<br>   6.2: 找到了就返回 ‘{imp, sel} = *bucket -&gt; imp’<br>   6.3: 遇到意外就重试<br>   6.4: 找不到就 ‘JumpMiss’<br>7：__objc_msgSend_uncached 告诉找不到缓存 ‘imp’<br>8：‘STATIC_ENTRY __objc_msgSend_uncached’<br>9：‘MethodTableLookup’ 方法表查找<br>   9.1: ‘sava parameter registers’<br>   9.2: ‘self’ 以及 _cmd 准备<br>   9.3: ‘_class_lookupMethodAndLoadCache3’ 调用</p>
+<p>下面展示两种用法：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">int</span> main(<span class="built_in">int</span> argc, <span class="built_in">char</span><span class="operator"> * </span>argv<span class="literal">[]</span>) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">       </span><br><span class="line">        FLYStudent<span class="operator"> * </span>person = <span class="literal">[FLYS<span class="identifier">tudent</span> <span class="identifier">alloc</span>]</span>;</span><br><span class="line"></span><br><span class="line">        objc<span class="constructor">_msgSend(<span class="params">person</span>, <span class="params">sel_registerName</span>(<span class="string">"walk"</span>)</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//调用对象方法</span></span><br><span class="line">        <span class="keyword">struct</span> objc_super flySuper;</span><br><span class="line">        flySuper.receiver    = person;</span><br><span class="line">        flySuper.super_class = <span class="literal">[<span class="identifier">person</span> <span class="identifier">class</span>]</span>;<span class="comment">//receiver的isa</span></span><br><span class="line">        objc<span class="constructor">_msgSendSuper(&amp;<span class="params">flySuper</span>, <span class="params">sel_registerName</span>(<span class="string">"walk"</span>)</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//调用类方法</span></span><br><span class="line">        <span class="keyword">struct</span> objc_super classSuper;</span><br><span class="line">        classSuper.receiver    = <span class="literal">[<span class="identifier">person</span> <span class="identifier">class</span>]</span>;</span><br><span class="line">        classSuper.super_class = object<span class="constructor">_getClass([<span class="params">person</span> <span class="params">class</span>])</span>;<span class="comment">//receiver的isa（或者为receiver的isa的superClass）</span></span><br><span class="line">        objc<span class="constructor">_msgSendSuper(&amp;<span class="params">classSuper</span>, <span class="params">sel_registerName</span>(<span class="string">"sayXiXi"</span>)</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    return <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">IMP _class_lookupMethodAndLoadCache3(<span class="keyword">id</span> obj, SEL sel, Class cls)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> lookUpImpOrForward(cls, sel, obj, </span><br><span class="line">                              <span class="literal">YES</span><span class="comment">/*initialize*/</span>, <span class="literal">NO</span><span class="comment">/*cache*/</span>, <span class="literal">YES</span><span class="comment">/*resolver*/</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"><span class="markdown">/<span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span>*</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>lookUpImpOrForward.</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>The standard IMP lookup. </span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>initialize==NO tries to avoid +initialize (</span>but<span class="markdown"> sometimes fails)</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>cache==NO skips optimistic unlocked lookup (</span>but<span class="markdown"> uses cache elsewhere)</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>Most callers </span>should<span class="markdown"> use initialize==YES and cache==YES.</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>inst is </span>an<span class="markdown"> instance of cls or </span>a<span class="markdown"> subclass thereof, or nil if none is known. </span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">*   </span>If cls is </span>an<span class="markdown"> un-initialized metaclass then </span>a<span class="markdown"> non-nil inst is faster.</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">* </span>May return <span class="emphasis">_objc_</span>msgForward_impcache. IMPs destined for external use </span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">*   </span>must be converted to <span class="emphasis">_objc_</span>msgForward or <span class="emphasis">_objc_</span>msgForward_stret.</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet">*   </span>If </span>you<span class="markdown"> </span>don't<span class="markdown"> want forwarding at all, use lookUpImpOrNil() instead.</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span><span class="strong">*****</span>/</span></span></span><br><span class="line">IMP lookUpImpOrForward(Class cls, SEL sel, id inst, </span><br><span class="line">                       <span class="built_in">bool</span> initialize, <span class="built_in">bool</span> cache, <span class="built_in">bool</span> resolver)</span><br><span class="line">&#123;</span><br><span class="line">    IMP imp = nil;</span><br><span class="line">    <span class="built_in">bool</span> triedResolver = NO;</span><br><span class="line"></span><br><span class="line">    runtimeLock.assertUnlocked();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Optimistic cache lookup</span></span><br><span class="line">    <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">        imp = cache_getImp(cls, sel);</span><br><span class="line">        <span class="keyword">if</span> (imp) <span class="keyword">return</span> imp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// runtimeLock is held during isRealized and isInitialized checking</span></span><br><span class="line">    <span class="comment">// to prevent races against concurrent realization.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// runtimeLock is held during method search to make</span></span><br><span class="line">    <span class="comment">// method-lookup + cache-fill atomic with respect to method addition.</span></span><br><span class="line">    <span class="comment">// Otherwise, a category could be added but ignored indefinitely because</span></span><br><span class="line">    <span class="comment">// the cache was re-filled with the old value after the cache flush on</span></span><br><span class="line">    <span class="comment">// behalf of the category.</span></span><br><span class="line"></span><br><span class="line">    runtimeLock.lock();</span><br><span class="line">    checkIsKnownClass(cls);<span class="comment">//检查是否是已知类</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    如果没有初始化，去初始化该类</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    <span class="keyword">if</span> (!cls-&gt;isRealized()) &#123;</span><br><span class="line">        realizeClass(cls);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    initialize该类</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    <span class="keyword">if</span> (initialize  &amp;&amp;  !cls-&gt;isInitialized()) &#123;</span><br><span class="line">        runtimeLock.unlock();</span><br><span class="line">        _class_initialize (_class_getNonMetaClass(cls, inst));</span><br><span class="line">        runtimeLock.lock();</span><br><span class="line">        <span class="comment">// If sel == initialize, _class_initialize will send +initialize and </span></span><br><span class="line">        <span class="comment">// then the messenger will send +initialize again after this </span></span><br><span class="line">        <span class="comment">// procedure finishes. Of course, if this is not being called </span></span><br><span class="line">        <span class="comment">// from the messenger then it won't happen. 2778172</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"> retry:    </span><br><span class="line">    runtimeLock.assertLocked();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Try this class's cache.</span></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    取缓存，以下为汇编源码，防止被hook，以及运行速度和性能</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    STATIC_ENTRY _cache_getImp</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    GetClassFromIsa_p16 p0</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    CacheLookup GETIMP</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    LGetImpMiss:</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    mov p0, #0</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    ret</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    END_ENTRY _cache_getImp</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    imp = cache_getImp(cls, sel);</span><br><span class="line">    <span class="keyword">if</span> (imp) goto done;</span><br><span class="line"></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    查找当前类里面方法列表</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    <span class="comment">// Try this class's method lists.</span></span><br><span class="line">    &#123;</span><br><span class="line">        Method meth = getMethodNoSuper_nolock(cls, sel);</span><br><span class="line">        <span class="keyword">if</span> (meth) &#123;</span><br><span class="line">            log_and_fill_cache(cls, meth-&gt;imp, sel, inst, cls);</span><br><span class="line">            imp = meth-&gt;imp;</span><br><span class="line">            goto done;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    查找父类里面方法</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    <span class="comment">// Try superclass caches and method lists.</span></span><br><span class="line">    &#123;</span><br><span class="line">        unsigned attempts = unreasonableClassCount();</span><br><span class="line">        <span class="keyword">for</span> (Class curClass = cls-&gt;superclass;</span><br><span class="line">             curClass != nil;</span><br><span class="line">             curClass = curClass-&gt;superclass)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Halt if there is a cycle in the superclass chain.</span></span><br><span class="line">            <span class="keyword">if</span> (--attempts == <span class="number">0</span>) &#123;</span><br><span class="line">                _objc_fatal(<span class="string">"Memory corruption in class list."</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Superclass cache.</span></span><br><span class="line">            imp = cache_getImp(curClass, sel);</span><br><span class="line">            <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">                <span class="keyword">if</span> (imp != (IMP)_objc_msgForward_impcache) &#123;</span><br><span class="line">                    <span class="comment">// Found the method in a superclass. Cache it in this class.</span></span><br><span class="line">                    log_and_fill_cache(cls, imp, sel, inst, curClass);</span><br><span class="line">                    goto done;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// Found a forward:: entry in a superclass.</span></span><br><span class="line">                    <span class="comment">// Stop searching, but don't cache yet; call method </span></span><br><span class="line">                    <span class="comment">// resolver for this class first.</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Superclass method list.</span></span><br><span class="line">            Method meth = getMethodNoSuper_nolock(curClass, sel);</span><br><span class="line">            <span class="keyword">if</span> (meth) &#123;</span><br><span class="line">                log_and_fill_cache(cls, meth-&gt;imp, sel, inst, curClass);</span><br><span class="line">                imp = meth-&gt;imp;</span><br><span class="line">                goto done;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    消息转发机制</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    <span class="comment">// No implementation found. Try method resolver once.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolver  &amp;&amp;  !triedResolver) &#123;</span><br><span class="line">        runtimeLock.unlock();</span><br><span class="line">        _class_resolveMethod(cls, sel, inst);</span><br><span class="line">        runtimeLock.lock();</span><br><span class="line">        <span class="comment">// Don't cache the result; we don't hold the lock so it may have </span></span><br><span class="line">        <span class="comment">// changed already. Re-do the search from scratch instead.</span></span><br><span class="line">        triedResolver = YES;</span><br><span class="line">        goto retry;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// No implementation found, and method resolver didn't help. </span></span><br><span class="line">    <span class="comment">// Use forwarding.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    最终都没有找到，走_objc_msgForward_impcache方法，苹果留的最后的后门，</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    汇编源码：</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    STATIC_ENTRY __objc_msgForward_impcache</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    // No stret specialization.</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    b   __objc_msgForward</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    END_ENTRY __objc_msgForward_impcache</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    ENTRY __objc_msgForward</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    adrp    x17, __objc_forward_handler@PAGE</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    ldr p17, [x17, __objc_forward_handler@PAGEOFF]</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    TailCallFunctionPointer x17</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    </span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    END_ENTRY __objc_msgForward</span></span></span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    以上__objc_forward_handler是非汇编</span></span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="code">    */</span></span></span></span><br><span class="line">    imp = (IMP)_objc_msgForward_impcache;</span><br><span class="line">    cache_fill(cls, sel, imp, inst);</span><br><span class="line"></span><br><span class="line"> done:</span><br><span class="line">    runtimeLock.unlock();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> imp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((noreturn)) <span class="keyword">void</span> </span><br><span class="line">objc_defaultForwardHandler(<span class="keyword">id</span> <span class="keyword">self</span>, SEL sel)</span><br><span class="line">&#123;</span><br><span class="line">    _objc_fatal(<span class="string">"%c[%s %s]: unrecognized selector sent to instance %p "</span></span><br><span class="line">                <span class="string">"(no message forward handler is installed)"</span>, </span><br><span class="line">                class_isMetaClass(object_getClass(<span class="keyword">self</span>)) ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                object_getClassName(<span class="keyword">self</span>), sel_getName(sel), <span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span> *_objc_forward_handler = (<span class="keyword">void</span>*)objc_defaultForwardHandler;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">void</span> _class_resolveMethod(Class cls, <span class="keyword">SEL </span><span class="keyword">sel, </span>id inst)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="meta">if</span> (! cls-&gt;isMetaClass()) &#123;</span><br><span class="line">        // try [cls resolveInstanceMethod:<span class="keyword">sel]</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line"><span class="keyword"> </span>       _class_resolveInstanceMethod(cls, <span class="keyword">sel, </span>inst)<span class="comment">;</span></span><br><span class="line">    &#125; </span><br><span class="line">    <span class="meta">else</span> &#123;</span><br><span class="line">        // try [nonMetaClass resolveClassMethod:<span class="keyword">sel]</span></span><br><span class="line"><span class="keyword"> </span>       // <span class="keyword">and </span>[cls resolveInstanceMethod:<span class="keyword">sel]</span></span><br><span class="line"><span class="keyword"> </span>       _class_resolveClassMethod(cls, <span class="keyword">sel, </span>inst)<span class="comment">;</span></span><br><span class="line">        <span class="meta">if</span> (!lookUpImpOrNil(cls, <span class="keyword">sel, </span>inst, </span><br><span class="line">                            NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">        &#123;</span><br><span class="line">            _class_resolveInstanceMethod(cls, <span class="keyword">sel, </span>inst)<span class="comment">;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _class_resolveInstanceMethod(Class cls, SEL sel, <span class="keyword">id</span> inst)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (! lookUpImpOrNil(cls-&gt;ISA(), SEL_resolveInstanceMethod, cls, </span><br><span class="line">                         <span class="literal">NO</span><span class="comment">/*initialize*/</span>, <span class="literal">YES</span><span class="comment">/*cache*/</span>, <span class="literal">NO</span><span class="comment">/*resolver*/</span>)) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Resolver not implemented.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">BOOL</span> (*msg)(Class, SEL, SEL) = (<span class="keyword">typeof</span>(msg))objc_msgSend;</span><br><span class="line">    <span class="keyword">bool</span> resolved = msg(cls, SEL_resolveInstanceMethod, sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache the result (good or bad) so the resolver doesn't fire next time.</span></span><br><span class="line">    <span class="comment">// +resolveInstanceMethod adds to self a.k.a. cls</span></span><br><span class="line">    IMP imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                             <span class="literal">NO</span><span class="comment">/*initialize*/</span>, <span class="literal">YES</span><span class="comment">/*cache*/</span>, <span class="literal">NO</span><span class="comment">/*resolver*/</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolved  &amp;&amp;  PrintResolving) &#123;</span><br><span class="line">        <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: method %c[%s %s] "</span></span><br><span class="line">                         <span class="string">"dynamically resolved to %p"</span>, </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), imp);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Method resolver didn't add anything?</span></span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: +[%s resolveInstanceMethod:%s] returned YES"</span></span><br><span class="line">                         <span class="string">", but no new implementation of %c[%s %s] was found"</span>,</span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _class_resolveClassMethod(Class cls, SEL sel, <span class="keyword">id</span> inst)</span><br><span class="line">&#123;</span><br><span class="line">    assert(cls-&gt;isMetaClass());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (! lookUpImpOrNil(cls, SEL_resolveClassMethod, inst, </span><br><span class="line">                         <span class="literal">NO</span><span class="comment">/*initialize*/</span>, <span class="literal">YES</span><span class="comment">/*cache*/</span>, <span class="literal">NO</span><span class="comment">/*resolver*/</span>)) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Resolver not implemented.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">BOOL</span> (*msg)(Class, SEL, SEL) = (<span class="keyword">typeof</span>(msg))objc_msgSend;</span><br><span class="line">    <span class="keyword">bool</span> resolved = msg(_class_getNonMetaClass(cls, inst), </span><br><span class="line">                        SEL_resolveClassMethod, sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache the result (good or bad) so the resolver doesn't fire next time.</span></span><br><span class="line">    <span class="comment">// +resolveClassMethod adds to self-&gt;ISA() a.k.a. cls</span></span><br><span class="line">    IMP imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                             <span class="literal">NO</span><span class="comment">/*initialize*/</span>, <span class="literal">YES</span><span class="comment">/*cache*/</span>, <span class="literal">NO</span><span class="comment">/*resolver*/</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolved  &amp;&amp;  PrintResolving) &#123;</span><br><span class="line">        <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: method %c[%s %s] "</span></span><br><span class="line">                         <span class="string">"dynamically resolved to %p"</span>, </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), imp);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Method resolver didn't add anything?</span></span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: +[%s resolveClassMethod:%s] returned YES"</span></span><br><span class="line">                         <span class="string">", but no new implementation of %c[%s %s] was found"</span>,</span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8/" rel="tag"># 方法的本质</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8.html" rel="next" title="iOS底层探索系列--类的本质">
+                <i class="fa fa-chevron-left"></i> iOS底层探索系列--类的本质
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/%5Bobject%20Object%5D"
+                alt="Eric" />
+            
+              <p class="site-author-name" itemprop="name">Eric</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、runtime"><span class="nav-text">一、runtime</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、objc-msgSend"><span class="nav-text">一、objc_msgSend</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

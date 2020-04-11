@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS 时光书馆 iOS开发 底层原理 类的本质" />
+
+
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="探索iOS底层探索系列--类的本质，一个对象是如果分配自己的属性，成员变量，以及方法存储区域的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS底层探索系列--类的本质">
+<meta property="og:url" content="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="探索iOS底层探索系列--类的本质，一个对象是如果分配自己的属性，成员变量，以及方法存储区域的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/objc_class_1.png">
+<meta property="og:image" content="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/objc_class_2.png">
+<meta property="og:image" content="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/cache_t.png">
+<meta property="article:published_time" content="2019-12-22T07:08:19.000Z">
+<meta property="article:modified_time" content="2019-12-22T07:08:19.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="iOS 时光书馆 iOS开发 底层原理 类的本质">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/objc_class_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false,"padding":18},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.ericlife.top/iOS底层探索系列--类的本质.html"/>
+
+
+
+
+
+  <title>iOS底层探索系列--类的本质 | 时光书馆</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '[object Object]', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ericlife.top/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/%5Bobject%20Object%5D">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">iOS底层探索系列--类的本质</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-22T15:08:19+08:00">
+                2019-12-22
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Post modified&#58;</span>
+              
+              <time title="Post modified" itemprop="dateModified" datetime="2019-12-22T15:08:19+08:00">
+                2019-12-22
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS底层探索系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  探索iOS底层探索系列--类的本质，一个对象是如果分配自己的属性，成员变量，以及方法存储区域的。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在讲这边文章之前，假设我们都已经掌握了c语言指针知识。并且已经编译好了苹果开源的objc4-756。<br>关于一些lldb的指令，请移步<a href="https://www.ericlife.top/Xcode%E8%B0%83%E8%AF%95LLDB.html">Xcode调试LLDB</a><br>补充两点：</p>
+<ul>
+<li>p/x 以16进制打印当前地址</li>
+<li>x/4xg 以16进制读取当前对象的首地址向后4位内存地址</li>
+</ul>
+<h2 id="一、查看cpp源码"><a href="#一、查看cpp源码" class="headerlink" title="一、查看cpp源码"></a>一、查看cpp源码</h2><p>首先我们创建一个工程，声明一个FLYPerson类</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="built_in">NS_ASSUME_NONNULL_BEGIN</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">FLYPerson</span> : <span class="title">NSObject</span></span>&#123;</span><br><span class="line">    <span class="built_in">NSString</span> *hobby;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *nickName;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)sayHello;</span><br><span class="line">- (<span class="keyword">void</span>)sayByeBye;</span><br><span class="line">- (<span class="keyword">void</span>)sayGoGo;</span><br><span class="line">+ (<span class="keyword">void</span>)sayHappy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">NS_ASSUME_NONNULL_END</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"FLYPerson.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">FLYPerson</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)sayHello &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"FLYPerson say : Hello!!!"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)sayByeBye &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"FLYPerson say : ByeBye!!!"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)sayGoGo &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"FLYPerson say : GoGo!!!"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">void</span>)sayHappy &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"FLYPerson say : Happy!!!"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>在main函数中我们创建一个对象</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/runtime.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"FLYPerson.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">        <span class="comment">// insert code here...</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"Hello, World!"</span>);</span><br><span class="line">        FLYPerson * person = [[FLYPerson alloc] init];</span><br><span class="line">        Class pClass       = object_getClass(person);</span><br><span class="line">        [person sayHello];</span><br><span class="line">        [person sayByeBye];</span><br><span class="line">        [person sayGoGo];</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@ - %p"</span>, person, pClass);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>利用clang编译成cpp源码(先cd到当前文件的目录):</p>
+<ul>
+<li>clang -rewrite-objc main.m -o main.cpp</li>
+<li>存在UIKit等其他动态引用库时：<br>clang -rewrite-objc -fobjc-arc -fobjc-runtime=ios-13.0.0 -isysroot/Application/Xcode.app/Comtents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.0.sdk main.m</li>
+<li>xcrun xcode 命令<br>模拟器：xcrun -sdk iphonesimulator clang -arch arm64 -rewrite-objc main.m -o main-arm64.cpp<br>真机：xcrun -sdk iphoneos clang -arch arm64 -rewrite-objc main.m -o main-arm64.cpp</li>
+</ul>
+<h2 id="二、在生成的-cpp源码中查看FLYPerson类"><a href="#二、在生成的-cpp源码中查看FLYPerson类" class="headerlink" title="二、在生成的.cpp源码中查看FLYPerson类"></a>二、在生成的.cpp源码中查看FLYPerson类</h2><p>既然我们探究的是类，那就是Class，我们在cpp文件中可以看到：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">objc_class</span> * <span class="title">Class</span>;</span></span><br></pre></td></tr></table></figure>
+<p>这说明，Class其实就是objc_class结构体的指针<br>继续查找，可以发现objc_clss的声明：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> objc_class &#123;</span><br><span class="line">    Class _Nonnull isa <span class="constructor">__attribute__((<span class="params">deprecated</span>)</span>);</span><br><span class="line">&#125; <span class="constructor">__attribute__((<span class="params">unavailable</span>)</span>);</span><br></pre></td></tr></table></figure>
+<p>已经注释已经废弃，没有办法了么？还记得我们已经准备好了756的源码，去源码中搜索objc_class，会发现几点重要信息：<br><img src="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/objc_class_1.png" alt><br>上图中可以证实，class其实就是objc_class</p>
+<p><img src="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/objc_class_2.png" alt></p>
+<h2 id="三、分析objc-class源码"><a href="#三、分析objc-class源码" class="headerlink" title="三、分析objc_class源码"></a>三、分析objc_class源码</h2><h3 id="1、先来了解一下主要的数据结构"><a href="#1、先来了解一下主要的数据结构" class="headerlink" title="1、先来了解一下主要的数据结构"></a>1、先来了解一下主要的数据结构</h3><p>看一下objc_class数据结构：<br>objc-runtime-new.h中struct objc_class : objc_object</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">objc_class</span> :</span> objc_object &#123;</span><br><span class="line">    <span class="comment">// Class ISA;</span></span><br><span class="line">    Class superclass;</span><br><span class="line">    <span class="keyword">cache_t</span> cache;             <span class="comment">// formerly cache pointer and vtable</span></span><br><span class="line">    <span class="keyword">class_data_bits_t</span> bits;    <span class="comment">// class_rw_t * plus custom rr/alloc flags</span></span><br><span class="line"></span><br><span class="line">    ...<span class="comment">//此处省略了结构体内的函数方法，以上是全部属性</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看一下内部属性的各自数据结构，这里的// Class ISA; ISA被隐藏了，这是因为objc_class继承自objc_object</p>
+<figure class="highlight capnproto"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">objc_object</span> </span>&#123;</span><br><span class="line">    Class _Nonnull isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>注意：<br>这里isa用Class类型，应该是与oc的多态类似，isa和class的结构相同，或者isa就是按照class的结构来设计的。</p>
+<p>cache_t：（对sel和imp做缓存，这里有一个3/4缓存机制）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cache_t</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">bucket_t</span> *_<span class="title">buckets</span>;</span> <span class="comment">// 指针占用8字节</span></span><br><span class="line">    <span class="keyword">mask_t</span> _mask;              <span class="comment">// uint32_t类型 32 / 8 = 4字节</span></span><br><span class="line">    <span class="keyword">mask_t</span> _occupied;          <span class="comment">// uint32_t类型 32 / 8 = 4字节</span></span><br><span class="line">    ... <span class="comment">//省略所有函数方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>class_data_bits_t：（这里只有一个属性bits,其中具体的值要转换成data查看，即class_rw_t* data() ）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_data_bits_t</span> &#123;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Values are the FAST_ flags above.</span></span><br><span class="line">    <span class="keyword">uintptr_t</span> bits;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    ...</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">class_rw_t</span>* data() &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">class_rw_t</span> *)(bits &amp; FAST_DATA_MASK);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setData</span><span class="params">(<span class="keyword">class_rw_t</span> *newData)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        assert(!data()  ||  (newData-&gt;flags &amp; (RW_REALIZING | RW_FUTURE)));</span><br><span class="line">        <span class="comment">// Set during realization or construction only. No locking needed.</span></span><br><span class="line">        <span class="comment">// Use a store-release fence because there may be concurrent</span></span><br><span class="line">        <span class="comment">// readers of data and data's contents.</span></span><br><span class="line">        <span class="keyword">uintptr_t</span> newBits = (bits &amp; ~FAST_DATA_MASK) | (<span class="keyword">uintptr_t</span>)newData;</span><br><span class="line">        atomic_thread_fence(memory_order_release);</span><br><span class="line">        bits = newBits;</span><br><span class="line">    &#125;</span><br><span class="line">    ...<span class="comment">//以下函数省略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>class_rw_t的数据结构：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_rw_t</span> &#123;</span></span><br><span class="line">    <span class="comment">// Be warned that Symbolication knows the layout of this structure.</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> version;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">class_ro_t</span> *ro;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">method_array_t</span> methods;</span><br><span class="line">    <span class="keyword">property_array_t</span> properties;</span><br><span class="line">    <span class="keyword">protocol_array_t</span> protocols;</span><br><span class="line"></span><br><span class="line">    Class firstSubclass;</span><br><span class="line">    Class nextSiblingClass;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> *demangledName;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SUPPORT_INDEXED_ISA</span></span><br><span class="line">    <span class="keyword">uint32_t</span> index;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setFlags</span><span class="params">(<span class="keyword">uint32_t</span> <span class="built_in">set</span>)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        OSAtomicOr32Barrier(<span class="built_in">set</span>, &amp;flags);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">clearFlags</span><span class="params">(<span class="keyword">uint32_t</span> <span class="built_in">clear</span>)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        OSAtomicXor32Barrier(<span class="built_in">clear</span>, &amp;flags);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// set and clear must not overlap</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">changeFlags</span><span class="params">(<span class="keyword">uint32_t</span> <span class="built_in">set</span>, <span class="keyword">uint32_t</span> <span class="built_in">clear</span>)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        assert((<span class="built_in">set</span> &amp; <span class="built_in">clear</span>) == <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">uint32_t</span> oldf, newf;</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            oldf = flags;</span><br><span class="line">            newf = (oldf | <span class="built_in">set</span>) &amp; ~<span class="built_in">clear</span>;</span><br><span class="line">        &#125; <span class="keyword">while</span> (!OSAtomicCompareAndSwap32Barrier(oldf, newf, (<span class="keyword">volatile</span> <span class="keyword">int32_t</span> *)&amp;flags));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>class_ro_t的数据结构：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_ro_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceStart;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceSize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __LP64__</span></span><br><span class="line">    <span class="keyword">uint32_t</span> reserved;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * ivarLayout;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * name;</span><br><span class="line">    <span class="keyword">method_list_t</span> * baseMethodList;</span><br><span class="line">    <span class="keyword">protocol_list_t</span> * baseProtocols;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> * ivars;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * weakIvarLayout;</span><br><span class="line">    <span class="keyword">property_list_t</span> *baseProperties;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">method_list_t</span> *baseMethods() <span class="keyword">const</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> baseMethodList;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="2、计算objc-class中各属性占用的字节长度"><a href="#2、计算objc-class中各属性占用的字节长度" class="headerlink" title="2、计算objc_class中各属性占用的字节长度"></a>2、计算objc_class中各属性占用的字节长度</h3><p>提取出objc_class中的属性：<br>    Class ISA;                 // 8字节<br>    Class superclass;          // 8字节<br>    cache_t cache;             // 经过计算后为16字节<br>    class_data_bits_t bits;    // class_rw_t * plus custom rr/alloc flags</p>
+<h3 id="3、获取类中成员变量、属性和method"><a href="#3、获取类中成员变量、属性和method" class="headerlink" title="3、获取类中成员变量、属性和method"></a>3、获取类中成员变量、属性和method</h3><p>此时回到我们main函数:<br>利用lldb指令打印FLYperson对象指针地址：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x/<span class="number">4</span>gx pClass</span><br><span class="line"><span class="number">0x1000021f8</span>: <span class="number">0x001d8001000021d1</span> <span class="number">0x0000000100b37140</span></span><br><span class="line"><span class="number">0x100002208</span>: <span class="number">0x00000001003da290</span> <span class="number">0x0000000000000000</span></span><br></pre></td></tr></table></figure>
+<p>0x1000021f8 偏移8个字节，刚好到superclass的首地址，打印出了superclass</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(lldb) po <span class="number">0x100002200</span></span><br><span class="line">&lt;NSObject: <span class="number">0x100002200</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>利用内存地址偏移，0x100002208 较 0x1000021f8 刚好偏移16位，刚好指向objc_class中的cache的首地址</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(lldb) po <span class="number">0x100002208</span></span><br><span class="line"><span class="number">4294976008</span></span><br></pre></td></tr></table></figure>
+<p>打印cache的首地址，发现是一串数字，因为cache是结构体，内部有多个值，进行了内存对齐，所以打印出来的是多个值的组合，先过滤，最后进行摸索，由于cache是16位，从cache首地址偏移16位，就能到达bits首地址</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">(lldb)</span> <span class="string">po</span> <span class="number">0x100002218</span></span><br><span class="line"><span class="string">objc[14430]:</span> <span class="string">Attempt</span> <span class="string">to</span> <span class="string">use</span> <span class="string">unknown</span> <span class="string">class</span> <span class="number">0x101e09dd0</span><span class="string">.</span></span><br><span class="line"><span class="number">4294976024</span></span><br><span class="line"></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="number">0x100002218</span></span><br><span class="line"><span class="string">(long)</span> <span class="string">$5</span> <span class="string">=</span> <span class="number">4294976024</span></span><br></pre></td></tr></table></figure>
+<p>两种方式均报错了,尝试强转（因为已经不是oc中对象类型，以下都是用p来打印）</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p (class_data_bits_t *)<span class="number">0x100002218</span></span><br><span class="line">(class_data_bits_t *) $<span class="number">7</span> = <span class="number">0x0000000100002218</span></span><br></pre></td></tr></table></figure>
+<p>此时用到class_data_bits_t中的方法(此方法是通过掩码的方式，将数据获取出来，FAST_DATA_MASK是掩码)</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">class_rw_t</span>* <span class="class"><span class="keyword">data</span>() &#123;</span></span><br><span class="line"><span class="class">    <span class="title">return</span> (<span class="title">class_rw_t</span> *)(<span class="title">bits</span> &amp; <span class="type">FAST_DATA_MASK</span>);</span></span><br><span class="line"><span class="class">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>继续获取：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p $<span class="number">7</span>-&gt;data()</span><br><span class="line">(class_rw_t *) $<span class="number">9</span> = <span class="number">0x0000000101e09dd0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//取$9的值</span></span><br><span class="line">(lldb) p *$<span class="number">9</span></span><br><span class="line">(class_rw_t) $<span class="number">10</span> = &#123;</span><br><span class="line">  flags = <span class="number">2148139008</span></span><br><span class="line">  version = <span class="number">0</span></span><br><span class="line">  ro = <span class="number">0x0000000100002170</span></span><br><span class="line">  methods = &#123;</span><br><span class="line">    list_array_tt&lt;method_t, method_list_t&gt; = &#123;</span><br><span class="line">       = &#123;</span><br><span class="line">        list = <span class="number">0x00000001000020a8</span></span><br><span class="line">        <span class="built_in">array</span>AndFlag = <span class="number">4294975656</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  properties = &#123;</span><br><span class="line">    list_array_tt&lt;property_t, property_list_t&gt; = &#123;</span><br><span class="line">       = &#123;</span><br><span class="line">        list = <span class="number">0x0000000100002158</span></span><br><span class="line">        <span class="built_in">array</span>AndFlag = <span class="number">4294975832</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  protocols = &#123;</span><br><span class="line">    list_array_tt&lt;unsigned long, protocol_list_t&gt; = &#123;</span><br><span class="line">       = &#123;</span><br><span class="line">        list = <span class="number">0x0000000000000000</span></span><br><span class="line">        <span class="built_in">array</span>AndFlag = <span class="number">0</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  firstSubclass = nil</span><br><span class="line">  nextSiblingClass = NSUUID</span><br><span class="line">  demangledName = <span class="number">0x0000000000000000</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p $<span class="number">10.</span>ro</span><br><span class="line">(<span class="keyword">const</span> class_ro_t *) $<span class="number">11</span> = <span class="number">0x0000000100002170</span></span><br><span class="line">(lldb) p *$<span class="number">11</span></span><br><span class="line">(<span class="keyword">const</span> class_ro_t) $<span class="number">12</span> = &#123;</span><br><span class="line">  flags = <span class="number">388</span></span><br><span class="line">  instanceStart = <span class="number">8</span></span><br><span class="line">  instanceSize = <span class="number">24</span></span><br><span class="line">  reserved = <span class="number">0</span></span><br><span class="line">  ivarLayout = <span class="number">0x0000000100000f45</span> <span class="string">"\x02"</span></span><br><span class="line">  name = <span class="number">0x0000000100000f3b</span> <span class="string">"FLYPerson"</span></span><br><span class="line">  baseMethodList = <span class="number">0x00000001000020a8</span></span><br><span class="line">  baseProtocols = <span class="number">0x0000000000000000</span></span><br><span class="line">  ivars = <span class="number">0x0000000100002110</span></span><br><span class="line">  weakIvarLayout = <span class="number">0x0000000000000000</span></span><br><span class="line">  baseProperties = <span class="number">0x0000000100002158</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>属性：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p $<span class="number">12.</span>baseProperties</span><br><span class="line">(property_list_t *const) $<span class="number">13</span> = <span class="number">0x0000000100002158</span></span><br><span class="line">(lldb) p *$<span class="number">13</span></span><br><span class="line">(property_list_t) $<span class="number">14</span> = &#123;</span><br><span class="line">  entsize_list_tt&lt;property_t, property_list_t, <span class="number">0</span>&gt; = &#123;</span><br><span class="line">    entsizeAndFlags = <span class="number">16</span></span><br><span class="line">    count = <span class="number">1</span></span><br><span class="line">    first = (name = <span class="string">"nickName"</span>, attributes = <span class="string">"T@<span class="subst">\"</span>NSString<span class="subst">\"</span>,C,N,V_nickName"</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>成员变量：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p $<span class="number">12.</span>ivars</span><br><span class="line">(const ivar_list_t *const) $<span class="number">15</span> = <span class="number">0x0000000100002110</span></span><br><span class="line">(lldb) p *$<span class="number">15</span></span><br><span class="line">(const ivar_list_t) $<span class="number">16</span> = &#123;</span><br><span class="line">  entsize_list_tt&lt;ivar_t, ivar_list_t, <span class="number">0</span>&gt; = &#123;</span><br><span class="line">    entsizeAndFlags = <span class="number">32</span></span><br><span class="line">    count = <span class="number">2</span></span><br><span class="line">    first = &#123;</span><br><span class="line">      offset = <span class="number">0x00000001000021c0</span></span><br><span class="line">      name = <span class="number">0x0000000100000f7d</span> <span class="string">"hobby"</span></span><br><span class="line">      type = <span class="number">0x0000000100000fa8</span> <span class="string">"@<span class="subst">\"</span>NSString<span class="subst">\"</span>"</span></span><br><span class="line">      alignment_raw = <span class="number">3</span></span><br><span class="line">      size = <span class="number">8</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>方法列表：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p $<span class="number">12.</span>baseMethodList</span><br><span class="line">(method_list_t *<span class="keyword">const</span>) $<span class="number">17</span> = <span class="number">0x00000001000020a8</span></span><br><span class="line">(lldb) p *$<span class="number">17</span></span><br><span class="line">(method_list_t) $<span class="number">18</span> = &#123;</span><br><span class="line">  entsize_list_tt&lt;method_t, method_list_t, <span class="number">3</span>&gt; = &#123;</span><br><span class="line">    entsizeAndFlags = <span class="number">26</span></span><br><span class="line">    count = <span class="number">4</span></span><br><span class="line">    first = &#123;</span><br><span class="line">      name = <span class="string">"sayHello"</span></span><br><span class="line">      types = <span class="number">0x0000000100000f8d</span> <span class="string">"v16@0:8"</span></span><br><span class="line">      imp = <span class="number">0x0000000100000c90</span> (FLYTest`-[FLYPerson sayHello] at FLYPerson.m:<span class="number">12</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>count = 4 说明有4个方法，让我们一一打印(get是结构体中的函数，可去结构体中查看)</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p <span class="meta">$18</span>.<span class="keyword">get</span>(<span class="number">0</span>)</span><br><span class="line">(method_t) <span class="meta">$19</span> = &#123;</span><br><span class="line">  <span class="type">name</span> = "sayHello"</span><br><span class="line">  <span class="keyword">types</span> = <span class="number">0x0000000100000f8d</span> "v16@0:8"</span><br><span class="line">  imp = <span class="number">0x0000000100000c90</span> (FLYTest`-[FLYPerson sayHello] at FLYPerson.m:<span class="number">12</span>)</span><br><span class="line">&#125;</span><br><span class="line">(lldb) p <span class="meta">$18</span>.<span class="keyword">get</span>(<span class="number">1</span>)</span><br><span class="line">(method_t) <span class="meta">$20</span> = &#123;</span><br><span class="line">  <span class="type">name</span> = ".cxx_destruct"</span><br><span class="line">  <span class="keyword">types</span> = <span class="number">0x0000000100000f8d</span> "v16@0:8"</span><br><span class="line">  imp = <span class="number">0x0000000100000d60</span> (FLYTest`-[FLYPerson .cxx_destruct] at FLYPerson.m:<span class="number">10</span>)</span><br><span class="line">&#125;</span><br><span class="line">(lldb) p <span class="meta">$18</span>.<span class="keyword">get</span>(<span class="number">2</span>)</span><br><span class="line">(method_t) <span class="meta">$21</span> = &#123;</span><br><span class="line">  <span class="type">name</span> = "setNickName:"</span><br><span class="line">  <span class="keyword">types</span> = <span class="number">0x0000000100000f9d</span> "v24@0:8@16"</span><br><span class="line">  imp = <span class="number">0x0000000100000d20</span> (FLYTest`-[FLYPerson setNickName:] at FLYPerson.h:<span class="number">16</span>)</span><br><span class="line">&#125;</span><br><span class="line">(lldb) p <span class="meta">$18</span>.<span class="keyword">get</span>(<span class="number">3</span>)</span><br><span class="line">(method_t) <span class="meta">$22</span> = &#123;</span><br><span class="line">  <span class="type">name</span> = "nickName"</span><br><span class="line">  <span class="keyword">types</span> = <span class="number">0x0000000100000f95</span> "@16@0:8"</span><br><span class="line">  imp = <span class="number">0x0000000100000cf0</span> (FLYTest`-[FLYPerson nickName] at FLYPerson.h:<span class="number">16</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上并没有类方法，因为类方法是存放在元类中的,让我们来获取该类的ISA，即该类的元类</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x/<span class="number">4</span>xg pClass</span><br><span class="line"><span class="number">0x1000021f8</span>: <span class="number">0x001d8001000021d1</span> <span class="number">0x0000000100b37140</span></span><br><span class="line"><span class="number">0x100002208</span>: <span class="number">0x00000001003da290</span> <span class="number">0x0000000000000000</span></span><br><span class="line"></span><br><span class="line">(lldb) po <span class="number">0x001d8001000021d1</span> &amp; <span class="number">0x00007ffffffffff8</span></span><br><span class="line">FLYPerson</span><br><span class="line"></span><br><span class="line">(lldb) p/x <span class="number">0x001d8001000021d1</span> &amp; <span class="number">0x00007ffffffffff8</span></span><br><span class="line">(long) $<span class="number">3</span> = <span class="number">0x00000001000021d0</span></span><br><span class="line"></span><br><span class="line">(lldb) x/<span class="number">4</span>gx <span class="number">0x00000001000021d0</span></span><br><span class="line"><span class="number">0x1000021d0</span>: <span class="number">0x001d800100b370f1</span> <span class="number">0x0000000100b370f0</span></span><br><span class="line"><span class="number">0x1000021e0</span>: <span class="number">0x000000010112bcb0</span> <span class="number">0x0000000100000003</span></span><br><span class="line"></span><br><span class="line">(lldb) p (class_data_bits_t *)<span class="number">0x1000021f0</span></span><br><span class="line">(class_data_bits_t *) $<span class="number">5</span> = <span class="number">0x00000001000021f0</span></span><br><span class="line"></span><br><span class="line">(lldb) p $<span class="number">5</span>-&gt;data()</span><br><span class="line">(class_rw_t *) $<span class="number">7</span> = <span class="number">0x0000000101111ac0</span></span><br><span class="line"></span><br><span class="line">(lldb) p $<span class="number">7</span>-&gt;ro</span><br><span class="line">(<span class="keyword">const</span> class_ro_t *) $<span class="number">8</span> = <span class="number">0x0000000100002060</span></span><br><span class="line"></span><br><span class="line">(lldb) p *$<span class="number">8</span></span><br><span class="line">(<span class="keyword">const</span> class_ro_t) $<span class="number">9</span> = &#123;</span><br><span class="line">  flags = <span class="number">389</span></span><br><span class="line">  instanceStart = <span class="number">40</span></span><br><span class="line">  instanceSize = <span class="number">40</span></span><br><span class="line">  reserved = <span class="number">0</span></span><br><span class="line">  ivarLayout = <span class="number">0x0000000000000000</span></span><br><span class="line">  name = <span class="number">0x0000000100000f3b</span> <span class="string">"FLYPerson"</span></span><br><span class="line">  baseMethodList = <span class="number">0x0000000100002040</span></span><br><span class="line">  baseProtocols = <span class="number">0x0000000000000000</span></span><br><span class="line">  ivars = <span class="number">0x0000000000000000</span></span><br><span class="line">  weakIvarLayout = <span class="number">0x0000000000000000</span></span><br><span class="line">  baseProperties = <span class="number">0x0000000000000000</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">(lldb) p $<span class="number">9.</span>baseMethodList</span><br><span class="line">(method_list_t *<span class="keyword">const</span>) $<span class="number">11</span> = <span class="number">0x0000000100002040</span></span><br><span class="line"></span><br><span class="line">(lldb) p *$<span class="number">11</span></span><br><span class="line">(method_list_t) $<span class="number">12</span> = &#123;</span><br><span class="line">  entsize_list_tt&lt;method_t, method_list_t, <span class="number">3</span>&gt; = &#123;</span><br><span class="line">    entsizeAndFlags = <span class="number">26</span></span><br><span class="line">    count = <span class="number">1</span></span><br><span class="line">    first = &#123;</span><br><span class="line">      name = <span class="string">"sayHappy"</span></span><br><span class="line">      types = <span class="number">0x0000000100000f8d</span> <span class="string">"v16@0:8"</span></span><br><span class="line">      imp = <span class="number">0x0000000100000cc0</span> (FLYTest`+[FLYPerson sayHappy] at FLYPerson.m:<span class="number">16</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>经过一顿操作之后，又回到了上述的地方（至于0x00007ffffffffff8怎么来的，会在另一篇文章中指出）</p>
+<p>小结：<br>在获取成员变量、属性和方法的时候，objc_class -&gt; bits -&gt; class_rw_t * data() -&gt; class_ro_t * ro -&gt; 获取对应的属性。<br>此处需要注意的是：在class_rw_t中</p>
+<ul>
+<li>method_array_t methods;</li>
+<li>property_array_t properties;</li>
+<li>protocol_array_t protocols;</li>
+</ul>
+<p>还不清楚这三个属性的作用，有时间补充</p>
+<h3 id="4、探索cache的原理"><a href="#4、探索cache的原理" class="headerlink" title="4、探索cache的原理"></a>4、探索cache的原理</h3><p>看一下cache_t完整的结构体</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cache_t</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">bucket_t</span> *_<span class="title">buckets</span>;</span> <span class="comment">//实际存储区 </span></span><br><span class="line">    <span class="keyword">mask_t</span> _mask;     <span class="comment">// 当前容量</span></span><br><span class="line">    <span class="keyword">mask_t</span> _occupied; <span class="comment">// 当前占据</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">struct bucket_t *<span class="title">buckets</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="keyword">mask_t</span> mask();</span><br><span class="line">    <span class="keyword">mask_t</span> occupied();</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">incrementOccupied</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setBucketsAndMask</span><span class="params">(struct <span class="keyword">bucket_t</span> *newBuckets, <span class="keyword">mask_t</span> newMask)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">initializeToEmpty</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">mask_t</span> capacity();</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isConstantEmptyCache</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">canBeFreed</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> size_t <span class="title">bytesForCapacity</span><span class="params">(<span class="keyword">uint32_t</span> cap)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> struct bucket_t * <span class="title">endMarker</span><span class="params">(struct <span class="keyword">bucket_t</span> *b, <span class="keyword">uint32_t</span> cap)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">expand</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">reallocate</span><span class="params">(<span class="keyword">mask_t</span> oldCapacity, <span class="keyword">mask_t</span> newCapacity)</span></span>;</span><br><span class="line">    <span class="function">struct bucket_t * <span class="title">find</span><span class="params">(<span class="keyword">cache_key_t</span> key, id receiver)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">bad_cache</span><span class="params">(id receiver, SEL sel, Class isa)</span> __<span class="title">attribute__</span><span class="params">((noreturn))</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>bucket_t的结构：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">bucket_t</span> &#123;</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// IMP-first is better for arm64e ptrauth and no worse for arm64.</span></span><br><span class="line">    <span class="comment">// SEL-first is better for armv7* and i386 and x86_64.</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> __arm64__</span></span><br><span class="line">    MethodCacheIMP _imp;</span><br><span class="line">    <span class="keyword">cache_key_t</span> _key;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    <span class="keyword">cache_key_t</span> _key;</span><br><span class="line">    MethodCacheIMP _imp;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">inline</span> cache_key_t <span class="title">key</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> _key; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">inline</span> IMP <span class="title">imp</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> (IMP)_imp; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">inline</span> <span class="keyword">void</span> <span class="title">setKey</span><span class="params">(<span class="keyword">cache_key_t</span> newKey)</span> </span>&#123; _key = newKey; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">inline</span> <span class="keyword">void</span> <span class="title">setImp</span><span class="params">(IMP newImp)</span> </span>&#123; _imp = newImp; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">set</span><span class="params">(<span class="keyword">cache_key_t</span> newKey, IMP newImp)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可见，sel和imp都是存在bucket_t中。<br>跑一下项目，将断点打在[person sayGoGo]，利用lldb查看内存</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">(lldb)</span> <span class="string">x</span> <span class="string">person</span></span><br><span class="line"><span class="attr">0x102100020:</span> <span class="string">4d</span> <span class="number">22</span> <span class="number">00</span> <span class="number">00</span> <span class="number">01</span> <span class="number">80</span> <span class="string">1d</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  <span class="string">M"..............</span></span><br><span class="line"><span class="attr">0x102100030:</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  <span class="string">................</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="string">(cache_t</span> <span class="string">*)0x102100030</span></span><br><span class="line"><span class="string">(cache_t</span> <span class="string">*)</span> <span class="string">$1</span> <span class="string">=</span> <span class="number">0x0000000102100030</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="string">*$1</span></span><br><span class="line"><span class="string">(cache_t)</span> <span class="string">$2</span> <span class="string">=</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">_buckets</span> <span class="string">=</span> <span class="number">0x0000000000000000</span></span><br><span class="line">  <span class="string">_mask</span> <span class="string">=</span> <span class="number">0</span></span><br><span class="line">  <span class="string">_occupied</span> <span class="string">=</span> <span class="number">0</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">x</span> <span class="string">pClass</span></span><br><span class="line"><span class="attr">0x100002248:</span> <span class="number">21</span> <span class="number">22</span> <span class="number">00</span> <span class="number">00</span> <span class="number">01</span> <span class="number">80</span> <span class="string">1d</span> <span class="number">00</span> <span class="number">40</span> <span class="number">71</span> <span class="string">b3</span> <span class="number">00</span> <span class="number">01</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  <span class="string">!"......@q......</span></span><br><span class="line"><span class="attr">0x100002258:</span> <span class="number">80</span> <span class="number">01</span> <span class="number">10</span> <span class="number">02</span> <span class="number">01</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">03</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">03</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  <span class="string">................</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="string">(cache_t</span> <span class="string">*)0x100002258</span></span><br><span class="line"><span class="string">(cache_t</span> <span class="string">*)</span> <span class="string">$4</span> <span class="string">=</span> <span class="number">0x0000000100002258</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="string">*$4</span></span><br><span class="line"><span class="string">(cache_t)</span> <span class="string">$5</span> <span class="string">=</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">_buckets</span> <span class="string">=</span> <span class="number">0x0000000102100180</span></span><br><span class="line">  <span class="string">_mask</span> <span class="string">=</span> <span class="number">3</span></span><br><span class="line">  <span class="string">_occupied</span> <span class="string">=</span> <span class="number">3</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="string">$5._buckets</span></span><br><span class="line"><span class="string">(bucket_t</span> <span class="string">*)</span> <span class="string">$6</span> <span class="string">=</span> <span class="number">0x0000000102100180</span></span><br><span class="line"><span class="string">(lldb)</span> <span class="string">p</span> <span class="string">*$6</span></span><br><span class="line"><span class="string">(bucket_t)</span> <span class="string">$7</span> <span class="string">=</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">_key</span> <span class="string">=</span> <span class="number">4294971196</span></span><br><span class="line">  <span class="string">_imp</span> <span class="string">=</span> <span class="number">0x0000000100000ba0</span> <span class="string">(FLYTest`-[FLYPerson</span> <span class="string">sayHello]</span> <span class="string">at</span> <span class="string">FLYPerson.m:12)</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，我们先获取person的cache_t,发现内部的值都是空值，又来获取其Class的cache_t,发现是有值的，得出结论，对象的方法列表缓存是存在其类对象中(其实就是对象的ISA中，因为对象的元类就是其Class)。<br>既然我们知道了方法是缓存在class中，那我们直接探索class中方法的缓存策略。</p>
+<p>经过诸多尝试，我们发现，对象在调用方法的时候，执行的步骤大概如下：<br><img src="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/cache_t.png" alt="cache_t大概流程"><br>重点来了，看一下</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">static void cache_fill_nolock(Class cls, SEL sel, IMP imp, id receiver)</span><br><span class="line">&#123;</span><br><span class="line">    cacheUpdateLock.assertLocked();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Never cache before +initialize is done</span></span><br><span class="line">    <span class="function"><span class="title">if</span> (!cls-&gt;</span>isInitialized()) return;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Make sure the entry wasn't added to the cache by some other thread </span></span><br><span class="line">    <span class="comment">// before we grabbed the cacheUpdateLock.</span></span><br><span class="line">    <span class="keyword">if</span> (cache_getImp(cls, sel)) return;</span><br><span class="line"></span><br><span class="line">    cache_t *cache = getCache(cls);</span><br><span class="line">    cache_key_t key = getKey(sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Use the cache as-is if it is less than 3/4 full</span></span><br><span class="line">    <span class="function"><span class="title">mask_t</span> newOccupied = cache-&gt;</span>occupied() + <span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="title">mask_t</span> capacity = cache-&gt;</span>capacity();</span><br><span class="line">    <span class="function"><span class="title">if</span> (cache-&gt;</span>isConstantEmptyCache()) &#123;</span><br><span class="line">        <span class="comment">// Cache is read-only. Replace it.</span></span><br><span class="line">        <span class="function"><span class="title">cache</span>-&gt;</span>reallocate(capacity, capacity ?: INIT_CACHE_SIZE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (newOccupied &lt;= capacity / <span class="number">4</span> * <span class="number">3</span>) &#123;</span><br><span class="line">        <span class="comment">// Cache is less than 3/4 full. Use it as-is.</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Cache is too full. Expand it.</span></span><br><span class="line">        <span class="function"><span class="title">cache</span>-&gt;</span>expand();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Scan for the first unused slot and insert there.</span></span><br><span class="line">    <span class="comment">// There is guaranteed to be an empty slot because the </span></span><br><span class="line">    <span class="comment">// minimum size is 4 and we resized at 3/4 full.</span></span><br><span class="line">    <span class="function"><span class="title">bucket_t</span> *bucket = cache-&gt;</span>find(key, receiver);</span><br><span class="line">    <span class="function"><span class="title">if</span> (bucket-&gt;</span><span class="function"><span class="title">key</span>() == 0) cache-&gt;</span>incrementOccupied();</span><br><span class="line">    <span class="function"><span class="title">bucket</span>-&gt;</span>set(key, imp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight hsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cache_t *getCache(Class <span class="keyword">cls</span>) </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">assert</span>(<span class="keyword">cls</span>)<span class="comment">;</span></span><br><span class="line">    <span class="keyword">return</span> &amp;<span class="keyword">cls</span>-&gt;cache<span class="comment">;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cache_key_t <span class="keyword">getKey</span>(SEL sel) </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">assert</span>(sel)<span class="comment">;</span></span><br><span class="line">    <span class="keyword">return</span> (cache_key_t)sel<span class="comment">;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上两个方法没什么好说的，一个获取cache，一个获取sel的key，这里是把（char类型）sel转成了unsigned long，因为数字比char容易处理，且速度快。<br>cache-&gt;capacity() 方法：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mask_t cache_t::capacity() </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> mask() ? mask()+<span class="number">1</span> : <span class="number">0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>capacity 获取新的容量，在原基础上+1。</p>
+<p>cache-&gt;reallocate方法：</p>
+<figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">void cache_t:<span class="type"></span>:reallocate(mask_t oldCapacity, mask_t <span class="keyword">new</span><span class="type">Capacity</span>)</span><br><span class="line">&#123;</span><br><span class="line">    bool freeOld = canBeFreed();</span><br><span class="line"></span><br><span class="line">    bucket_t *oldBuckets = buckets();</span><br><span class="line">    bucket_t *<span class="keyword">new</span><span class="type">Buckets</span> = allocateBuckets(<span class="keyword">new</span><span class="type">Capacity</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache's old contents are not propagated. </span></span><br><span class="line">    <span class="comment">// This is thought to save cache memory at the cost of extra cache fills.</span></span><br><span class="line">    <span class="comment">// fixme re-measure this</span></span><br><span class="line"></span><br><span class="line">    assert(<span class="keyword">new</span><span class="type">Capacity</span> &gt; <span class="number">0</span>);</span><br><span class="line">    assert((uintptr_t)(mask_t)(<span class="keyword">new</span><span class="type">Capacity</span>-<span class="number">1</span>) == <span class="keyword">new</span><span class="type">Capacity</span>-<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    setBucketsAndMask(<span class="keyword">new</span><span class="type">Buckets</span>, <span class="keyword">new</span><span class="type">Capacity</span> - <span class="number">1</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (freeOld) &#123;</span><br><span class="line">        cache_collect_free(oldBuckets, oldCapacity);</span><br><span class="line">        cache_collect(<span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>reallocate方法，开辟新空间，会把原来的内存都释放掉，也就是会把原来缓存的内容全部清除掉。</p>
+<p>cache-&gt;expand方法：</p>
+<figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void cache_t:<span class="type"></span>:expand()</span><br><span class="line">&#123;</span><br><span class="line">    cacheUpdateLock.assertLocked();</span><br><span class="line">    </span><br><span class="line">    uint32_t oldCapacity = capacity();</span><br><span class="line">    uint32_t <span class="keyword">new</span><span class="type">Capacity</span> = oldCapacity ? oldCapacity*<span class="number">2</span> : <span class="type">INIT_CACHE_SIZE</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((uint32_t)(mask_t)<span class="keyword">new</span><span class="type">Capacity</span> != <span class="keyword">new</span><span class="type">Capacity</span>) &#123;</span><br><span class="line">        <span class="comment">// mask overflow - can't grow further</span></span><br><span class="line">        <span class="comment">// fixme this wastes one bit of mask</span></span><br><span class="line">        <span class="keyword">new</span><span class="type">Capacity</span> = oldCapacity;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    reallocate(oldCapacity, <span class="keyword">new</span><span class="type">Capacity</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>expand是扩容方法，从代码中可以得知，如果原来的容量是0，则创建为4的新容量，如果不是0，则扩展为原来的两倍。扩容的时候会在最后一位插入key为1，值根据不同设备存不同的值。容量设置为4-1或者两倍-1。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bucket_t</span> * <span class="keyword">cache_t</span>::<span class="built_in">find</span>(<span class="keyword">cache_key_t</span> k, id receiver)</span><br><span class="line">&#123;</span><br><span class="line">    assert(k != <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">bucket_t</span> *b = buckets();</span><br><span class="line">    <span class="keyword">mask_t</span> m = mask();</span><br><span class="line">    <span class="keyword">mask_t</span> <span class="built_in">begin</span> = cache_hash(k, m);</span><br><span class="line">    <span class="keyword">mask_t</span> i = <span class="built_in">begin</span>;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (b[i].key() == <span class="number">0</span>  ||  b[i].key() == k) &#123;</span><br><span class="line">            <span class="keyword">return</span> &amp;b[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">while</span> ((i = cache_next(i, m)) != <span class="built_in">begin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// hack</span></span><br><span class="line">    Class cls = (Class)((<span class="keyword">uintptr_t</span>)<span class="keyword">this</span> - offsetof(objc_class, cache));</span><br><span class="line">    <span class="keyword">cache_t</span>::bad_cache(receiver, (SEL)k, cls);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>find方法找到对应当前sel的bucket，如果找不到获取一个空的bucket，如果没有空的则报错。这里其实有一个算法，所以每次遍历并不是从0开始的，所以每次缓存方法的时候的位置不是依次存储的，而是根据该算法有关。</p>
+<p>小结：<br>知道了每个方法的作用，不难看出cache的机制，进来之后先判断cache是否为空，如果为空，创建空间为4的容量的缓存区。如果非空，且当前占据小于等于总容量的3/4,直接进行缓存，如果大于总容量3/4则进行扩容，扩容过程中会把之前的缓存清掉，然后将当前要缓存的进行缓存。</p>
+<h2 id="四、最后"><a href="#四、最后" class="headerlink" title="四、最后"></a>四、最后</h2><p>以上只是一个读取类的数据结构的思路，这里主要是经过了内存地址读取，内存偏移，分析结构体等等，重要的是思路和过程，当然结果也重要，毕竟可以吹一波了！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/" rel="tag"># 类的本质</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E8%BF%87%E7%A8%8B.html" rel="next" title="iOS底层探索系列--创建对象过程">
+                <i class="fa fa-chevron-left"></i> iOS底层探索系列--创建对象过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8.html" rel="prev" title="iOS底层探索系列--方法的本质">
+                iOS底层探索系列--方法的本质 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/%5Bobject%20Object%5D"
+                alt="Eric" />
+            
+              <p class="site-author-name" itemprop="name">Eric</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、查看cpp源码"><span class="nav-text">一、查看cpp源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、在生成的-cpp源码中查看FLYPerson类"><span class="nav-text">二、在生成的.cpp源码中查看FLYPerson类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、分析objc-class源码"><span class="nav-text">三、分析objc_class源码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、先来了解一下主要的数据结构"><span class="nav-text">1、先来了解一下主要的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、计算objc-class中各属性占用的字节长度"><span class="nav-text">2、计算objc_class中各属性占用的字节长度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、获取类中成员变量、属性和method"><span class="nav-text">3、获取类中成员变量、属性和method</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、探索cache的原理"><span class="nav-text">4、探索cache的原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、最后"><span class="nav-text">四、最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

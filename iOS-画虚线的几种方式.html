@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="画虚线," />
+
+
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="一、重写drawRect方法1234567891011121314151617 - (void)drawRect:(CGRect)rect&amp;#123; 	[super drawRect:rect];	 CGContextRef currentContext &#x3D; UIGraphicsGetCurrentContext(); 	 &#x2F;&#x2F;设置虚线颜色 	 CGContextSetStrokeColorWi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS-画虚线的几种方式">
+<meta property="og:url" content="https://www.ericlife.top/iOS-%E7%94%BB%E8%99%9A%E7%BA%BF%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="一、重写drawRect方法1234567891011121314151617 - (void)drawRect:(CGRect)rect&amp;#123; 	[super drawRect:rect];	 CGContextRef currentContext &#x3D; UIGraphicsGetCurrentContext(); 	 &#x2F;&#x2F;设置虚线颜色 	 CGContextSetStrokeColorWi">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-02-24T02:50:15.000Z">
+<meta property="article:modified_time" content="2018-06-13T05:21:05.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="画虚线">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false,"padding":18},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.ericlife.top/iOS-画虚线的几种方式.html"/>
+
+
+
+
+
+  <title>iOS-画虚线的几种方式 | 时光书馆</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '[object Object]', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ericlife.top/iOS-%E7%94%BB%E8%99%9A%E7%BA%BF%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/%5Bobject%20Object%5D">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">iOS-画虚线的几种方式</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-02-24T10:50:15+08:00">
+                2017-02-24
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Post modified&#58;</span>
+              
+              <time title="Post modified" itemprop="dateModified" datetime="2018-06-13T13:21:05+08:00">
+                2018-06-13
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一、重写drawRect方法"><a href="#一、重写drawRect方法" class="headerlink" title="一、重写drawRect方法"></a>一、重写drawRect方法</h2><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> - (void)drawRect:(CGRect)rect</span><br><span class="line">&#123; </span><br><span class="line">	<span class="literal">[<span class="identifier">super</span> <span class="identifier">drawRect</span>:<span class="identifier">rect</span>]</span>;</span><br><span class="line">	 CGContextRef currentContext = <span class="constructor">UIGraphicsGetCurrentContext()</span>; </span><br><span class="line">	 <span class="comment">//设置虚线颜色 </span></span><br><span class="line">	 <span class="constructor">CGContextSetStrokeColorWithColor(<span class="params">currentContext</span>, [UIColor BlackColor].CGColor)</span>; </span><br><span class="line">	 <span class="comment">//设置虚线宽度 </span></span><br><span class="line">	 <span class="constructor">CGContextSetLineWidth(<span class="params">currentContext</span>, 1)</span>; </span><br><span class="line">	 <span class="comment">//设置虚线绘制起点 </span></span><br><span class="line">	 <span class="constructor">CGContextMoveToPoint(<span class="params">currentContext</span>, 0, 0)</span>; </span><br><span class="line">	 <span class="comment">//设置虚线绘制终点 </span></span><br><span class="line">	 <span class="constructor">CGContextAddLineToPoint(<span class="params">currentContext</span>, <span class="params">self</span>.<span class="params">frame</span>.<span class="params">origin</span>.<span class="params">x</span> + <span class="params">self</span>.<span class="params">frame</span>.<span class="params">size</span>.<span class="params">width</span>, 0)</span>; <span class="comment">//设置虚线排列的宽度间隔:下面的arr中的数字表示先绘制3个点再绘制1个点 </span></span><br><span class="line">	 CGFloat arr<span class="literal">[]</span> = &#123;<span class="number">3</span>,<span class="number">1</span>&#125;; </span><br><span class="line">	 <span class="comment">//下面最后一个参数“2”代表排列的个数。 </span></span><br><span class="line">	 <span class="constructor">CGContextSetLineDash(<span class="params">currentContext</span>, 0, <span class="params">arr</span>, 2)</span>; </span><br><span class="line">	 <span class="constructor">CGContextDrawPath(<span class="params">currentContext</span>, <span class="params">kCGPathStroke</span>)</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看着这些代码肯定有一部分人头疼，因为一般开发绘图部分用的比较少，特别是很少接触这些东西的人，甚至对绘图这部分的只是已经忘光了，所以在这里自己也脑补一下。<strong>以下来自转载</strong><br>iOS的绘图操作是在UIView类的drawRect方法中完成的，所以如果我们要想在一个UIView中绘图，需要写一个扩展UIView 的类，并重写drawRect方法，在这里进行绘图操作，程序会自动调用此方法进行绘图。下面先说明一下绘图，比如，你想绘制一个方块，你需要写一个类来扩展UIView并在drawRect方法中填入如下代码：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">- (void)drawRect:(CGRect)rect &#123; </span><br><span class="line">	<span class="comment">// Drawing code. </span></span><br><span class="line">	<span class="comment">//获得处理的上下文 </span></span><br><span class="line">	CGContextRef context = <span class="constructor">UIGraphicsGetCurrentContext()</span>; </span><br><span class="line">	<span class="comment">//设置线条样式 </span></span><br><span class="line">	<span class="constructor">CGContextSetLineCap(<span class="params">context</span>, <span class="params">kCGLineCapSquare</span>)</span>; </span><br><span class="line">	<span class="comment">//设置线条粗细宽度 </span></span><br><span class="line">	<span class="constructor">CGContextSetLineWidth(<span class="params">context</span>, 1.0)</span>; </span><br><span class="line">	<span class="comment">//设置颜色 </span></span><br><span class="line">	<span class="constructor">CGContextSetRGBStrokeColor(<span class="params">context</span>, 1.0, 0.0, 0.0, 1.0)</span>; </span><br><span class="line">	<span class="comment">//开始一个起始路径 </span></span><br><span class="line">	<span class="constructor">CGContextBeginPath(<span class="params">context</span>)</span>; </span><br><span class="line">	<span class="comment">//起始点设置为(0,0):注意这是上下文对应区域中的相对坐标 </span></span><br><span class="line">	<span class="constructor">CGContextMoveToPoint(<span class="params">context</span>, 0, 0)</span>; </span><br><span class="line">	<span class="comment">//设置下一个坐标点 </span></span><br><span class="line">	<span class="constructor">CGContextAddLineToPoint(<span class="params">context</span>, 100, 100)</span>; </span><br><span class="line">	/设置下一个坐标点 </span><br><span class="line">	<span class="constructor">CGContextAddLineToPoint(<span class="params">context</span>, 0, 150)</span>; </span><br><span class="line">	<span class="comment">//设置下一个坐标点 CGContextAddLineToPoint(context, 50, 180); </span></span><br><span class="line">	<span class="comment">//连接上面定义的坐标点 </span></span><br><span class="line">	<span class="constructor">CGContextStrokePath(<span class="params">context</span>)</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再说明一下重绘，重绘操作仍然在drawRect方法中完成，但是苹果不建议直接调用drawRect方法，当然如果你强行直接调用此方法，当然是没有效果的。苹果要求我们调用UIView类中的setNeedsDisplay方法，则程序会自动调用drawRect方法进行重绘（调用setNeedsDisplay会自动调用drawRect）。<br>在UIView中,重写drawRect: (CGRect)aRect方法,可以自己定义想要画的图案.且此方法一般情况下只会画一次.也就是说这个drawRect方法一般情况下只会被掉用一次。当某些情况下想要手动重画这个View,只需要掉用<strong>[self setNeedsDisplay]</strong>方法即可.<br>drawRect的执行顺序及注意<br><strong>drawRect调是在Controller-&gt;loadView, Controller-&gt;viewDidLoad 两方法之后掉用的</strong>.<br>如果在UIView初始化时没有设置rect大小，将直接导致drawRect不被自动调用。<br>该方法在调用sizeThatFits后被调用，所以可以先调用sizeToFit计算出size。然后系统自动调用drawRect:方法。<br>通过设置contentMode属性值为UIViewContentModeRedraw。那么将在每次设置或更改frame的时候自动调用drawRect:。<br>直接调用setNeedsDisplay，或者setNeedsDisplayInRect:触发drawRect:，但是有个前提条件是rect不能为0.</p>
+<blockquote>
+<p>以上1,2推荐；而3,4不提倡<br>若使用UIView绘图，只能在drawRect：方法中获取相应的contextRef并绘图。如果在其他方法中获取将获取到一个invalidate的ref并且不能用于画图。drawRect：方法不能手动显示调用，必须通过调用setNeedsDisplay 或者 setNeedsDisplayInRect ，让系统自动调该方法。若使用calayer绘图，只能在drawInContext:中（类似鱼drawRect）绘制，或者在delegate中的相应方法绘制。同样也是调用setNeedDisplay等间接调用以上方法。若要实时画图，不能使用gestureRecognizer，只能使用touchbegan等方法来掉用setNeedsDisplay实时刷新屏幕转载地址：<a href="http://blog.csdn.net/fww330666557/article/details/8647608" target="_blank" rel="noopener">http://blog.csdn.net/fww330666557/article/details/8647608</a></p>
+</blockquote>
+<h2 id="二、通过UIImage的绘图方法来绘制"><a href="#二、通过UIImage的绘图方法来绘制" class="headerlink" title="二、通过UIImage的绘图方法来绘制"></a>二、通过UIImage的绘图方法来绘制</h2><p>// 画虚线// 创建一个imageView 高度是你想要的虚线的高度 一般设为2<br>_lineImg = [[UIImageView alloc] initWithFrame:CGRectMake(0, 20, kScreenWidth, 2)];<br>// 调用方法 返回的iamge就是虚线<br>_lineImg.image = [self drawLineByImageView:_lineImg];<br>// 添加到控制器的view上<br>[self.view addSubview:_lineImg];<br>// 返回虚线image的方法</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">- (UIImage *)drawLineByImageView:(UIImageView *)imageView</span><br><span class="line">&#123; </span><br><span class="line">	<span class="constructor">UIGraphicsBeginImageContext(<span class="params">imageView</span>.<span class="params">frame</span>.<span class="params">size</span>)</span>;</span><br><span class="line">	<span class="comment">//开始画线 划线的frame </span></span><br><span class="line">	<span class="literal">[<span class="identifier">imageView</span>.<span class="identifier">image</span> <span class="identifier">drawInRect</span>:CGR<span class="identifier">ectMake</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="identifier">imageView</span>.<span class="identifier">frame</span>.<span class="identifier">size</span>.<span class="identifier">width</span>, <span class="identifier">imageView</span>.<span class="identifier">frame</span>.<span class="identifier">size</span>.<span class="identifier">height</span>)]</span>; </span><br><span class="line">	<span class="comment">//设置线条终点形状 </span></span><br><span class="line">	<span class="constructor">CGContextSetLineCap(UIGraphicsGetCurrentContext()</span>, kCGLineCapRound); </span><br><span class="line">	<span class="comment">// 5是每个虚线的长度 1是高度 </span></span><br><span class="line">	<span class="built_in">float</span> lengths<span class="literal">[]</span> = &#123;<span class="number">5</span>,<span class="number">1</span>&#125;; </span><br><span class="line">	CGContextRef line = <span class="constructor">UIGraphicsGetCurrentContext()</span>; </span><br><span class="line">	<span class="comment">// 设置颜色 </span></span><br><span class="line">	<span class="constructor">CGContextSetStrokeColorWithColor(<span class="params">line</span>, [UIColor <span class="params">colorWithWhite</span>:0.408 <span class="params">alpha</span>:1.000].CGColor)</span>; </span><br><span class="line">	<span class="constructor">CGContextSetLineDash(<span class="params">line</span>, 0, <span class="params">lengths</span>, 2)</span>; </span><br><span class="line">	<span class="comment">//画虚线 </span></span><br><span class="line">	<span class="constructor">CGContextMoveToPoint(<span class="params">line</span>, 0.0, 2.0)</span>; </span><br><span class="line">	<span class="comment">//开始画线 CGContextAddLineToPoint(line, kScreenWidth - 10, 2.0); </span></span><br><span class="line">	<span class="constructor">CGContextStrokePath(<span class="params">line</span>)</span>;</span><br><span class="line">	<span class="constructor">UIGraphicsGetImageFromCurrentImageContext()</span></span><br><span class="line">	<span class="comment">//返回的就是image</span></span><br><span class="line">	return <span class="constructor">UIGraphicsGetImageFromCurrentImageContext()</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="三、通过CAShapeLayer方式绘制虚线"><a href="#三、通过CAShapeLayer方式绘制虚线" class="headerlink" title="三、通过CAShapeLayer方式绘制虚线"></a>三、通过CAShapeLayer方式绘制虚线</h2><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment">** lineView: 需要绘制成虚线的view </span></span><br><span class="line"><span class="comment">** lineLength: 虚线的宽度 </span></span><br><span class="line"><span class="comment">** lineSpacing: 虚线的间距 </span></span><br><span class="line"><span class="comment">** lineColor: 虚线的颜色 </span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">+ (<span class="keyword">void</span>)drawDashLine:(<span class="built_in">UIView</span> *)lineView lineLength:(<span class="keyword">int</span>)lineLength lineSpacing:(<span class="keyword">int</span>)lineSpacing lineColor:(<span class="built_in">UIColor</span> *)lineColor</span><br><span class="line">&#123; </span><br><span class="line">	<span class="built_in">CAShapeLayer</span> *shapeLayer = [<span class="built_in">CAShapeLayer</span> layer]; </span><br><span class="line">	[shapeLayer setBounds:lineView.bounds]; </span><br><span class="line">	[shapeLayer setPosition:<span class="built_in">CGPointMake</span>(<span class="built_in">CGRectGetWidth</span>(lineView.frame) / <span class="number">2</span>, <span class="built_in">CGRectGetHeight</span>(lineView.frame))];</span><br><span class="line">	[shapeLayer setFillColor:[<span class="built_in">UIColor</span> clearColor].CGColor]; </span><br><span class="line">	<span class="comment">// 设置虚线颜色为blackColor </span></span><br><span class="line">	[shapeLayer setStrokeColor:lineColor.CGColor]; </span><br><span class="line">	<span class="comment">// 设置虚线宽度 </span></span><br><span class="line">	[shapeLayer setLineWidth:<span class="built_in">CGRectGetHeight</span>(lineView.frame)]; </span><br><span class="line">	[shapeLayer setLineJoin:kCALineJoinRound]; </span><br><span class="line">	<span class="comment">// 设置线宽，线间距 </span></span><br><span class="line">	[shapeLayer setLineDashPattern:[<span class="built_in">NSArray</span> arrayWithObjects:[<span class="built_in">NSNumber</span> numberWithInt:lineLength], [<span class="built_in">NSNumber</span> numberWithInt:lineSpacing], <span class="literal">nil</span>]]; </span><br><span class="line">	<span class="comment">// 设置路径 CGMutablePathRef path = CGPathCreateMutable(); CGPathMoveToPoint(path, NULL, 0, 0);</span></span><br><span class="line">	<span class="built_in">CGPathAddLineToPoint</span>(path, <span class="literal">NULL</span>,<span class="built_in">CGRectGetWidth</span>(lineView.frame), <span class="number">0</span>); </span><br><span class="line">	[shapeLayer setPath:path]; <span class="built_in">CGPathRelease</span>(path); </span><br><span class="line">	<span class="comment">// 把绘制好的虚线添加上来 </span></span><br><span class="line">	[lineView.layer addSublayer:shapeLayer]; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这部分代码，有一个注意点：就是position和anchorPoint的区别，这点有兴趣的可以去脑补一下。当然layer上的绘图，我也感觉自己很low了，因为形式没用过，所以基本上快忘光了，所以自己也需要花时间去脑补一下。链接：<a href="http://wonderffee.github.io/blog/2013/10/13/understand-anchorpoint-and-position/" target="_blank" rel="noopener">http://wonderffee.github.io/blog/2013/10/13/understand-anchorpoint-and-position/</a></p>
+<h2 id="四、图片平铺（简单暴力）"><a href="#四、图片平铺（简单暴力）" class="headerlink" title="四、图片平铺（简单暴力）"></a>四、图片平铺（简单暴力）</h2><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UIImageView</span> *imgDashLineView =[[<span class="built_in">UIImageView</span> alloc] initWithFrame:<span class="built_in">CGRectMake</span>(<span class="number">15</span>, <span class="number">200</span>, <span class="keyword">self</span>.view.frame.size.width - <span class="number">30</span>, <span class="number">1</span>)];</span><br><span class="line">[imgDashLineView setBackgroundColor:[<span class="built_in">UIColor</span> colorWithPatternImage:[<span class="built_in">UIImage</span> imageNamed:<span class="string">@"xuxian.png"</span>]]];</span><br><span class="line">[<span class="keyword">self</span>.view addSubview:imgDashLineView];</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%94%BB%E8%99%9A%E7%BA%BF/" rel="tag"># 画虚线</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/iOS%E5%BC%80%E5%8F%91%E5%B8%B8%E7%94%A8%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0.html" rel="prev" title="iOS开发常用数学函数">
+                iOS开发常用数学函数 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/%5Bobject%20Object%5D"
+                alt="Eric" />
+            
+              <p class="site-author-name" itemprop="name">Eric</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、重写drawRect方法"><span class="nav-text">一、重写drawRect方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、通过UIImage的绘图方法来绘制"><span class="nav-text">二、通过UIImage的绘图方法来绘制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、通过CAShapeLayer方式绘制虚线"><span class="nav-text">三、通过CAShapeLayer方式绘制虚线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、图片平铺（简单暴力）"><span class="nav-text">四、图片平铺（简单暴力）</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

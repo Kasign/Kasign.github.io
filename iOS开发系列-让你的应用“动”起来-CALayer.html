@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="动画,layer," />
+
+
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="概览在iOS中随处都可以看到绚丽的动画效果，实现这些动画的过程并不复杂，今天将带大家一窥iOS动画全貌。在这里你可以看到iOS中如何使用图层精简非交互式绘图，如何通过核心动画创建基础动画、关键帧动画、动画组、转场动画，如何通过UIView的装饰方法对这些动画操作进行简化等。在今天的文章里您可以看到动画操作在iOS中是如何简单和高效，很多原来想做但是苦于没有思路的动画在iOS中将变得越发简单：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS开发系列-让你的应用“动”起来--CALayer">
+<meta property="og:url" content="https://www.ericlife.top/iOS%E5%BC%80%E5%8F%91%E7%B3%BB%E5%88%97-%E8%AE%A9%E4%BD%A0%E7%9A%84%E5%BA%94%E7%94%A8%E2%80%9C%E5%8A%A8%E2%80%9D%E8%B5%B7%E6%9D%A5-CALayer.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="概览在iOS中随处都可以看到绚丽的动画效果，实现这些动画的过程并不复杂，今天将带大家一窥iOS动画全貌。在这里你可以看到iOS中如何使用图层精简非交互式绘图，如何通过核心动画创建基础动画、关键帧动画、动画组、转场动画，如何通过UIView的装饰方法对这些动画操作进行简化等。在今天的文章里您可以看到动画操作在iOS中是如何简单和高效，很多原来想做但是苦于没有思路的动画在iOS中将变得越发简单：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-1436b711fc0fd157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-cab9986817414c4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-b3a99537419dce31.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-983f8fbeb04c3dea.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-0ce398f485925bea.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-37d68836198e596b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2017-03-01T03:00:05.000Z">
+<meta property="article:modified_time" content="2018-06-13T05:21:05.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="动画">
+<meta property="article:tag" content="layer">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/2647951-1436b711fc0fd157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false,"padding":18},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.ericlife.top/iOS开发系列-让你的应用“动”起来-CALayer.html"/>
+
+
+
+
+
+  <title>iOS开发系列-让你的应用“动”起来--CALayer | 时光书馆</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '[object Object]', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ericlife.top/iOS%E5%BC%80%E5%8F%91%E7%B3%BB%E5%88%97-%E8%AE%A9%E4%BD%A0%E7%9A%84%E5%BA%94%E7%94%A8%E2%80%9C%E5%8A%A8%E2%80%9D%E8%B5%B7%E6%9D%A5-CALayer.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/%5Bobject%20Object%5D">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">iOS开发系列-让你的应用“动”起来--CALayer</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-01T11:00:05+08:00">
+                2017-03-01
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Post modified&#58;</span>
+              
+              <time title="Post modified" itemprop="dateModified" datetime="2018-06-13T13:21:05+08:00">
+                2018-06-13
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h1><p>在iOS中随处都可以看到绚丽的动画效果，实现这些动画的过程并不复杂，今天将带大家一窥iOS动画全貌。在这里你可以看到iOS中如何使用图层精简非交互式绘图，如何通过核心动画创建基础动画、关键帧动画、动画组、转场动画，如何通过UIView的装饰方法对这些动画操作进行简化等。在今天的文章里您可以看到动画操作在iOS中是如何简单和高效，很多原来想做但是苦于没有思路的动画在iOS中将变得越发简单：</p>
+<blockquote>
+<ul>
+<li>CALayer:<ul>
+<li>CALayer简介</li>
+<li>CALayer常用属性</li>
+<li>CALayer绘图</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h1 id="CALayer"><a href="#CALayer" class="headerlink" title="CALayer"></a>CALayer</h1><h2 id="1-CALayer简介"><a href="#1-CALayer简介" class="headerlink" title="1. CALayer简介"></a>1. CALayer简介</h2><p>在介绍动画操作之前我们必须先来了解一个动画中常用的对象CALayer。CALayer包含在QuartzCore框架中，这是一个跨平台的框架，既可以用在iOS中又可以用在Mac OS X中。在使用Core Animation开发动画的本质就是将CALayer中的内容转化为位图从而供硬件操作，所以要熟练掌握动画操作必须先来熟悉CALayer。</p>
+<p>使用Quartz 2D绘图时大家其实已经用到了CALayer，当利用drawRect:方法绘图的本质就是绘制到了UIView的layer（属性）中，可是这个过程大家在上一节中根本体会不到。但是在Core Animation中我们操作更多的则不再是UIView而是直接面对CALayer。下图描绘了CALayer和UIView的关系，在UIView中有一个layer属性作为根图层，根图层上可以放其他子图层，在UIView中所有能够看到的内容都包含在layer中：<br><img src="http://upload-images.jianshu.io/upload_images/2647951-1436b711fc0fd157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+<hr>
+<h2 id="2-CALayer常用属性"><a href="#2-CALayer常用属性" class="headerlink" title="2. CALayer常用属性"></a>2. CALayer常用属性</h2><p>在iOS中CALayer的设计主要是了为了内容展示和动画操作，CALayer本身并不包含在UIKit中，它不能响应事件。由于CALayer在设计之初就考虑它的动画操作功能，CALayer很多属性在修改时都能形成动画效果，这种属性称为“隐式动画属性”。但是对于UIView的根图层而言属性的修改并不形成动画效果，因为很多情况下根图层更多的充当容器的做用，如果它的属性变动形成动画效果会直接影响子图层。另外，UIView的根图层创建工作完全由iOS负责完成，无法重新创建，但是可以往根图层中添加子图层或移除子图层。</p>
+<p>下表列出了CALayer常用的属性：</p>
+<table>
+<thead>
+<tr>
+<th align="center">属性</th>
+<th>说明</th>
+<th align="center">是否支持隐式动画</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">anchorPoint</td>
+<td>和中心点position重合的一个点，称为“锚点”，锚点的描述是相对于x、y位置比例而言的默认在图像中心点(0.5,0.5)的位置</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">backgroundColor</td>
+<td>图层背景颜色</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">borderColor</td>
+<td>边框颜色</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">borderWidth</td>
+<td>边框宽度</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">bounds</td>
+<td>图层大小</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">contents</td>
+<td>图层显示内容，例如可以将图片作为图层内容显示</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">contentsRect</td>
+<td>图层显示内容的大小和位置</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">cornerRadius</td>
+<td>圆角半径</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">doubleSided</td>
+<td>图层背面是否显示，默认为YES</td>
+<td align="center">否</td>
+</tr>
+<tr>
+<td align="center">frame</td>
+<td>图层大小和位置，不支持隐式动画，所以CALayer中很少使用frame，通常使用bounds和position代替</td>
+<td align="center">否</td>
+</tr>
+<tr>
+<td align="center">hidden</td>
+<td>是否隐藏</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">mask</td>
+<td>图层蒙版</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">maskToBounds</td>
+<td>子图层是否剪切图层边界，默认为NO</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">opacity</td>
+<td>透明度 ，类似于UIView的alpha</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">position</td>
+<td>图层中心点位置，类似于UIView的center</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">shadowColor</td>
+<td>阴影颜色</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">shadowOffset</td>
+<td>阴影偏移量</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">shadowOpacity</td>
+<td>阴影透明度，注意默认为0，如果设置阴影必须设置此属性</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">shadowPath</td>
+<td>阴影的形状</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">shadowRadius</td>
+<td>阴影模糊半径</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">sublayers</td>
+<td>子图层</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">sublayerTransform</td>
+<td>子图层形变</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">transform</td>
+<td>图层形变</td>
+<td align="center">是</td>
+</tr>
+</tbody></table>
+<ul>
+<li>隐式属性动画的本质是这些属性的变动默认隐含了CABasicAnimation动画实现，详情大家可以参照Xcode帮助文档中“Animatable Properties”一节。</li>
+<li>在CALayer中很少使用frame属性，因为frame本身不支持动画效果，通常使用bounds和position代替。</li>
+<li>CALayer中透明度使用opacity表示而不是alpha；中心点使用position表示而不是center。</li>
+<li>anchorPoint属性是图层的锚点，范围在（0<del>1,0</del>1）表示在x、y轴的比例，这个点永远可以同position（中心点）重合，当图层中心点固定后，调整anchorPoint即可达到调整图层显示位置的作用（因为它永远和position重合）</li>
+</ul>
+<p>为了进一步说明anchorPoint的作用，假设有一个层大小100*100，现在中心点位置（50,50），由此可以得出frame（0,0,100,100）。上面说过anchorPoint默认为（0.5,0.5），同中心点position重合，此时使用图形描述如图1；当修改anchorPoint为（0,0），此时锚点处于图层左上角，但是中心点poition并不会改变，因此图层会向右下角移动，如图2；然后修改anchorPoint为（1,1,），position还是保持位置不变，锚点处于图层右下角，此时图层如图3。<br><img src="http://upload-images.jianshu.io/upload_images/2647951-cab9986817414c4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>下面通过一个简单的例子演示一下上面几个属性，程序初始化阶段我们定义一个正方形，但是圆角路径调整为正方形边长的一半，使其看起来是一个圆形，在点击屏幕的时候修改图层的属性形成动画效果（注意在程序中没有直接修改UIView的layer属性，因为根图层无法形成动画效果）：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  KCMainViewController.m</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCMainViewController.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> WIDTH 50</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">KCMainViewController</span> ()</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCMainViewController</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">	[<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">	[<span class="keyword">self</span> drawMyLayer];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark 绘制图层</span></span><br><span class="line">-(<span class="keyword">void</span>)drawMyLayer&#123;</span><br><span class="line">	<span class="built_in">CGSize</span> size=[<span class="built_in">UIScreen</span> mainScreen].bounds.size;</span><br><span class="line">	<span class="comment">//获得根图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layer=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	<span class="comment">//设置背景颜色,由于QuartzCore是跨平台框架，无法直接使用UIColor</span></span><br><span class="line">	layer.backgroundColor=[<span class="built_in">UIColor</span> colorWithRed:<span class="number">0</span> green:<span class="number">146</span>/<span class="number">255.0</span> blue:<span class="number">1.0</span> alpha:<span class="number">1.0</span>].CGColor;</span><br><span class="line">	<span class="comment">//设置中心点</span></span><br><span class="line">	layer.position=<span class="built_in">CGPointMake</span>(size.width/<span class="number">2</span>, size.height/<span class="number">2</span>);</span><br><span class="line">	<span class="comment">//设置大小</span></span><br><span class="line">	layer.bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, WIDTH,WIDTH);</span><br><span class="line">	<span class="comment">//设置圆角,当圆角半径等于矩形的一半时看起来就是一个圆形</span></span><br><span class="line">	layer.cornerRadius=WIDTH/<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//设置阴影</span></span><br><span class="line">	layer.shadowColor=[<span class="built_in">UIColor</span> grayColor].CGColor;</span><br><span class="line">	layer.shadowOffset=<span class="built_in">CGSizeMake</span>(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">	layer.shadowOpacity=<span class="number">.9</span>;</span><br><span class="line">	<span class="comment">//设置边框</span></span><br><span class="line">	<span class="comment">//    layer.borderColor=[UIColor whiteColor].CGColor;</span></span><br><span class="line">	<span class="comment">//    layer.borderWidth=1;</span></span><br><span class="line">	<span class="comment">//   设置锚点</span></span><br><span class="line">	<span class="comment">//    layer.anchorPoint=CGPointZero;</span></span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layer];</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark 点击放大</span></span><br><span class="line">-(<span class="keyword">void</span>)touchesEnded:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">UITouch</span> *touch=[touches anyObject];</span><br><span class="line">	<span class="built_in">CALayer</span> *layer=<span class="keyword">self</span>.view.layer.sublayers[<span class="number">0</span>];</span><br><span class="line">	<span class="built_in">CGFloat</span> width=layer.bounds.size.width;</span><br><span class="line">	<span class="keyword">if</span> (width==WIDTH) &#123;</span><br><span class="line">	width=WIDTH*<span class="number">4</span>;</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">	width=WIDTH;</span><br><span class="line">	&#125;</span><br><span class="line">	layer.bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, width, width);</span><br><span class="line">	layer.position=[touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line">	layer.cornerRadius=width/<span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>运行效果：<br><img src="http://upload-images.jianshu.io/upload_images/2647951-b3a99537419dce31.gif?imageMogr2/auto-orient/strip" alt></p>
+<hr>
+<h2 id="3-CALayer绘图"><a href="#3-CALayer绘图" class="headerlink" title="3. CALayer绘图"></a>3. CALayer绘图</h2><p>在使用Quartz 2D绘图时，当调用了UIView的drawRect:方法绘制图形、图像，这种方式本质还是在图层中绘制，但是这里会着重介绍一下如何直接在图层中绘图。在图层中绘图的方式跟原来基本没有区别，只是drawRect:方法是由UIKit组件进行调用，因此里面可以使用一些UIKit封装的方法进行绘图，而直接绘制到图层的方法由于并非UIKit直接调用因此只能用原生的Core Graphics方法绘制。</p>
+<p>图层绘图有两种方法，不管使用哪种方法绘制完必须调用图层的setNeedDisplay方法（注意是图层的方法，不是UIView的方法，前面我们介绍过UIView也有此方法）</p>
+<ol>
+<li>通过图层代理drawLayer: inContext:方法绘制</li>
+<li>通过自定义图层drawInContext:方法绘制</li>
+</ol>
+<h3 id="3-1、使用代理方法绘图"><a href="#3-1、使用代理方法绘图" class="headerlink" title="3.1、使用代理方法绘图"></a>3.1、使用代理方法绘图</h3><p>通过代理方法进行图层绘图只要指定图层的代理，然后在代理对象中重写<strong>-(void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx</strong>方法即可。需要注意这个方法虽然是代理方法但是不用手动实现CALayerDelegate，因为CALayer定义中给NSObject做了分类扩展，所有的NSObject都包含这个方法。另外设置完代理后必须要调用图层的setNeedDisplay方法，否则绘制的内容无法显示。</p>
+<p>下面的代码演示了在一个自定义图层绘制一张图像并将图像设置成圆形，这种效果在很多应用中很常见，如最新版的手机QQ头像就是这种效果：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  KCMainViewController.m</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCMainViewController.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PHOTO_HEIGHT 150</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">KCMainViewController</span> ()</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCMainViewController</span></span></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad </span><br><span class="line">&#123;</span><br><span class="line">	[<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">	<span class="comment">//自定义图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layer=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layer.bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT);</span><br><span class="line">	layer.position=<span class="built_in">CGPointMake</span>(<span class="number">160</span>, <span class="number">200</span>);</span><br><span class="line">	layer.backgroundColor=[<span class="built_in">UIColor</span> redColor].CGColor;</span><br><span class="line">	layer.cornerRadius=PHOTO_HEIGHT/<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//注意仅仅设置圆角，对于图形而言可以正常显示，但是对于图层中绘制的图片无法正确显示</span></span><br><span class="line">	<span class="comment">//如果想要正确显示则必须设置masksToBounds=YES，剪切子图层</span></span><br><span class="line">	layer.masksToBounds=<span class="literal">YES</span>;</span><br><span class="line">	<span class="comment">//阴影效果无法和masksToBounds同时使用，因为masksToBounds的目的就是剪切外边框，而阴影效果刚好在外边框</span></span><br><span class="line">	<span class="comment">//    layer.shadowColor=[UIColor grayColor].CGColor;</span></span><br><span class="line">	<span class="comment">//    layer.shadowOffset=CGSizeMake(2, 2);</span></span><br><span class="line">	<span class="comment">//    layer.shadowOpacity=1;</span></span><br><span class="line">	<span class="comment">//设置边框</span></span><br><span class="line">	layer.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layer.borderWidth=<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//设置图层代理</span></span><br><span class="line">	layer.delegate=<span class="keyword">self</span>;</span><br><span class="line">	<span class="comment">//添加图层到根图层</span></span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layer];</span><br><span class="line">	<span class="comment">//调用图层setNeedDisplay,否则代理方法不会被调用</span></span><br><span class="line">	[layer setNeedsDisplay];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">#<span class="meta-keyword">pragma</span> mark 绘制图形、图像到图层，注意参数中的ctx是图层的图形上下文，其中绘图位置也是相对图层而言的</span></span><br><span class="line">	-(<span class="keyword">void</span>)drawLayer:(<span class="built_in">CALayer</span> *)layer inContext:(<span class="built_in">CGContextRef</span>)ctx&#123;</span><br><span class="line">	<span class="comment">//    NSLog(@"%@",layer);//这个图层正是上面定义的图层</span></span><br><span class="line">	<span class="built_in">CGContextSaveGState</span>(ctx);</span><br><span class="line">	<span class="comment">//图形上下文形变，解决图片倒立的问题</span></span><br><span class="line">	<span class="built_in">CGContextScaleCTM</span>(ctx, <span class="number">1</span>, <span class="number">-1</span>);</span><br><span class="line">	<span class="built_in">CGContextTranslateCTM</span>(ctx, <span class="number">0</span>, -PHOTO_HEIGHT);</span><br><span class="line">	<span class="built_in">UIImage</span> *image=[<span class="built_in">UIImage</span> imageNamed:<span class="string">@"photo.png"</span>];</span><br><span class="line">	<span class="comment">//注意这个位置是相对于图层而言的不是屏幕</span></span><br><span class="line">	<span class="built_in">CGContextDrawImage</span>(ctx, <span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT), image.CGImage);</span><br><span class="line">	<span class="comment">//    CGContextFillRect(ctx, CGRectMake(0, 0, 100, 100));</span></span><br><span class="line">	<span class="comment">//    CGContextDrawPath(ctx, kCGPathFillStroke);</span></span><br><span class="line">	<span class="built_in">CGContextRestoreGState</span>(ctx);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>运行效果：<br><img src="http://upload-images.jianshu.io/upload_images/2647951-983f8fbeb04c3dea.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+<p>使用代理方法绘制图形、图像时在drawLayer:inContext:方法中可以通过事件参数获得绘制的图层和图形上下文。在这个方法中绘图时所有的位置都是相对于图层而言的，图形上下文指的也是当前图层的图形上下文。</p>
+<p>需要注意的是上面代码中绘制图片圆形裁切效果时如果不设置masksToBounds是无法显示圆形，但是对于其他图形却没有这个限制。原因就是当绘制一张图片到图层上的时候会重新创建一个图层添加到当前图层，这样一来如果设置了圆角之后虽然底图层有圆角效果，但是子图层还是矩形，只有设置了masksToBounds为YES让子图层按底图层剪切才能显示圆角效果。同样的，有些朋友经常在网上提问说为什么使用UIImageView的layer设置圆角后图片无法显示圆角，只有设置masksToBounds才能出现效果，也是类似的问题。</p>
+<h4 id="3-1-1、扩展1–带阴影效果的圆形图片裁切"><a href="#3-1-1、扩展1–带阴影效果的圆形图片裁切" class="headerlink" title="3.1.1、扩展1–带阴影效果的圆形图片裁切"></a>3.1.1、扩展1–带阴影效果的圆形图片裁切</h4><p>如果设置了masksToBounds=YES之后确实可以显示图片圆角效果，但遗憾的是设置了这个属性之后就无法设置阴影效果。因为masksToBounds=YES就意味着外边框不能显示，而阴影恰恰作为外边框绘制的，这样两个设置就产生了矛盾。要解决这个问题不妨换个思路:使用两个大小一样的图层，下面的图层负责绘制阴影，上面的图层用来显示图片。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  KCMainViewController.m</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCMainViewController.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PHOTO_HEIGHT 150</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">KCMainViewController</span> ()</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCMainViewController</span></span></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">	[<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">	<span class="built_in">CGPoint</span> position= <span class="built_in">CGPointMake</span>(<span class="number">160</span>, <span class="number">200</span>);</span><br><span class="line">	<span class="built_in">CGRect</span> bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT);</span><br><span class="line">	<span class="built_in">CGFloat</span> cornerRadius=PHOTO_HEIGHT/<span class="number">2</span>;</span><br><span class="line">	<span class="built_in">CGFloat</span> borderWidth=<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//阴影图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layerShadow=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layerShadow.bounds=bounds;</span><br><span class="line">	layerShadow.position=position;</span><br><span class="line">	layerShadow.cornerRadius=cornerRadius;</span><br><span class="line">	layerShadow.shadowColor=[<span class="built_in">UIColor</span> grayColor].CGColor;</span><br><span class="line">	layerShadow.shadowOffset=<span class="built_in">CGSizeMake</span>(<span class="number">2</span>, <span class="number">1</span>);</span><br><span class="line">	layerShadow.shadowOpacity=<span class="number">1</span>;</span><br><span class="line">	layerShadow.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layerShadow.borderWidth=borderWidth;</span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layerShadow];</span><br><span class="line">	<span class="comment">//容器图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layer=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layer.bounds=bounds;</span><br><span class="line">	layer.position=position;</span><br><span class="line">	layer.backgroundColor=[<span class="built_in">UIColor</span> redColor].CGColor;</span><br><span class="line">	layer.cornerRadius=cornerRadius;</span><br><span class="line">	layer.masksToBounds=<span class="literal">YES</span>;</span><br><span class="line">	layer.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layer.borderWidth=borderWidth;</span><br><span class="line">	<span class="comment">//设置图层代理</span></span><br><span class="line">	layer.delegate=<span class="keyword">self</span>;</span><br><span class="line">	<span class="comment">//添加图层到根图层</span></span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layer];</span><br><span class="line">	<span class="comment">//调用图层setNeedDisplay,否则代理方法不会被调用</span></span><br><span class="line">	[layer setNeedsDisplay];</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark 绘制图形、图像到图层，注意参数中的ctx是图层的图形上下文，其中绘图位置也是相对图层而言的</span></span><br><span class="line">-(<span class="keyword">void</span>)drawLayer:(<span class="built_in">CALayer</span> *)layer inContext:(<span class="built_in">CGContextRef</span>)ctx&#123;</span><br><span class="line">	<span class="comment">//    NSLog(@"%@",layer);//这个图层正是上面定义的图层</span></span><br><span class="line">	<span class="built_in">CGContextSaveGState</span>(ctx);</span><br><span class="line">	<span class="comment">//图形上下文形变，解决图片倒立的问题</span></span><br><span class="line">	<span class="built_in">CGContextScaleCTM</span>(ctx, <span class="number">1</span>, <span class="number">-1</span>);</span><br><span class="line">	<span class="built_in">CGContextTranslateCTM</span>(ctx, <span class="number">0</span>, -PHOTO_HEIGHT);</span><br><span class="line">	<span class="built_in">UIImage</span> *image=[<span class="built_in">UIImage</span> imageNamed:<span class="string">@"photo.jpg"</span>];</span><br><span class="line">	<span class="comment">//注意这个位置是相对于图层而言的不是屏幕</span></span><br><span class="line">	<span class="built_in">CGContextDrawImage</span>(ctx, <span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT), image.CGImage);</span><br><span class="line">	<span class="comment">//    CGContextFillRect(ctx, CGRectMake(0, 0, 100, 100));</span></span><br><span class="line">	<span class="comment">//    CGContextDrawPath(ctx, kCGPathFillStroke);</span></span><br><span class="line">	<span class="built_in">CGContextRestoreGState</span>(ctx);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>运行效果：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/2647951-0ce398f485925bea.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+<h4 id="3-1-2、扩展2–图层的形变"><a href="#3-1-2、扩展2–图层的形变" class="headerlink" title="3.1.2、扩展2–图层的形变"></a>3.1.2、扩展2–图层的形变</h4><p>从上面代码中大家不难发现使用Core Graphics绘制图片时会倒立显示，对图层的图形上下文进行了反转。在前一篇文章中也采用了类似的方法去解决这个问题，但是在那篇文章中也提到过如果直接让图像沿着x轴旋转180度同样可以达到正确显示的目的，只是当时的旋转靠图形上下文还无法绕x轴旋转。今天学习了图层之后，其实可以控制图层直接旋转而不用借助于图形上下文的形变操作，而且这么操作起来会更加简单和直观。对于上面的程序，只需要设置图层的transform属性即可。需要注意的是transform是CATransform3D类型，形变可以在三个维度上进行，使用方法和前面介绍的二维形变是类似的，而且都有对应的形变设置方法（如：CATransform3DMakeTranslation()、CATransform3DMakeScale()、CATransform3DMakeRotation()）。下面的代码通过CATransform3DMakeRotation()方法在x轴旋转180度解决倒立问题：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  形变演示</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCMainViewController.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PHOTO_HEIGHT 150</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">KCMainViewController</span> ()</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCMainViewController</span></span></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">	[<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">	<span class="built_in">CGPoint</span> position= <span class="built_in">CGPointMake</span>(<span class="number">160</span>, <span class="number">200</span>);</span><br><span class="line">	<span class="built_in">CGRect</span> bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT);</span><br><span class="line">	<span class="built_in">CGFloat</span> cornerRadius=PHOTO_HEIGHT/<span class="number">2</span>;</span><br><span class="line">	<span class="built_in">CGFloat</span> borderWidth=<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//阴影图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layerShadow=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layerShadow.bounds=bounds;</span><br><span class="line">	layerShadow.position=position;</span><br><span class="line">	layerShadow.cornerRadius=cornerRadius;</span><br><span class="line">	layerShadow.shadowColor=[<span class="built_in">UIColor</span> grayColor].CGColor;</span><br><span class="line">	layerShadow.shadowOffset=<span class="built_in">CGSizeMake</span>(<span class="number">2</span>, <span class="number">1</span>);</span><br><span class="line">	layerShadow.shadowOpacity=<span class="number">1</span>;</span><br><span class="line">	layerShadow.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layerShadow.borderWidth=borderWidth;</span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layerShadow];</span><br><span class="line">	<span class="comment">//容器图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layer=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layer.bounds=bounds;</span><br><span class="line">	layer.position=position;</span><br><span class="line">	layer.backgroundColor=[<span class="built_in">UIColor</span> redColor].CGColor;</span><br><span class="line">	layer.cornerRadius=cornerRadius;</span><br><span class="line">	layer.masksToBounds=<span class="literal">YES</span>;</span><br><span class="line">	layer.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layer.borderWidth=borderWidth;</span><br><span class="line">	<span class="comment">//利用图层形变解决图像倒立问题</span></span><br><span class="line">	layer.transform=<span class="built_in">CATransform3DMakeRotation</span>(M_PI, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">	<span class="comment">//设置图层代理</span></span><br><span class="line">	layer.delegate=<span class="keyword">self</span>;</span><br><span class="line">	<span class="comment">//添加图层到根图层</span></span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layer];</span><br><span class="line">	<span class="comment">//调用图层setNeedDisplay,否则代理方法不会被调用</span></span><br><span class="line">	[layer setNeedsDisplay];</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark 绘制图形、图像到图层，注意参数中的ctx时图层的图形上下文，其中绘图位置也是相对图层而言的</span></span><br><span class="line">-(<span class="keyword">void</span>)drawLayer:(<span class="built_in">CALayer</span> *)layer inContext:(<span class="built_in">CGContextRef</span>)ctx&#123;</span><br><span class="line">	<span class="comment">//    NSLog(@"%@",layer);//这个图层正是上面定义的图层</span></span><br><span class="line">	<span class="built_in">UIImage</span> *image=[<span class="built_in">UIImage</span> imageNamed:<span class="string">@"photo.jpg"</span>];</span><br><span class="line">	<span class="comment">//注意这个位置是相对于图层而言的不是屏幕</span></span><br><span class="line">	<span class="built_in">CGContextDrawImage</span>(ctx, <span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT), image.CGImage);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>事实上如果仅仅就显示一张图片在图层中当然没有必要那么麻烦，直接设置图层contents就可以了，不牵涉到绘图也就没有倒立的问题了。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  图层内容设置</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCMainViewController.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PHOTO_HEIGHT 150</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">KCMainViewController</span> ()</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCMainViewController</span></span></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">	[<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">	<span class="built_in">CGPoint</span> position= <span class="built_in">CGPointMake</span>(<span class="number">160</span>, <span class="number">200</span>);</span><br><span class="line">	<span class="built_in">CGRect</span> bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, PHOTO_HEIGHT, PHOTO_HEIGHT);</span><br><span class="line">	<span class="built_in">CGFloat</span> cornerRadius=PHOTO_HEIGHT/<span class="number">2</span>;</span><br><span class="line">	<span class="built_in">CGFloat</span> borderWidth=<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//阴影图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layerShadow=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layerShadow.bounds=bounds;</span><br><span class="line">	layerShadow.position=position;</span><br><span class="line">	layerShadow.cornerRadius=cornerRadius;</span><br><span class="line">	layerShadow.shadowColor=[<span class="built_in">UIColor</span> grayColor].CGColor;</span><br><span class="line">	layerShadow.shadowOffset=<span class="built_in">CGSizeMake</span>(<span class="number">2</span>, <span class="number">1</span>);</span><br><span class="line">	layerShadow.shadowOpacity=<span class="number">1</span>;</span><br><span class="line">	layerShadow.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layerShadow.borderWidth=borderWidth;</span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layerShadow];</span><br><span class="line">	<span class="comment">//容器图层</span></span><br><span class="line">	<span class="built_in">CALayer</span> *layer=[[<span class="built_in">CALayer</span> alloc]init];</span><br><span class="line">	layer.bounds=bounds;</span><br><span class="line">	layer.position=position;</span><br><span class="line">	layer.backgroundColor=[<span class="built_in">UIColor</span> redColor].CGColor;</span><br><span class="line">	layer.cornerRadius=cornerRadius;</span><br><span class="line">	layer.masksToBounds=<span class="literal">YES</span>;</span><br><span class="line">	layer.borderColor=[<span class="built_in">UIColor</span> whiteColor].CGColor;</span><br><span class="line">	layer.borderWidth=borderWidth;</span><br><span class="line">	<span class="comment">//设置内容（注意这里一定要转换为CGImage）</span></span><br><span class="line">	<span class="built_in">UIImage</span> *image=[<span class="built_in">UIImage</span> imageNamed:<span class="string">@"photo.jpg"</span>];</span><br><span class="line">	<span class="comment">//    layer.contents=(id)image.CGImage;</span></span><br><span class="line">	[layer setContents:(<span class="keyword">id</span>)image.CGImage];</span><br><span class="line">	<span class="comment">//添加图层到根图层</span></span><br><span class="line">	[<span class="keyword">self</span>.view.layer addSublayer:layer];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>既然如此为什么还大费周章的说形变呢，因为形变对于动画有特殊的意义。在动画开发中形变往往不是直接设置transform，而是通过keyPath进行设置。这种方法设置形变的本质和前面没有区别，只是利用了KVC可以动态修改其属性值而已，但是这种方式在动画中确实很常用的，因为它可以很方便的将几种形变组合到一起使用。同样是解决动画旋转问题，只要将前面的旋转代码改为下面的代码即可：</p>
+<blockquote>
+<p>[layer setValue:@M_PI forKeyPath:@”transform.rotation.x”];</p>
+</blockquote>
+<p>当然，通过key path设置形变参数就需要了解有哪些key path可以设置，这里就不再一一列举，大家可以参照Xcode帮助文档中“CATransform3D Key Paths”一节，里面描述的很详细。</p>
+<h3 id="3-2、使用自定义图层绘图"><a href="#3-2、使用自定义图层绘图" class="headerlink" title="3.2、使用自定义图层绘图"></a>3.2、使用自定义图层绘图</h3><p>在自定义图层中绘图时只要自己编写一个类继承于CALayer然后在drawInContext:中绘图即可。同前面在代理方法绘图一样，要显示图层中绘制的内容也要调用图层的setNeedDisplay方法，否则drawInContext方法将不会调用。</p>
+<p>在使用Quartz 2D在UIView中绘制图形的本质也是绘制到图层中，为了说明这个问题下面演示自定义图层绘图时没有直接在视图控制器中调用自定义图层，而是在一个UIView将自定义图层添加到UIView的根图层中（例子中的UIView跟自定义图层绘图没有直接关系）。从下面的代码中可以看到：UIView在显示时其根图层会自动创建一个CGContextRef（CALayer本质使用的是位图上下文），同时调用图层代理（UIView创建图层会自动设置图层代理为其自身）的<strong>draw: inContext:</strong>方法并将图形上下文作为参数传递给这个方法。而在UIView的<strong>draw:inContext:</strong>方法中会调用其drawRect:方法，在<strong>drawRect:</strong>方法中使用<strong>UIGraphicsGetCurrentContext()</strong>方法得到的上下文正是前面创建的上下文。<br>KCLayer.m</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  KCLayer.m</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line">#<span class="keyword">import</span> <span class="string">"KCLayer.h"</span></span><br><span class="line">@implementation KCLayer</span><br><span class="line">-(<span class="built_in">void</span>)drawInContext:(CGContextRef)ctx&#123;</span><br><span class="line">	NSLog(@<span class="string">"3-drawInContext:"</span>);</span><br><span class="line">	NSLog(@<span class="string">"CGContext:%@"</span>,ctx);</span><br><span class="line">	<span class="comment">//    CGContextRotateCTM(ctx, M_PI_4);</span></span><br><span class="line">	CGContextSetRGBFillColor(ctx, <span class="number">135.0</span>/<span class="number">255.0</span>, <span class="number">232.0</span>/<span class="number">255.0</span>, <span class="number">84.0</span>/<span class="number">255.0</span>, <span class="number">1</span>);</span><br><span class="line">	CGContextSetRGBStrokeColor(ctx, <span class="number">135.0</span>/<span class="number">255.0</span>, <span class="number">232.0</span>/<span class="number">255.0</span>, <span class="number">84.0</span>/<span class="number">255.0</span>, <span class="number">1</span>);</span><br><span class="line">	<span class="comment">//    CGContextFillRect(ctx, CGRectMake(0, 0, 100, 100));</span></span><br><span class="line">	<span class="comment">//    CGContextFillEllipseInRect(ctx, CGRectMake(50, 50, 100, 100));</span></span><br><span class="line">	CGContextMoveToPoint(ctx, <span class="number">94.5</span>, <span class="number">33.5</span>);</span><br><span class="line">	<span class="comment">//// Star Drawing</span></span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">104.02</span>, <span class="number">47.39</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">120.18</span>, <span class="number">52.16</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">109.91</span>, <span class="number">65.51</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">110.37</span>, <span class="number">82.34</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">94.5</span>, <span class="number">76.7</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">78.63</span>, <span class="number">82.34</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">79.09</span>, <span class="number">65.51</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">68.82</span>, <span class="number">52.16</span>);</span><br><span class="line">	CGContextAddLineToPoint(ctx,<span class="number">84.98</span>, <span class="number">47.39</span>);</span><br><span class="line">	CGContextClosePath(ctx);</span><br><span class="line">	CGContextDrawPath(ctx, kCGPathFillStroke);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>KCView.m</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  KCView.m</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCView.h"</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCLayer.h"</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCView</span></span></span><br><span class="line">-(<span class="keyword">instancetype</span>)initWithFrame:(<span class="built_in">CGRect</span>)frame&#123;</span><br><span class="line">	<span class="built_in">NSLog</span>(<span class="string">@"initWithFrame:"</span>);</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">self</span>=[<span class="keyword">super</span> initWithFrame:frame]) </span><br><span class="line">	&#123;</span><br><span class="line">		KCLayer *layer=[[KCLayer alloc]init];</span><br><span class="line">		layer.bounds=<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">185</span>, <span class="number">185</span>);</span><br><span class="line">		layer.position=<span class="built_in">CGPointMake</span>(<span class="number">160</span>,<span class="number">284</span>);</span><br><span class="line">		layer.backgroundColor=[<span class="built_in">UIColor</span> colorWithRed:<span class="number">0</span> green:<span class="number">146</span>/<span class="number">255.0</span> blue:<span class="number">1.0</span> alpha:<span class="number">1.0</span>].CGColor;</span><br><span class="line">		<span class="comment">//显示图层</span></span><br><span class="line">		[layer setNeedsDisplay];</span><br><span class="line">		[<span class="keyword">self</span>.layer addSublayer:layer];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line">-(<span class="keyword">void</span>)drawRect:(<span class="built_in">CGRect</span>)rect&#123;</span><br><span class="line">	<span class="built_in">NSLog</span>(<span class="string">@"2-drawRect:"</span>);</span><br><span class="line">	<span class="built_in">NSLog</span>(<span class="string">@"CGContext:%@"</span>,<span class="built_in">UIGraphicsGetCurrentContext</span>());<span class="comment">//得到的当前图形上下文正是drawLayer中传递的</span></span><br><span class="line">	[<span class="keyword">super</span> drawRect:rect];</span><br><span class="line">&#125;</span><br><span class="line">-(<span class="keyword">void</span>)drawLayer:(<span class="built_in">CALayer</span> *)layer inContext:(<span class="built_in">CGContextRef</span>)ctx&#123;</span><br><span class="line">	<span class="built_in">NSLog</span>(<span class="string">@"1-drawLayer:inContext:"</span>);</span><br><span class="line">	<span class="built_in">NSLog</span>(<span class="string">@"CGContext:%@"</span>,ctx);</span><br><span class="line">	[<span class="keyword">super</span> drawLayer:layer inContext:ctx];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>KCMainViewController.m</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  KCMainViewController.m</span></span><br><span class="line"><span class="comment">//  CALayer</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by Kenshin Cui on 14-3-22.</span></span><br><span class="line"><span class="comment">//  Copyright (c) 2014年 Kenshin Cui. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCMainViewController.h"</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"KCView.h"</span></span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">KCMainViewController</span> ()</span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">KCMainViewController</span></span></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">[<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">	KCView *view=[[KCView alloc]initWithFrame:[<span class="built_in">UIScreen</span> mainScreen].bounds];</span><br><span class="line">	view.backgroundColor=[<span class="built_in">UIColor</span> colorWithRed:<span class="number">249.0</span>/<span class="number">255.0</span> green:<span class="number">249.0</span>/<span class="number">255.0</span> blue:<span class="number">249.0</span>/<span class="number">255.0</span> alpha:<span class="number">1</span>];</span><br><span class="line">	[<span class="keyword">self</span>.view addSubview:view];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>运行效果：<br><img src="http://upload-images.jianshu.io/upload_images/2647951-37d68836198e596b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%8A%A8%E7%94%BB/" rel="tag"># 动画</a>
+          
+            <a href="/tags/layer/" rel="tag"># layer</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/iOS%E5%BC%80%E5%8F%91%E5%B8%B8%E7%94%A8%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0.html" rel="next" title="iOS开发常用数学函数">
+                <i class="fa fa-chevron-left"></i> iOS开发常用数学函数
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/iOS%E5%BC%80%E5%8F%91%E7%B3%BB%E5%88%97-%E8%AE%A9%E4%BD%A0%E7%9A%84%E5%BA%94%E7%94%A8%E2%80%9C%E5%8A%A8%E2%80%9D%E8%B5%B7%E6%9D%A5-Core-Animation.html" rel="prev" title="iOS开发系列-让你的应用“动”起来--Core-Animation">
+                iOS开发系列-让你的应用“动”起来--Core-Animation <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/%5Bobject%20Object%5D"
+                alt="Eric" />
+            
+              <p class="site-author-name" itemprop="name">Eric</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概览"><span class="nav-text">概览</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CALayer"><span class="nav-text">CALayer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-CALayer简介"><span class="nav-text">1. CALayer简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-CALayer常用属性"><span class="nav-text">2. CALayer常用属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-CALayer绘图"><span class="nav-text">3. CALayer绘图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1、使用代理方法绘图"><span class="nav-text">3.1、使用代理方法绘图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-1、扩展1–带阴影效果的圆形图片裁切"><span class="nav-text">3.1.1、扩展1–带阴影效果的圆形图片裁切</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-2、扩展2–图层的形变"><span class="nav-text">3.1.2、扩展2–图层的形变</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2、使用自定义图层绘图"><span class="nav-text">3.2、使用自定义图层绘图</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
