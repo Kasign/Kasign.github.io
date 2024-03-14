@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://www.libsyk.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="iOS中Metal开发从0到1教程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Metal开发教程（一）- 预备知识">
+<meta property="og:url" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="iOS中Metal开发从0到1教程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/2_Boxes-320x320.png">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/3_Metal_vs_opengles-250x250.jpg">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/2.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/3.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/4.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/1.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/9.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/8.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/7.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/11.png">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/5.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/6.webp">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/4_vertices-320x320.jpg">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/5_matrix-426x320.jpg">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/6_points-480x220.jpg">
+<meta property="og:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/triangle_blue.png">
+<meta property="article:published_time" content="2024-03-11T03:40:35.000Z">
+<meta property="article:modified_time" content="2024-03-11T03:40:35.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="iOS Metal iOS开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/2_Boxes-320x320.png">
+
+<link rel="canonical" href="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Metal开发教程（一）- 预备知识 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Metal开发教程（一）- 预备知识
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-11 11:40:35" itemprop="dateCreated datePublished" datetime="2024-03-11T11:40:35+08:00">2024-03-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Metal%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">Metal开发</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+            <div class="post-description">iOS中Metal开发从0到1教程</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="一、发展历史"><a href="#一、发展历史" class="headerlink" title="一、发展历史"></a>一、发展历史</h3><p>历史上有两种选择来调用 GPU 的强大功能：OpenGL 和仅限 Windows 的 DirectX。2013 年，GPU 供应商 AMD 宣布了 Mantle 项目，旨在改进 GPU API，并提出 Direct3D（DirectX 的一部分）和 OpenGL 的替代方案。AMD 率先创建了真正的低开销 API，用于对 GPU 进行底层访问。Mantle 承诺能够生成比类似 API 多 9 倍的绘制调用（绘制到屏幕上的对象数量），并且还引入了异步命令队列，以便图形和计算工作负载可以并行运行。不幸的是，该项目在成为主流 API 之前就被终止了。</p>
+<p>Metal 于 2014 年 6 月 2 日在全球开发者大会 (WWDC) 上宣布，最初仅在 A7 或更新的 GPU 上提供。Apple 创建了一种新语言，可以直接通过着色器函数对 GPU 进行编程。这是基于 C++11 规范的<strong>Metal着色语言(MSL)</strong>。一年后，在 WWDC 2015 上，Apple 宣布了两个 Metal 子框架：<strong>MetalKit</strong>和<strong>Metal Performance Shaders</strong> (MPS)。2018 年，MPS 作为光线追踪加速器首次亮相。</p>
+<p>API 继续发展，以与 Apple 内部设计的新型 Apple GPU 的令人兴奋的功能配合使用。<strong>Metal 2</strong>增加了对虚拟现实 (VR)、增强现实 (AR) 和加速机器学习 (ML) 的支持，以及许多新功能，包括图像块、图块着色和线程组共享。Metal着色语言现基于 C++14 规范。</p>
+<p>2022 年，Apple 推出了带有新框架 MetalFX 的<strong>Metal 3</strong>，用于升级解决低分辨率的方案。Metal 3 的功能还包括直接从磁盘快速加载纹理资源、用于添加或减少几何体的网格着色器以及使用 C/C++ for Metal。</p>
+<p>为什么要使用Metal？<br>Metal 是一流的图形 API。这意味着 Metal 可以增强图形管道的能力，更具体地说，可以增强游戏引擎的能力，如下所示：</p>
+<ul>
+<li><p><strong>Unity 和虚幻引擎</strong>：当今两个领先的跨平台游戏引擎非常适合针对各种控制台、桌面和移动设备的游戏程序员。然而，这些引擎并不总是跟上 Metal 中新功能的步伐。例如，Unity 中的曲面细分被延迟了很长时间，并且仍然不支持网格着色器。如果想使用尖端的 Metal 开发，并使用 Apple 芯片的强大功能，不能总是依赖第三方引擎。</p>
+</li>
+<li><p><strong>神界 - 原罪 2</strong>：Larian Studios 与 Apple 密切合作，充分利用 Metal 和 Apple GPU 硬件，将他们令人惊叹的 AAA 游戏带到了 iPad 上。这确实是一次令人惊叹的视觉体验。</p>
+</li>
+<li><p><strong>The Witness</strong>：这款屡获殊荣的益智游戏有一个在 Metal 之上运行的定制引擎。通过利用 Metal，iPad 版本与桌面版本一样华丽，强烈推荐给益智游戏迷。</p>
+</li>
+<li><p><strong>其他游戏</strong>：来自著名游戏，如《杀手》、《生化奇兵》、《杀出重围》 、 《四海兄弟》、 《星际争霸》、 《魔兽世界》、《堡垒之夜》 、《虚幻竞技场》 、《蝙蝠侠》，甚至是深受喜爱的《我的世界》。</p>
+</li>
+</ul>
+<p>但 Metal 并不局限于游戏世界。许多应用程序都受益于图像和视频处理的 GPU 加速：</p>
+<ul>
+<li><strong>Procreate</strong>：一款用于素描、绘画和插图的应用程序。自从转换为 Metal 以来，它的运行速度比以前快了四倍。</li>
+<li><strong>Pixelmator</strong>：一款基于 Metal 的应用程序，提供图像失真工具。事实上，他们能够实现由 Metal 2 提供支持的新绘画引擎和动态油漆混合技术。</li>
+<li><strong>Affinity Photo</strong>：在 iPad 上可用。据开发人员 Serif 介绍，“使用 Metal 可以让用户轻松处理大型超高分辨率照片或可能具有数千层的复杂构图。”</li>
+<li>Metal，特别是 MPS 子框架，在机器学习和卷积神经网络 (CNN) 深度学习领域非常有用。</li>
+</ul>
+<h3 id="二、对比"><a href="#二、对比" class="headerlink" title="二、对比"></a>二、对比</h3><h4 id="1）Metal-与-SpriteKit、SceneKit-或-Unity"><a href="#1）Metal-与-SpriteKit、SceneKit-或-Unity" class="headerlink" title="1）Metal 与 SpriteKit、SceneKit 或 Unity"></a>1）Metal 与 SpriteKit、SceneKit 或 Unity</h4><p>在开始之前，了解 Metal 与 SpriteKit、SceneKit 或 Unity 等更高级别框架的比较会很有帮助。</p>
+<p>Metal 是一种底层 3D 图形 API，类似于 OpenGL ES，但开销更低，性能更好。它是 GPU 上方非常低的一层，这意味着，在执行任何操作（例如将精灵或 3D 模型渲染到屏幕上）时，都需要编写所有代码来执行此操作。</p>
+<p>相反，SpriteKit、SceneKit 和 Unity 等高级游戏框架构建在 Metal 或 OpenGL ES 等较低级 3D 图形 API 之上。它们提供了通常需要在游戏中编写的大部分样板代码，例如将精灵或 3D 模型渲染到屏幕上。</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/2_Boxes-320x320.png" alt></p>
+<p>如果只想制作游戏，那么大多数时候可能会使用更高级的游戏框架，例如 SpriteKit、SceneKit 或 Unity，因为这样做会更简单。</p>
+<p>然而，仍然有两个学习 Metal 的充分理由：</p>
+<p>将硬件推向极限：由于 Metal 的如此底层，它可以将硬件性能推向极限，并完全控制游戏的运行方式。<br>这是一次很棒的学习经历：学习 Metal 会教你很多关于 3D 图形、编写自己的游戏引擎以及高级游戏框架如何工作的知识。</p>
+<h4 id="2）Metal-与-OpenGL-ES"><a href="#2）Metal-与-OpenGL-ES" class="headerlink" title="2）Metal 与 OpenGL ES"></a>2）Metal 与 OpenGL ES</h4><p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/3_Metal_vs_opengles-250x250.jpg" alt></p>
+<p>OpenGL ES 被设计为跨平台。这意味着可以编写 C++ OpenGL ES 代码，并且大多数时候，通过一些小的修改，可以在其他平台（例如 Android）上运行它。</p>
+<p>对于有着超过25年历史的 OpenGL 技术本身，随着现代图形技术的发展，遇到了一些问题：</p>
+<ul>
+<li>现代 GPU 的渲染管线已经发生变化。</li>
+<li>不支持多线程操作。</li>
+<li>不支持异步处理。</li>
+<li>较为复杂的开发语言。</li>
+</ul>
+<p>随着图形学的发展，OpenGL 本身设计上存在的问题已经影响了 GPU 真正性能的发挥，因此 Apple 设计了 Metal。<br>为了解决这些问题，Metal 诞生了。<br>它为现代 GPU 设计，并面向 OpenGL 开发者。它拥有：</p>
+<ul>
+<li>更高效的 GPU 交互，更低的 CPU 负荷。</li>
+<li>支持多线程操作，以及线程间资源共享能力。</li>
+<li>支持资源和同步的控制。</li>
+<li>语言更符合开发者的开发习惯。</li>
+<li>可逐帧调试。</li>
+</ul>
+<h3 id="三、Metal使用场景"><a href="#三、Metal使用场景" class="headerlink" title="三、Metal使用场景"></a>三、Metal使用场景</h3><p>GPU 属于一类特殊的计算，Flynn的分类术语为单指令多数据 (SIMD)。简而言之，GPU 是针对吞吐量（一个单位时间内可以处理多少数据）进行优化的处理器，而 CPU 是针对延迟（处理单个数据单位需要多长时间）进行优化。大多数程序都是串行执行的：它们接收输入，处理它，提供输出，然后重复循环。</p>
+<p>这些周期有时会执行计算密集型任务，例如大型矩阵乘法，这将花费 CPU 大量时间进行串行处理，即使在少数内核上以多线程方式也是如此。</p>
+<p>相比之下，GPU 拥有数百甚至数千个核心，这些核心比 CPU 核心更小、内存更少，但可以执行快速并行数学计算。</p>
+<p>在以下情况下选择Metal：</p>
+<ul>
+<li>希望尽可能高效地渲染 3D 模型。</li>
+<li>希望的游戏具有自己独特的风格，也许具有自定义照明和阴影。</li>
+<li>将执行密集的数据处理，例如每帧计算和更改屏幕上每个像素的颜色，就像处理图像和视频时一样。</li>
+<li>有大型数值问题，例如科学模拟，可以将其划分为独立的子问题以并行处理。</li>
+<li>需要并行处理多个大型数据集，例如在训练深度学习模型时。</li>
+</ul>
+<h3 id="四、绘制原理"><a href="#四、绘制原理" class="headerlink" title="四、绘制原理"></a>四、绘制原理</h3><p>工欲善其事必先利其器，如果对图形学没有一点入门理解，还是好好先看一看图形渲染的步骤，最好了解一下OpenGL的工作原理，不要因为OpenGL在苹果被废弃掉了就对其嗤之以鼻，因为这个库在苹果以外的很多地方还是被广泛应用到的，学会了图形渲染，对Metal的理解会有很大帮助。该篇章取自Learn OpenGL中文文档。</p>
+<h4 id="1）基本原理概括"><a href="#1）基本原理概括" class="headerlink" title="1）基本原理概括"></a>1）基本原理概括</h4><p>手机包含两个不同的处理单元，CPU 和 GPU。CPU 是个多面手，并且不得不处理所有的事情，而 GPU 则可以集中来处理好一件事情，就是并行地做浮点运算。事实上，图像处理和渲染就是在将要渲染到窗口上的像素上做许许多多的浮点运算。通过有效的利用 GPU，可以成百倍甚至上千倍地提高手机上的图像渲染能力。下面的流程图显示了一个图像渲染到屏幕的流程。</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/2.webp" alt></p>
+<p>通过流程图我们可以看到，在我们日常的渲染中，OpenGL/Metal已经默默地替我们承担了很多渲染的操作，如果感兴趣可以在iOS 图像渲染原理看看这些图像是怎么一步步渲染下去的。</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/3.webp" alt><br><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/4.webp" alt></p>
+<p>总的来说，Metal担任的就是CPU和GPU交互的一个桥梁，他负责一个管理图形渲染的队列，在屏幕刷新一帧的时候，将队列的内容提交给GPU，以及时地渲染到屏幕上。</p>
+<p>在OpenGL中，任何事物都在3D空间中，而屏幕和窗口却是2D像素数组，这导致OpenGL的大部分工作都是关于把3D坐标转变为适应你屏幕的2D像素。3D坐标转为2D坐标的处理过程是由OpenGL的图形渲染管线（Graphics Pipeline，大多译为管线，实际上指的是一堆原始图形数据途经一个输送管道，期间经过各种变化处理最终出现在屏幕的过程）管理的。图形渲染管线可以被划分为两个主要部分：第一部分把你的3D坐标转换为2D坐标，第二部分是把2D坐标转变为实际的有颜色的像素。</p>
+<p>图形渲染管线接受一组3D坐标，然后把它们转变为你屏幕上的有色2D像素输出。图形渲染管线可以被划分为几个阶段，每个阶段将会把前一个阶段的输出作为输入。所有这些阶段都是高度专门化的（它们都有一个特定的函数），并且很容易并行执行。正是由于它们具有并行执行的特性，当今大多数显卡都有成千上万的小处理核心，它们在GPU上为每一个（渲染管线）阶段运行各自的小程序，从而在图形渲染管线中快速处理你的数据。这些小程序叫做着色器(Shader)。</p>
+<p>以下是图形渲染管线的每个阶段的抽象展示，也是渲染图片的一个重要步骤，相当于给一幅画勾勒出线条，再上色，三维混合（如有必要），以达到我们想要的图画效果。</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/1.webp" alt></p>
+<h4 id="2）图形渲染的根基——三角形与像素点"><a href="#2）图形渲染的根基——三角形与像素点" class="headerlink" title="2）图形渲染的根基——三角形与像素点"></a>2）图形渲染的根基——三角形与像素点</h4><p>在图形渲染中，有个非常非常非常重要的概念——三角形，可以这样说，如果呈现在屏幕上的图像是一座美丽的布达拉宫，那么三角形就是里面的一座地基、一根根柱子。</p>
+<p>而你所看到的前三个步骤，就是从几个点，以三角形的方式勾勒出了整个线条。而第四个步骤则把线条做成一格一格的像素点。</p>
+<p>顶点着色器：该阶段的输入是顶点数据（Vertex Data） 数据，比如以数组的形式传递 3 个 3D 坐标用来表示一个三角形。顶点数据是一系列顶点的集合。顶点着色器主要的目的是把 3D 坐标转为另一种 3D 坐标，同时顶点着色器可以对顶点属性进行一些基本处理。</p>
+<p>形状（图元）装配：该阶段将顶点着色器输出的所有顶点作为输入，并将所有的点装配成指定图元的形状。图中则是一个三角形。图元（Primitive） 用于表示如何渲染顶点数据，如：点、线、三角形。</p>
+<p>几何着色器：该阶段把图元形式的一系列顶点的集合作为输入，它可以通过产生新顶点构造出新的（或是其它的）图元来生成其他形状。例子中，它生成了另一个三角形。（其实个人觉得这里应该加多个顶点才对，不然好像有点让人误解多出来的那条线是怎么来的）</p>
+<p>光栅化阶段(Rasterization Stage)：根据几何着色器的输出，把图元映射为最终屏幕上相应的像素，生成供片段着色器(Fragment Shader)使用的片段(Fragment)。</p>
+<h4 id="3）纹理、采样与着色"><a href="#3）纹理、采样与着色" class="headerlink" title="3）纹理、采样与着色"></a>3）纹理、采样与着色</h4><p>到光栅化这一步，我们已经可以获取到未被上色的像素了，一个图像有了初步的一些轮廓，那么他是怎么被上色，甚至被组合形成一个三维图案的呢？片段着色器就是上色的重要一环了。</p>
+<p>片段着色器的主要目的是计算一个像素的最终颜色，这也是所有OpenGL高级效果产生的地方。通常，片段着色器包含3D场景的数据（比如光照、阴影、光的颜色等等），这些数据可以被用来计算最终像素的颜色。<br>那么，他的颜色从哪里来呢？程序员可以根据自己想要的颜色进行上色，即直接在片段着色器写死颜色的rgba值，比如生成一个橘色的三角形：</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/9.webp" alt></p>
+<p>那如果我们想读取一张图片渲染到上面去呢？像下面一样，把罗伊斯的照片贴到屏幕上去。</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/8.webp" alt></p>
+<p>这时候需要引入一个同样重要的概念：纹理。</p>
+<p>纹理是一个2D图片（甚至也有1D和3D的纹理），它可以用来添加物体的细节；你可以想象纹理是一张绘有砖块的纸，无缝折叠贴合到你的3D的房子上，这样你的房子看起来就像有砖墙外表了。因为我们可以在一张图片上插入非常多的细节，这样就可以让物体非常精细而不用指定额外的顶点。<br>上面的概念可能有点笼统，在渲染的知识里面，你需要暂时先将一张图片看成一个一个像素点，采样器（sampler）将图片上的像素点一一采样，再映射到已经光栅化的像素点中，使其上色，最终得到一个个上色后的像素点。后文会着重介绍怎么采样纹理和给光栅化像素上色。</p>
+<p>最后，如果涉及到3D渲染（本文暂不涉及），该阶段会检测片段的对应的深度值（z 坐标），判断这个像素位于其它物体的前面还是后面，决定是否应该丢弃。此外，该阶段还会检查 alpha 值（ alpha 值定义了一个物体的透明度），从而对物体进行混合。因此，即使在片段着色器中计算出来了一个像素输出的颜色，在渲染多个三角形的时候最后的像素颜色也可能完全不同。</p>
+<h4 id="4）顶点着色器与片段着色器"><a href="#4）顶点着色器与片段着色器" class="headerlink" title="4）顶点着色器与片段着色器"></a>4）顶点着色器与片段着色器</h4><p>前面主要给大家介绍了从0到1的渲染过程，那么本文则会着重介绍一下MSL(Metal Shader Language) 给我们提供的接口，也就是说，我们只需要着手这两个着色器的开发，其他步骤无需我们动手。</p>
+<p>在基于Metal介绍这两个着色器之前，请大家再着重复习一下几个重要的概念：</p>
+<p>像素：一个图像由许多许多像素组成。</p>
+<p>顶点着色器：将原图像的3D坐标转换成适应屏幕的3D坐标，同时建立需要绘制的顶点坐标 与 需要采样的纹理坐标的映射关系。在开发中，我们需要预先设好顶点坐标与纹理坐标的映射，供系统内部光栅化处理，最后传到片段着色器中。</p>
+<p>纹理：用于被采样器采样，给片段着色器上色的图像。在开发中，我们需要读取图像的字节，调用接口生成纹理。</p>
+<p>片段着色器：基于顶点着色器的输出、纹理的采样结果，输出一个个着色后的像素，这些像素组成了一整个图像。在开发中，我们需要根据顶点着色器输出（光栅化处理后）的数据、纹理数据，对纹理进行采样，并输出该光栅化像素对应的rgba。（多个像素即为一张图片）</p>
+<p>接下来将会介绍Metal如何运用上面几个概念，在屏幕上渲染出一张图片出来，如果读到后面有疑惑，不妨回头再看看这几个概念和他们的职能。</p>
+<h3 id="五、开始创建Metal"><a href="#五、开始创建Metal" class="headerlink" title="五、开始创建Metal"></a>五、开始创建Metal</h3><p>Metal的简要流程图如下：<br><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/7.webp" alt></p>
+<p>设置 Metal 需要执行七个步骤才能开始渲染。需要创建一个：<br>1、MTLDevice<br>2、MTKView<br>3、Vertex Buffer<br>4、Vertex Shader<br>5、Fragment Shader<br>6、Render Pipeline<br>7、Command Queue</p>
+<h4 id="1）创建MTLDevice"><a href="#1）创建MTLDevice" class="headerlink" title="1）创建MTLDevice"></a>1）创建MTLDevice</h4><p>首先需要获得对MTLDevice.</p>
+<p>GPU 的主要 Metal 接口，应用程序使用它来绘制图形并并行运行计算。可以通过调用 MTLCreateSystemDefaultDevice 在运行时获取默认 MTLDevice（请参阅获取默认 GPU）。 每个 Metal Device 实例代表一个 GPU，并且是应用程序与其交互的主要起点。 使用 Metal Device 实例，可以检查 GPU 的特性和功能（请参阅设备检查）并使用其工厂方法创建辅助类型实例。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">&lt;MetalKit/MetalKit.h&gt;</span></span></span><br><span class="line"><span class="keyword">id</span> &lt;<span class="built_in">MTLDevice</span>&gt; device = <span class="built_in">MTLCreateSystemDefaultDevice</span>(); <span class="comment">// 创建device</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2）创建MTKView"><a href="#2）创建MTKView" class="headerlink" title="2）创建MTKView"></a>2）创建MTKView</h4><p>用于创建、配置和显示 Metal 对象的专用视图。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">id</span> &lt;<span class="built_in">MTLDevice</span>&gt; device = <span class="built_in">MTLCreateSystemDefaultDevice</span>(); <span class="comment">// 创建device</span></span><br><span class="line">mtkView = [[<span class="built_in">MTKView</span> alloc] initWithFrame:<span class="keyword">self</span>.view.bounds device:device];</span><br><span class="line">mtkView.framebufferOnly = <span class="literal">YES</span>; <span class="comment">// 一个布尔值，确定可绘制对象的纹理是否仅用于渲染。</span></span><br><span class="line">[<span class="keyword">self</span>.view addSubview:mtkView];</span><br></pre></td></tr></table></figure>
+
+<p>逐行浏览一下：</p>
+<p>1、创建一个device。<br>2、利用device创建一个新的MTKView。<br>3、出于性能原因，Apple 鼓励设置framebufferOnly为true，除非需要从为此层生成的纹理中进行采样，或者需要在层可绘制纹理上启用计算内核。大多数时候，不需要这样做。<br>4、最后，将该图层添加为视图主图层的子图层。</p>
+<h4 id="3-创建顶点缓冲区"><a href="#3-创建顶点缓冲区" class="headerlink" title="3) 创建顶点缓冲区"></a>3) 创建顶点缓冲区</h4><p>Metal 中的一切都是三角形。在此应用程序中，只需绘制一个三角形，但即使是复杂的 3D 形状也可以分解为一系列三角形。</p>
+<p>然后我们需要设置顶点数据，这里需要说明一下Metal的坐标系：<br>顶点坐标系是四维的(x, y, z, w)，原点在画布的正中心。采用左手坐标系。<br><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/11.png" alt> <img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/5.webp" alt></p>
+<p>纹理坐标系是二维的(x, y)，原点在图片的左上角。<br><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/6.webp" alt></p>
+<p>在 Metal 中，默认坐标系是标准化坐标系，这意味着默认情况下看到的是一个以 (0, 0, 0.5) 为中心的 2x2x1 立方体。<br>如果考虑 Z = 0 平面，则 (-1, -1, 0) 为左下角，(0, 0, 0) 为中心，(1, 1, 0) 为右上角。在本教程中，想要绘制一个具有以下三个点的三角形：</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/4_vertices-320x320.jpg" alt></p>
+<p>必须为此创建一个缓冲区。将以下常量属性添加到的类中：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">static <span class="keyword">const</span> vector_float4 quadVertices[] =</span><br><span class="line">&#123;  <span class="comment">// 顶点坐标 x y z w</span></span><br><span class="line">    &#123;<span class="number">0.0f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>, <span class="number">1.0f</span>&#125;,   <span class="comment">//顶点 0</span></span><br><span class="line">    &#123;<span class="number">-0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>, <span class="number">1.0f</span>&#125;, <span class="comment">//左下 1</span></span><br><span class="line">    &#123;<span class="number">0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>, <span class="number">1.0f</span>&#125;,  <span class="comment">//右下 2</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这会在 CPU 上创建一个浮点数组。需要将此数据移动到称为MTLBuffer，生成buffer。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span>.vertices = [<span class="keyword">self</span>.device newBufferWithBytes:quadVertices</span><br><span class="line">                                         length:<span class="keyword">sizeof</span>(quadVertices)</span><br><span class="line">                                        options:<span class="built_in">MTLResourceStorageModeShared</span>];</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-创建顶点着色器"><a href="#4-创建顶点着色器" class="headerlink" title="4) 创建顶点着色器"></a>4) 创建顶点着色器</h4><p>在上一节中创建的顶点将成为将编写的称为顶点着色器的小程序的输入。</p>
+<p>顶点着色器只是一个在 GPU 上运行的小程序，用称为Metal Shading Language的类 C++ 语言编写。</p>
+<p>每个顶点调用一次顶点着色器，其工作是获取该顶点的信息（例如位置）以及可能的其他信息（例如颜色或纹理坐标）并返回可能修改的位置和可能的其他数据。</p>
+<p>为了简单起见，的简单顶点着色器将返回与传入位置相同的位置。</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/5_matrix-426x320.jpg" alt></p>
+<p>了解顶点着色器的最简单方法就是亲自查看。转到文件 ▸ 新建 ▸ 文件，选择iOS ▸ 源 ▸ Metal 文件，然后单击下一步。输入Shaders.metal作为文件名，然后单击“创建”。</p>
+<p>注意：在 Metal 中，可以在单个 Metal 文件中包含多个着色器。如果愿意，还可以将着色器拆分到多个 Metal 文件中，因为 Metal 将从项目中包含的任何 Metal 文件加载着色器。</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">typedef struct</span><br><span class="line">&#123;</span><br><span class="line">    float4 clipSpacePosition <span class="string">[[position]]</span>;</span><br><span class="line">    float3 pixelColor;</span><br><span class="line">&#125; RasterizerData;</span><br><span class="line"></span><br><span class="line">// 顶点着色器</span><br><span class="line">vertex RasterizerData vertexLearnShader(uint vertexID <span class="string">[[ vertex_id ]]</span>, constant vector_float4 *vertexArray <span class="string">[[ buffer(0) ]]</span>) &#123;</span><br><span class="line">    RasterizerData out;</span><br><span class="line">    out.clipSpacePosition = vertexArray[vertexID];</span><br><span class="line">    <span class="keyword">return</span> out;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>1.所有顶点着色器必须以关键字 vertex 开头。该函数必须（至少）返回顶点的最终位置。float4 可以通过指示（四个浮点数的向量）来执行此操作。然后给出顶点着色器的名称；<br>2.第二个参数是一个指向数组 float4（四个浮点数）的指针，即每个顶点的位置。<br><font color="red">使用[[ … ]]语法来声明属性，可以使用这些属性来指定其他信息，例如资源位置、着色器输入和内置变量。在这里，标记此参数，[[ buffer(0) ]] 以指示从 Metal 代码发送到顶点着色器的第一个数据缓冲区将填充此参数。</font><br>3、顶点着色器还采用带有该属性的特殊参数 vertex_id，这意味着 Metal 将使用顶点数组内该特定顶点的索引来填充它。<br>4、在这里，根据顶点 ID 查找顶点数组内的位置并返回该位置。还可以将向量转换为 float4，这是 3D 数学所必需的。</p>
+<h4 id="5-创建片元着色器"><a href="#5-创建片元着色器" class="headerlink" title="5) 创建片元着色器"></a>5) 创建片元着色器</h4><p>顶点着色器完成后，Metal 为屏幕上的每个片段（像素）调用另一个着色器：片元着色器。</p>
+<p>片元着色器通过对顶点着色器的输出值进行插值来获取其输入值。例如，考虑三角形底部两个顶点之间的片段：</p>
+<p><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/6_points-480x220.jpg" alt></p>
+<p>片元着色器的工作是返回每个片段的最终颜色。为了简单起见，将每个片段设置为蓝色。</p>
+<p>将以下代码添加到Shaders.metal的底部：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 片元着色器</span></span><br><span class="line">fragment <span class="built_in">float</span>4 fragmentLearnShader(RasterizerData input [[stage_in]]) &#123;</span><br><span class="line">    <span class="comment">// 蓝色</span></span><br><span class="line">    half4 colorTex = half4(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">float</span>4(colorTex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>1.所有片元着色器必须以关键字 fragment 开头。该函数必须（至少）返回片段的最终颜色。可以在此处通过指示half4（四分量颜色值 RGBA）来执行此操作。注意，half4 比 float4 更节省 GPU 显存。<br>2.在这里，返回 (0, 0, 1, 1) 来表示颜色，即蓝色。</p>
+<h4 id="6-创建渲染管线"><a href="#6-创建渲染管线" class="headerlink" title="6) 创建渲染管线"></a>6) 创建渲染管线</h4><p>现在已经创建了顶点和片元着色器，需要将它们与一些其他配置数据一起组合到一个称为渲染管道的特殊对象中。</p>
+<p>Metal 的一大优点是着色器是预编译的，并且渲染管道配置是在首次设置后编译的。这使得一切都变得非常高效。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">MTLLibrary</span>&gt; defaultLibrary = [<span class="keyword">self</span>.device newDefaultLibrary];</span><br><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">MTLFunction</span>&gt; vertexFunction = [defaultLibrary newFunctionWithName:<span class="string">@"vertexLearnShader"</span>];</span><br><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">MTLFunction</span>&gt; fragmentFunction = [defaultLibrary newFunctionWithName:<span class="string">@"fragmentLearnShader"</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> MTL渲染管线描述符</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">MTLRenderPipelineDescriptor</span> *pipelineStateDescriptor = [[<span class="built_in">MTLRenderPipelineDescriptor</span> alloc] init];</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 管道调用处理顶点的顶点函数。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">pipelineStateDescriptor.vertexFunction = vertexFunction;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 管道调用来处理片段的片元函数。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">pipelineStateDescriptor.fragmentFunction = fragmentFunction;</span><br><span class="line">pipelineStateDescriptor.colorAttachments[<span class="number">0</span>].pixelFormat = <span class="built_in">MTLPixelFormatBGRA8Unorm</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">self</span>.pipelineState = [<span class="keyword">self</span>.device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor error:<span class="literal">NULL</span>];</span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>1.MTLLibrary可以通过调用 获得的对象来访问项目中包含的任何预编译着色器[device makeDefaultLibrary]。然后，可以按名称查找每个着色器。<br>2.可以在此处设置渲染管道配置。它包含想要使用的着色器，以及配置的像素格式 - 即要渲染到的输出缓冲区的数据格式。<br>3.最后，将管道配置编译为可以高效使用的管道状态。</p>
+<h4 id="7-创建命令队列"><a href="#7-创建命令队列" class="headerlink" title="7) 创建命令队列"></a>7) 创建命令队列</h4><p>需要执行的最后一个一次性设置步骤是创建一个MTLCommandQueue.</p>
+<p>可以将其视为命令 GPU 执行的有序命令列表，一次执行一个。</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">self.commandQueue</span> = [self.device newCommandQueue]<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="8-实战：渲染三角形"><a href="#8-实战：渲染三角形" class="headerlink" title="8) 实战：渲染三角形"></a>8) 实战：渲染三角形</h4><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"LJLearnRender.h"</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"LJBaseRender.h"</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;GLKit/GLKit.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">LJLearnRender</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="keyword">id</span> &lt;<span class="built_in">MTLRenderPipelineState</span>&gt; pipelineState;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="keyword">id</span> &lt;<span class="built_in">MTLCommandQueue</span>&gt; commandQueue;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="keyword">id</span> &lt;<span class="built_in">MTLDevice</span>&gt; device;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) vector_uint2 viewportSize;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="keyword">id</span>&lt;<span class="built_in">MTLBuffer</span>&gt; indexBuffer;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">NSUInteger</span> indexCount;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="keyword">id</span> &lt;<span class="built_in">MTLBuffer</span>&gt; vertices;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="built_in">MTKView</span> *mtkView;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="built_in">UIView</span> *superView;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">LJLearnRender</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//初始化方法</span></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithMetalKitView:(<span class="built_in">MTKView</span> *)mtkView superView:(<span class="built_in">UIView</span> *)superView &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> init];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="comment">//拿到外界传进来的device</span></span><br><span class="line">        <span class="keyword">self</span>.device = mtkView.device;</span><br><span class="line">        <span class="keyword">self</span>.mtkView = mtkView;</span><br><span class="line">        <span class="keyword">self</span>.superView = superView;</span><br><span class="line">        <span class="keyword">self</span>.viewportSize = (vector_uint2)&#123;mtkView.drawableSize.width, mtkView.drawableSize.height&#125;;</span><br><span class="line">        [<span class="keyword">self</span> setupCommandQueue];</span><br><span class="line">        [<span class="keyword">self</span> setUpPineline:mtkView];</span><br><span class="line">        [<span class="keyword">self</span> initConfig];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)initConfig &#123;</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span> setupVertex];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化commandQueue</span></span><br><span class="line">- (<span class="keyword">void</span>)setupCommandQueue &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span>.commandQueue = [<span class="keyword">self</span>.device newCommandQueue];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化pipelineState</span></span><br><span class="line">- (<span class="keyword">void</span>)setUpPineline:(<span class="built_in">MTKView</span> *)mtkView &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     MTL渲染管线描述符</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">id</span>&lt;<span class="built_in">MTLLibrary</span>&gt; defaultLibrary = [<span class="keyword">self</span>.device newDefaultLibrary];</span><br><span class="line">    <span class="keyword">id</span>&lt;<span class="built_in">MTLFunction</span>&gt; vertexFunction = [defaultLibrary newFunctionWithName:<span class="string">@"vertexLearnShader"</span>];</span><br><span class="line">    <span class="keyword">id</span>&lt;<span class="built_in">MTLFunction</span>&gt; fragmentFunction = [defaultLibrary newFunctionWithName:<span class="string">@"fragmentLearnShader"</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     MTL渲染管线描述符</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="built_in">MTLRenderPipelineDescriptor</span> *pipelineStateDescriptor = [[<span class="built_in">MTLRenderPipelineDescriptor</span> alloc] init];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     管道调用处理顶点的顶点函数。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    pipelineStateDescriptor.vertexFunction = vertexFunction;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     管道调用来处理片段的片元函数。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    pipelineStateDescriptor.fragmentFunction = fragmentFunction;</span><br><span class="line">    </span><br><span class="line">    pipelineStateDescriptor.colorAttachments[<span class="number">0</span>].pixelFormat = <span class="built_in">MTLPixelFormatBGRA8Unorm</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     MTL渲染管线状态</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">self</span>.pipelineState = [<span class="keyword">self</span>.device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor error:<span class="literal">NULL</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)setupVertex &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> vector_float4 quadVertices[] =</span><br><span class="line">    &#123;  <span class="comment">// 顶点坐标 x y z w</span></span><br><span class="line">        &#123;<span class="number">0.0</span>f, <span class="number">0.5</span>f, <span class="number">0.0</span>f, <span class="number">1.0</span>f&#125;, <span class="comment">//顶点 0</span></span><br><span class="line">        &#123;<span class="number">-0.5</span>f, <span class="number">-0.5</span>f, <span class="number">0.0</span>f, <span class="number">1.0</span>f&#125;, <span class="comment">//左下 1</span></span><br><span class="line">        &#123;<span class="number">0.5</span>f, <span class="number">-0.5</span>f, <span class="number">0.0</span>f, <span class="number">1.0</span>f&#125;, <span class="comment">//右下 2</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span>.vertices = [<span class="keyword">self</span>.device newBufferWithBytes:quadVertices</span><br><span class="line">                                             length:<span class="keyword">sizeof</span>(quadVertices)</span><br><span class="line">                                            options:<span class="built_in">MTLResourceStorageModeShared</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark - MTKViewDelegate</span></span><br><span class="line"><span class="comment">// MTKView的大小改变</span></span><br><span class="line">- (<span class="keyword">void</span>)mtkView:(<span class="keyword">nonnull</span> <span class="built_in">MTKView</span> *)view drawableSizeWillChange:(<span class="built_in">CGSize</span>)size &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span>.viewportSize = (vector_uint2)&#123;size.width, size.height&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用于向着色器传递数据</span></span><br><span class="line">- (<span class="keyword">void</span>)drawInMTKView:(<span class="built_in">MTKView</span> *)view &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**命令缓冲区*/</span></span><br><span class="line">    <span class="keyword">id</span> &lt;<span class="built_in">MTLCommandBuffer</span>&gt; commandBuffer = [<span class="keyword">self</span>.commandQueue commandBuffer];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**渲染通道描述符*/</span></span><br><span class="line">    <span class="built_in">MTLRenderPassDescriptor</span> *renderPassDescriptor = view.currentRenderPassDescriptor;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!renderPassDescriptor) &#123;</span><br><span class="line">        [commandBuffer commit];</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置背景色</span></span><br><span class="line">    renderPassDescriptor.colorAttachments[<span class="number">0</span>].clearColor = <span class="built_in">MTLClearColorMake</span>(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">1</span>);</span><br><span class="line">    renderPassDescriptor.colorAttachments[<span class="number">0</span>].loadAction = <span class="built_in">MTLLoadActionClear</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**MTL渲染命令编码器*/</span></span><br><span class="line">    <span class="keyword">id</span> &lt;<span class="built_in">MTLRenderCommandEncoder</span>&gt; renderCommandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];</span><br><span class="line">    </span><br><span class="line">     <span class="comment">/**设置视口尺寸*/</span></span><br><span class="line">    [renderCommandEncoder setViewport:(<span class="built_in">MTLViewport</span>)&#123;<span class="number">0</span>, <span class="number">0</span>, <span class="keyword">self</span>.viewportSize.x, <span class="keyword">self</span>.viewportSize.y, <span class="number">-1</span>, <span class="number">1</span>&#125;];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**设置渲染管道状态*/</span></span><br><span class="line">    [renderCommandEncoder setRenderPipelineState:<span class="keyword">self</span>.pipelineState];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**将缓冲区分配给顶点着色器参数表中的条目*/</span></span><br><span class="line">    [renderCommandEncoder setVertexBuffer:<span class="keyword">self</span>.vertices</span><br><span class="line">                                   offset:<span class="number">0</span></span><br><span class="line">                                  atIndex:<span class="number">0</span>];  <span class="comment">// 0</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     开始绘制三角形，从顶点0开始，总共3个顶点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    [renderCommandEncoder drawPrimitives:<span class="built_in">MTLPrimitiveTypeTriangleStrip</span></span><br><span class="line">                             vertexStart:<span class="number">0</span></span><br><span class="line">                             vertexCount:<span class="number">3</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     渲染命令编码器标识结束编码，声明编码器的所有命令生成已完成。调用 endEncoding 后，命令编码器就不再使用。 您不能使用此编码器对任何其他命令进行编码。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    [renderCommandEncoder endEncoding];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     呈现可绘制</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    [commandBuffer presentDrawable:view.currentDrawable];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     提交命令缓冲区以在 GPU 上运行</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    [commandBuffer commit];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：<br><img src="/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/triangle_blue.png" alt></p>
+<p>问：<br>如果画出一个矩形？椎体？</p>
+<p>扩展阅读：<br><a href="https://learnopengl-cn.github.io/" target="_blank" rel="noopener">https://learnopengl-cn.github.io/</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.libsyk.com/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89-%20%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86.html" title="Metal开发教程（一）- 预备知识">https://www.libsyk.com/Metal开发教程（一）- 预备知识.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-Metal/" rel="tag"># iOS Metal</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8.html" rel="next" title="iOS底层探索系列--方法的本质">
+      iOS底层探索系列--方法的本质 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、发展历史"><span class="nav-text">一、发展历史</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、对比"><span class="nav-text">二、对比</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1）Metal-与-SpriteKit、SceneKit-或-Unity"><span class="nav-text">1）Metal 与 SpriteKit、SceneKit 或 Unity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2）Metal-与-OpenGL-ES"><span class="nav-text">2）Metal 与 OpenGL ES</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、Metal使用场景"><span class="nav-text">三、Metal使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、绘制原理"><span class="nav-text">四、绘制原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1）基本原理概括"><span class="nav-text">1）基本原理概括</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2）图形渲染的根基——三角形与像素点"><span class="nav-text">2）图形渲染的根基——三角形与像素点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3）纹理、采样与着色"><span class="nav-text">3）纹理、采样与着色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4）顶点着色器与片段着色器"><span class="nav-text">4）顶点着色器与片段着色器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五、开始创建Metal"><span class="nav-text">五、开始创建Metal</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1）创建MTLDevice"><span class="nav-text">1）创建MTLDevice</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2）创建MTKView"><span class="nav-text">2）创建MTKView</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-创建顶点缓冲区"><span class="nav-text">3) 创建顶点缓冲区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-创建顶点着色器"><span class="nav-text">4) 创建顶点着色器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-创建片元着色器"><span class="nav-text">5) 创建片元着色器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-创建渲染管线"><span class="nav-text">6) 创建渲染管线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-创建命令队列"><span class="nav-text">7) 创建命令队列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-实战：渲染三角形"><span class="nav-text">8) 实战：渲染三角形</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">278k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:13</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>

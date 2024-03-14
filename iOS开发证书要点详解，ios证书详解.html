@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://www.libsyk.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="可以作为了解，现在都是自动管理证书了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS开发证书要点详解，ios证书详解">
+<meta property="og:url" content="https://www.libsyk.com/iOS%E5%BC%80%E5%8F%91%E8%AF%81%E4%B9%A6%E8%A6%81%E7%82%B9%E8%AF%A6%E8%A7%A3%EF%BC%8Cios%E8%AF%81%E4%B9%A6%E8%AF%A6%E8%A7%A3.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="可以作为了解，现在都是自动管理证书了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-6915aad5088cce83?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-51018fcd34ca6844?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-43443ba9168bb1eb?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-45d5cd4089552153?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-478b680d2dd8b28a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-59399d05ca6d0f75.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-4a248d32b62eff79?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2017-05-18T10:14:10.000Z">
+<meta property="article:modified_time" content="2018-06-13T05:21:05.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="证书">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/2647951-6915aad5088cce83?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+<link rel="canonical" href="https://www.libsyk.com/iOS%E5%BC%80%E5%8F%91%E8%AF%81%E4%B9%A6%E8%A6%81%E7%82%B9%E8%AF%A6%E8%A7%A3%EF%BC%8Cios%E8%AF%81%E4%B9%A6%E8%AF%A6%E8%A7%A3.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>iOS开发证书要点详解，ios证书详解 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.libsyk.com/iOS%E5%BC%80%E5%8F%91%E8%AF%81%E4%B9%A6%E8%A6%81%E7%82%B9%E8%AF%A6%E8%A7%A3%EF%BC%8Cios%E8%AF%81%E4%B9%A6%E8%AF%A6%E8%A7%A3.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          iOS开发证书要点详解，ios证书详解
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-05-18 18:14:10" itemprop="dateCreated datePublished" datetime="2017-05-18T18:14:10+08:00">2017-05-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-06-13 13:21:05" itemprop="dateModified" datetime="2018-06-13T13:21:05+08:00">2018-06-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+            <div class="post-description">可以作为了解，现在都是自动管理证书了。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>关于开发证书配置（Certificates&amp;Identifiers&amp;Provisioning Profiles），相信做iOS开发的同学没少被折腾。对于一个iOS开发小白、半吊子抑或老兵，或多或少会有以下不详、疑问、疑惑甚至困惑：</p>
+<p>本文将对相关概念做个系统的梳理串烧。</p>
+<p>首先，假设你使用过Apple设备（iMac/iPad/iPhone）且注册过Apple ID（Apple Account）。<br>其次，你必须加入苹果开发者计划（Enroll in iOS Developer Program to become a member），注册一个开发者账号。<br>只有拥有开发者账号，才可以申请开发/发布证书及相关配置授权文件，进而在iOS真机上开发调试Apps或发布到App Store。<br>开发者账号分为Individual和Company/Organization两种类型。如无特别交代，下文基于$99/Year的普通个人开发者（Individual）账号展开。</p>
+<h4 id="一-App-ID（bundle-identifier）"><a href="#一-App-ID（bundle-identifier）" class="headerlink" title="一.App ID（bundle identifier）"></a>一.App ID（bundle identifier）</h4><p>App ID用于标识一个或者一组App，App ID应该和Xcode中的Bundle Identifier是一致的或匹配的。<br>App ID字符串通常以反域名（reverse-domain-name）格式的Company Identifier（Company ID）作为前缀（Prefix/Seed）。<br>App ID全名会被追加ApplicationIdentifierPrefix（一般为TeamID.），分为两类：<br>Explicit App ID：唯一的App ID，这种App ID用于唯一标识一个应用程序。例如“com.apple.garageband”这个App ID，用于标识Bundle Identifier为“com.apple.garageband”的程序。<br>Wildcard App ID：通配符App ID，用于标识一组应用程序。例如“<em>”（实际上是ApplicationIdentifierPrefix）表示所有应用程序；而“com.apple.</em>”可以表示以“com.apple.”开头的所有应用程序。</p>
+<p>用户可在网站上删除（Delete）已注册的App IDs。App ID<strong>被配置到</strong>【XcodeTarget|Info|Bundle Identifier】下；对于Wildcard App ID，只要bundle identifier包含其作为Prefix/Seed即可。</p>
+<h4 id="二-设备（Device）"><a href="#二-设备（Device）" class="headerlink" title="二.设备（Device）"></a>二.设备（Device）</h4><p>Device就是运行iOS系统用于开发调试App的设备，每台设备使用<strong>UDID</strong>来唯一标识。iOS设备连接Mac后，可通过iTunes-&gt;Summary或者Xcode-&gt;Window-&gt;Devices获取iPhone的UDID（identifier）。<br>Apple Member Center网站个人账号下的Devices中包含了注册过的所有可用于开发和<a href="http://lib.csdn.net/base/softwaretest" target="_blank" rel="noopener">测试</a>的设备。普通个人开发账号每年累计最多只能注册100个设备，用户可在网站上启用/禁用（Enable/Disable）已注册的Device。<br>Apps signed by you or your team run only on designated development devices.<br>Apps run only on the test devices you specify.</p>
+<p>本文的Devices即<strong>连接到</strong>Xcode被授权用于开发测试的iOS设备（iPhone/iPad）。</p>
+<h4 id="三-证书（Certificates）"><a href="#三-证书（Certificates）" class="headerlink" title="三.证书（Certificates）"></a>三.证书（Certificates）</h4><p>顾名思义，证书是用来证明内容（App的executalbe code）的合法性和完整性的。对于想安装到真机或发布到AppStore的应用程序（App），只有经过签名验证（Signature Validated）才能确保来源可信，并且保证App内容是完整、未经篡改的。<br>证书分为两类：Development和Production（Distribution）。<br>Development证书用来开发和调试应用程序：A <strong><em>development certificate</em></strong> identifies you, as a team member, in a development provisioning profile that allows apps signed by you to <strong>*launch *</strong>on devices.<br>Production主要用来分发应用程序（根据证书种类有不同作用）：A <strong><em>distribution certificate</em></strong> identifies your team or organization in a distribution provisioning profile and allows you to <strong>*submit  *</strong>your app to the store. Only a team agent or an admin can create a distribution certificate.</p>
+<p>普通个人开发账号最多可注册iOS Development/Distribution证书各2个，用户可在网站上删除（Revoke）已注册的Certificate。下文主要针对开发调试阶段的Development证书。<br>首先，iOS以及Mac OS X系统（在安装Xcode时）将自动安装AppleWWDRCA.cer<em>(Apple Worldwide Developer Relations Certification Authority)</em>这个中间证书（<strong>Intermediate Certificates）</strong>。它实际上就是iOS证书的CA，其公钥用于解密认证证书的可靠性。如果Mac Keychain Access证书助理在申请证书时尚未安装过该证书，请先下载安装（Signing requires that you have both the signing identity and the intermediate certificate installed in your keychain）。<br><img src="http://upload-images.jianshu.io/upload_images/2647951-6915aad5088cce83?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+<p>通过Keychain证书助理<strong>手动申请</strong>开发证书时（也可通过Xcode自动请求生成），keychain将生成一个包含开发者身份信息的<strong>CSR</strong>（Certificate Signing Request）文件；同时，Keychain Access|Keys中将新增一对Public/Private <strong>Key Pair</strong>（This signing identity consists of a public-private key pair that Apple issues）。<br><img src="http://upload-images.jianshu.io/upload_images/2647951-51018fcd34ca6844?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>private key用于签名（CodeSign），始终保存在Mac OS的Keychain Access中；public key一般随证书散布出去，对签名进行校验认证。用户必须保护好本地Keychain中的private key，以防伪冒。<br>Keep a secure backup of your public-private key pair. If the private key is lost, you’ll have to create an <strong><em>entirely new</em></strong> identity to sign code.<br>Worse, if someone else has your private key, that person may be able to <strong>*impersonate *</strong>you.</p>
+<p>在Apple开发网站上传该CSR文件，Apple证书颁发机构WWDRCA将使用private key对CSR中的public key和一些身份信息进行加密签名生成<strong>数字证书</strong>（ios_development.cer）并记录在案（Apple Member Center）。<br>从Apple Member Center网站下载证书到Mac上双击即可安装。证书安装成功后，在KeychainAccess|Keys中展开创建CSR时生成的Key Pair中的私钥前面的箭头，可以查看到包含其对应公钥的证书（Your requested certificate will be the public half of the key pair.）；在Keychain Access|Certificates中展开安装的证书（ios_development.cer）前面的箭头，可以看到其对应的私钥。<br><img src="http://upload-images.jianshu.io/upload_images/2647951-43443ba9168bb1eb?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br><img src="http://upload-images.jianshu.io/upload_images/2647951-45d5cd4089552153?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>Certificate<strong>被配置到</strong>【Xcode Target|Build Settings|Code Signing|Code Signing Identity】下，下拉选择Identities from Profile “…”（一般先配置Provisioning Profile）。</p>
+<h4 id="四-供应配置文件（Provisioning-Profiles）"><a href="#四-供应配置文件（Provisioning-Profiles）" class="headerlink" title="四.供应配置文件（Provisioning Profiles）"></a>四.供应配置文件（Provisioning Profiles）</h4><p><strong>Provisioning Profile文件包含了上述的所有内容：</strong>证书、App ID和设备**。<br>一个Provisioning Profile对应一个Explicit App ID或Wildcard App ID（一组相同Prefix/Seed的App IDs）。在网站上手动创建一个Provisioning Profile时，需要依次指定App ID（单选）、证书（Certificates，可多选）和设备（Devices，可多选）。用户可在网站上删除（Delete）已注册的ProvisioningProfiles。<br>Provisioning Profile决定Xcode用哪个证书（公钥）/私钥组合（Key Pair/Signing Identity）来签署应用程序（Signing Product）,将在应用程序打包时嵌入到.ipa包里。安装应用程序时，Provisioning Profile文件被拷贝到iOS设备中，运行该iOS App的设备也通过它来认证安装的程序。<br>如果要打包或者在真机上运行一个APP，一般要经历以下三步：<br>首先，需要证书对应的私钥来进行签名，用于标识这个APP是合法、安全、完整的；<br>其次，需要指明它的App ID，并且验证Bundle ID是否与其一致；<br>然后，如果是真机调试，需要确认这台设备是否授权运行该APP。</p>
+<p>Provisioning Profile把这些信息全部打包在一起，方便我们在调试和发布程序打包时使用。这样，只要在不同的情况下选择不同的Provisioning Profile文件就可以了。<br>Provisioning Profile也分为Development和Distribution两类，有效期同Certificate一样。Distribution版本的ProvisioningProfile主要用于提交App Store审核，其中不指定开发测试的Devices（0，unlimited）。App ID为Wildcard App ID（*）。App Store审核通过上架后，允许所有iOS设备（Deployment Target）上安装运行该App。</p>
+<p>Xcode将全部供应配置文件（包括用户手动下载安装的和Xcode自动创建的Team Provisioning Profile）放在目录~/Library/MobileDevice/Provisioning Profiles下。<br>以下为典型供应配置文件<em>.mobileprovision的*</em>构成简析**：</p>
+<p>（1）<strong><em>Name</em></strong>：该mobileprovision的文件名。</p>
+<p>（2）<strong><em>UUID</em></strong>：该mobileprovision文件的真实文件名。</p>
+<p>（3）<strong><em>TeamName</em></strong>：Apple ID账号名。</p>
+<p>（4）<strong><em>TeamIdentifier</em></strong>：Team Identity。</p>
+<p>（5）<strong><em>AppIDName</em></strong>：explicit/wildcard App ID name（ApplicationIdentifierPrefix）。</p>
+<p>（6）<strong><em>ApplicationIdentifierPrefix</em></strong>：完整App ID的前缀（TeamIdentifier.*）。</p>
+<p>（7）<strong><em>DeveloperCertificates</em></strong>：包含了可以为使用该配置文件应用签名的所有证书<data><array>。</array></data></p>
+<p>证书是基于Base64编码，符合PEM(PrivacyEnhanced Mail, RFC 1848)格式的，可使用OpenSSL来处理（opensslx509 -text -in file.pem）。</p>
+<p>从DeveloperCertificates提取<data></data>之间的内容到文件cert.cer（cert.perm）：</p>
+<p>—–BEGIN CERTIFICATE—–</p>
+<p>将<data></data>之间的内容拷贝至此</p>
+<p>—–END CERTIFICATE—–`</p>
+<p>Mac下右键QuickLook查看cert.cer（cert.perm），在Keychain Access中右键Get Info查看对应证书ios_development.cer，正常情况（公私钥KeyPair配对）应吻合；Windows下没有足够信息（WWDRCA.cer），无法验证该证书。</p>
+<p>如果你用了一个不在这个列表中的证书进行签名，无论这个证书是否有效，这个应用都将CodeSign Fail。</p>
+<p>（8）<strong><em>Entitlements</em></strong>键<key>对应的<dict>：</dict></key></p>
+<p><strong>keychain-access-groups</strong>：$(AppIdentifierPrefix)，参见<strong><em>Code Signing Entitlements</em></strong>(*.entitlements)。</p>
+<p>每个应用程序都有一个可以用于安全保存一些如密码、认证等信息的<strong>keychain</strong>，一般而言自己的程序只能访问自己的keychain。通过对应用签名时的一些设置，还可以利用keychain的方式实现同一开发者签证（就是相同bundle seed）下的不同应用之间共享信息的操作。比如你有一个开发者帐户，并开发了两个不同的应用A和B，然后通过对A和B的keychain access group这个东西指定共用的访问分组，就可以实现共享此keychain中的内容。</p>
+<p><strong>application-identifier</strong>：带前缀的全名，例如$(AppIdentifierPrefix)com.apple.garageband。</p>
+<p><strong>com.apple.security.application-groups</strong>：App Group ID（group. com.apple），参见<strong><em>Code Signing Entitlements</em></strong>(*.entitlements)。</p>
+<p><strong>com.apple.developer.team-identifier</strong>：同Team Identifier。</p>
+<p>（9）<strong><em>Provisioned Devices</em></strong>：该mobileprovision授权的开发设备的UDID <array>。</array></p>
+<p>Provisioning Profile<strong>被配置到</strong>【XcodeTarget|Build Settings|Code Signing|Provisioning Profile】下，然后在Code Signing Identity下拉可选择Identities from Profile “…”（即Provisioning Profile中包含的Certificates）。</p>
+<h4 id="五-开发组供应配置文件"><a href="#五-开发组供应配置文件" class="headerlink" title="五.开发组供应配置文件"></a>五.开发组供应配置文件</h4><p>（<strong>Team Provisioning Profiles</strong>）<strong>每个Apple开发者账号都对应一个唯一的</strong>Team ID，<strong>Xcode3.2.3预发布版本中加入了Team Provisioning Profile这项新功能。<br>在Xcode中添加Apple Developer Account时，它将与Apple Member Center后台勾兑</strong>自动生成<em>*iOS Team Provisioning Profile（Managed by Xcode）。<br><img src="http://upload-images.jianshu.io/upload_images/2647951-478b680d2dd8b28a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>Team Provisioning Profile包含一个为Xcode iOS Wildcard App ID(</em>)生成的iOS Team Provisioning Profile:*（匹配所有应用程序），账户里所有的Development Certificates和Devices都可以使用它在这个eam注册的所有设备上调试所有的应用程序（不管bundleidentifier是什么）。同时，它还会为开发者自己创建的Wildcard/Explicit App IDs创建对应的iOSTeam Provisioning Profile。<br>Team Provisioning Profile生成/更新时机：<br>Add an Apple ID account to Xcode<br>Fix issue “No Provisioning Profiles with a valid signing identity” in Xcode<br>Assign Your App to a Team in Xcode project settings of General|Identity<br>Register new device on the apple development website or Xcode detected new device connected</p>
+<p>利用Xcode生成和管理的iOS Team Provisioning Profile来进行开发非常方便，可以不需要上网站手动生成下载Provisioning Profile。<br>Team Provisioning Profile同Provisioning Profile，只不过是由Xcode自动生成的，也<strong>被配置到</strong>【XcodeTarget|Build Settings|Code Signing|Provisioning Profile】下。</p>
+<h4 id="六-App-Group-（ID）"><a href="#六-App-Group-（ID）" class="headerlink" title="六.App Group （ID）"></a>六.App Group （ID）</h4><p><strong>WWDC14除了发布了OS X v10.10和switf外，iOS 8.0也开始变得更加开放了。说到开放，当然要数应用扩展（App Extension）了。顾名思义，应用扩展允许开发者扩展应用的自定义功能和内容，能够让用户在使用其他应用程序时使用该项功能，从而实现各个应用程序间的功能和资源共享。可以将扩展理解为一个轻量级（nimble and lightweight）的分身。<br>扩展和其Containing App各自拥有自己的沙盒，虽然扩展以插件形式内嵌在Containing App中，但是它们是独立的二进制包，不可以互访彼此的沙盒。为了实现Containing App与扩展的数据共享，苹果在iOS 8中引入了一个新的概念——App Group，它主要用于同一Group下的APP实现数据共享，具体来说是通过以App Group ID标识的共享资源区——App Group <a href="http://lib.csdn.net/base/docker" target="_blank" rel="noopener">Container</a>。<br>用户可在网站上编辑Explicit App IDs的App Group Assignment；可以删除（Delete）已注册的AppGroup （ID）。<br>Containing App与Extension的Explicit App ID必须Assign到同一App Group下才能实现数据共享，并且Containing App与Extension的App ID命名必须符合规范：<br>假如Garageband这个App ID为“com.apple.garageband”，则支持从语音备忘录导入到Garageband应用的插件的App ID可能形如“com.apple.garageband.*</strong>extImportRecording***”。<br><img src="http://upload-images.jianshu.io/upload_images/2647951-59399d05ca6d0f75.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt></p>
+<p>关于Provisioning Profile，可以使用自己手动生成的，也可以使用Xcode自动生成的Team Provisioning Profile。<br>App Group会<strong>被配置到</strong>【Xcode Target|Build Settings|Code Signing|Code Signing Entitlements】文件（*.entitlements）的键com.apple.security.application-groups下，不影响Provisioning Profile生成流程。</p>
+<h3 id="七-证书与签名（Certificate-amp-Signature）"><a href="#七-证书与签名（Certificate-amp-Signature）" class="headerlink" title="七.证书与签名（Certificate&amp; Signature）"></a>七.证书与签名（Certificate&amp; Signature）</h3><p><img src="http://upload-images.jianshu.io/upload_images/2647951-4a248d32b62eff79?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>每个证书（其实是公钥）对应的<strong>私钥</strong>会被用来对内容（executable code，resources such as images and nib files aren’t signed）进行数字<strong>签名</strong>（CodeSign）——使用哈希<a href="http://lib.csdn.net/base/datastructure" target="_blank" rel="noopener">算法</a>生成内容<strong>摘要</strong>（digest）。上面已经提到，公钥被包含在数字证书里，数字证书又被包含在描述文件(Provisioning File)中，描述文件在应用被安装的时候会被拷贝到iOS设备中。<br>iOS/Mac机上的ios_development.cer可以被AppleWWDRCA.cer中的 public key解密，从而获取每个开发证书中可信任的公钥。<br><strong>1.iOS/Mac设备（系统）使用CA证书</strong>（WWDRCA.cer）<strong>来判断App Provisioning Profile（Code Signing Identity）的合法性：</strong><br>若用WWDRCA公钥能成功解密出证书并得到公钥（Public Key）和内容摘要（Signature），证明此证书确乃AppleWWDRCA发布，即证书来源可信；<br>再对证书本身使用哈希算法计算摘要，若与上一步得到的摘要一致，则证明此证书未被篡改过，即证书完整。</p>
+<p><strong>2.iOS/Mac设备（系统）使用AppProvisioning Profile</strong>（Code Signing Identity）<strong>证书来判断App的合法性：</strong><br>若用证书公钥能成功解密出App（executable code）的内容摘要（Signature），证明此App确乃认证开发者发布，即来源可信；<br>再对App（executable code）本身使用哈希算法计算摘要，若与上一步得到的摘要一致，则证明此App（executable code）未被篡改过，即内容完整。</p>
+<h3 id="八-在多台机器上实现开发账户-证书共享"><a href="#八-在多台机器上实现开发账户-证书共享" class="headerlink" title="八.在多台机器上实现开发账户/证书共享"></a>八.在多台机器上实现开发账户/证书共享</h3><p><strong>若在Xcode Preferences添加了该Accounts，选中Team条目|ViewDetails：可以查看Signing Identities和Provisioning Profiles。<br>选中欲导出的Account，点击+-之后的☸|ExportAccounts，可导出包含account/code signingidentity/provisioning profiles信息的*.</strong>developerprofile<strong>（Exporting a Developer Profile）文件供其他机器上的Xcode开发使用（Import该Account）。<br>选中欲导出的Signing Identity条目，点击栏底+之后的☸|Export，必须输入密码，并需授权exportkey “privateKey” from keychain，将导出</strong>Certificates.p12；<strong>或在Keychain Access|Certificates中选中欲导出的certificate或其下private key，右键Export或者通过菜单File|Export Items导出</strong>Certificates.p12**。</p>
+<p>其他Mac机器上双击Certificates.p12（如有密码需输入密码）即可安装该共享证书，在开发者网站上将欲调试的iOS设备注册到该开发者账号名下，并下载对应证书授权了iOS调试设备的Provisioning Profile文件即可在iOS真机设备上开发调试。</p>
+<h3 id="九-证书配置常见错误"><a href="#九-证书配置常见错误" class="headerlink" title="九.证书配置常见错误"></a>九.证书配置常见错误</h3><ol>
+<li>Xcode Target|Genera|Identity Team下提示”Your build settings specify a provisioning profile with the UUID “xxx”,howerver, no such provisioning profile was found.”<br>Xcode Target|BuildSettings|Code Signing|当前配置的指定UDID的provisioningprofile在本地不存在，此时需要更改Provisioning Profile。必要时手动去网站下载或重新生成Provisioning Profile或直接在Xcode中Fix issue予以解决（可能自动生成iOS Team ProvisioningProfile）！</li>
+<li>Build Settings|CodeSigning的Provisioning Profile中选择了本地安装的provisioningprofile之后，Code Signing Identity中下拉提示No identities from profile “…”or No identities from keychain.<br>Xcode配置指定UDID的provisioning profile中的DeveloperCertificates在本地KeyChain中不存在（No identities are available）或不一致（KeyPair中的Private Key丢失），此时需去网站检查ProvisioningProfile中的App ID-Certificate-Device配置是否正确。如果是别人提供的共享账号（<em>.developerprofile）或共享证书(</em>.p12)，请确保导出了对应Key Pair中的Private Key。必要时也直接在Xcode中Fix issue予以解决（可能自动生成iOS Team ProvisioningProfile）。</li>
+<li>“Invalid application-identifier Entitlement”or “Code Signing Entitlements file do not match those specified in your provisioning profile.(0xE8008016).”</li>
+</ol>
+<p><strong>（1）</strong>检查对应版本（Debug）指定的<em>.entitlements文件中的“Keychain Access Groups”键值是否与ProvisioningProfile中的Entitlements项相吻合（后者一般为前者的Prefix/Seed）。<br>*</em>（2）也可以将**Build Settings|Code Signing的Provisioning Profile中对应版本（Debug）的Entitlements置空。<br>4.Xcode配置反应有时候不那么及时，可刷新、重置相关配置项开关（若有）或重启Xcode试试。</p>
+<p><strong>参考：</strong></p>
+<p>《iPhone真机调试应用程序》《iOS Developer：真机测试》<br>《iOS Development–Certificates, Provisioning Profiles》<br>《关于Certificate、Provisioning Profile、App ID的介绍及其关系》</p>
+<p>《iOS keyChain 研究》<br>《数字签名和数字证书》<br>《苹果开发者账号那些事儿》<br>《iOS Code Signing 学习笔记》<br>《代码签名探析/Inside Code Signing》<br>《iOS Code Signing: 解惑/iOS Code Signing: Under The Hood》<br>转载：<a href="http://blog.csdn.net/lw_chen/article/details/48709901" target="_blank" rel="noopener">iOS开发证书要点详解，ios证书详解</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.libsyk.com/iOS%E5%BC%80%E5%8F%91%E8%AF%81%E4%B9%A6%E8%A6%81%E7%82%B9%E8%AF%A6%E8%A7%A3%EF%BC%8Cios%E8%AF%81%E4%B9%A6%E8%AF%A6%E8%A7%A3.html" title="iOS开发证书要点详解，ios证书详解">https://www.libsyk.com/iOS开发证书要点详解，ios证书详解.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AF%81%E4%B9%A6/" rel="tag"># 证书</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/KVO%E9%94%AE%E5%80%BC%E4%BE%9D%E8%B5%96.html" rel="prev" title="KVO键值依赖">
+      <i class="fa fa-chevron-left"></i> KVO键值依赖
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/iOS-%E6%96%87%E5%AD%97%E6%A0%B7%E5%BC%8F%E5%A4%84%E7%90%86%E6%80%BB%E7%BB%93.html" rel="next" title="iOS-文字样式处理总结">
+      iOS-文字样式处理总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一-App-ID（bundle-identifier）"><span class="nav-text">一.App ID（bundle identifier）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二-设备（Device）"><span class="nav-text">二.设备（Device）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三-证书（Certificates）"><span class="nav-text">三.证书（Certificates）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四-供应配置文件（Provisioning-Profiles）"><span class="nav-text">四.供应配置文件（Provisioning Profiles）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#五-开发组供应配置文件"><span class="nav-text">五.开发组供应配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#六-App-Group-（ID）"><span class="nav-text">六.App Group （ID）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#七-证书与签名（Certificate-amp-Signature）"><span class="nav-text">七.证书与签名（Certificate&amp; Signature）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#八-在多台机器上实现开发账户-证书共享"><span class="nav-text">八.在多台机器上实现开发账户&#x2F;证书共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#九-证书配置常见错误"><span class="nav-text">九.证书配置常见错误</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">278k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:13</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>

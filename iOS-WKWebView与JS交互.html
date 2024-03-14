@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://www.libsyk.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="iOS-WKWebView与JS交互总结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS-WKWebView与JS交互">
+<meta property="og:url" content="https://www.libsyk.com/iOS-WKWebView%E4%B8%8EJS%E4%BA%A4%E4%BA%92.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="iOS-WKWebView与JS交互总结">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-11-15T01:56:13.000Z">
+<meta property="article:modified_time" content="2018-06-13T05:21:05.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="WKWebView">
+<meta property="article:tag" content="js">
+<meta property="article:tag" content="交互">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.libsyk.com/iOS-WKWebView%E4%B8%8EJS%E4%BA%A4%E4%BA%92.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>iOS-WKWebView与JS交互 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.libsyk.com/iOS-WKWebView%E4%B8%8EJS%E4%BA%A4%E4%BA%92.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          iOS-WKWebView与JS交互
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-11-15 09:56:13" itemprop="dateCreated datePublished" datetime="2017-11-15T09:56:13+08:00">2017-11-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-06-13 13:21:05" itemprop="dateModified" datetime="2018-06-13T13:21:05+08:00">2018-06-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+            <div class="post-description">iOS-WKWebView与JS交互总结</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="一、WK协议"><a href="#一、WK协议" class="headerlink" title="一、WK协议"></a>一、WK协议</h3><h4 id="1-1-WKScriptMessageHandler协议"><a href="#1-1-WKScriptMessageHandler协议" class="headerlink" title="1.1 WKScriptMessageHandler协议"></a>1.1 WKScriptMessageHandler协议</h4><p>WKScriptMessageHandler其实就是一个遵循的协议，它能让网页通过JS把消息发送给OC。其中协议方法。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*! @abstract Invoked when a script message is received from a webpage.</span></span><br><span class="line"><span class="comment"> @param userContentController The user content controller invoking the</span></span><br><span class="line"><span class="comment"> delegate method.</span></span><br><span class="line"><span class="comment"> @param message The script message received.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="selector-tag">-</span> (void)<span class="selector-tag">userContentController</span><span class="selector-pseudo">:(WKUserContentController</span> *)<span class="selector-tag">userContentController</span> <span class="selector-tag">didReceiveScriptMessage</span><span class="selector-pseudo">:(WKScriptMessage</span> *)<span class="selector-tag">message</span>;</span><br></pre></td></tr></table></figure>
+<p>从协议中我们可以看出这里使用了两个类WKUserContentController和WKScriptMessage。WKUserContentController可以理解为调度器，WKScriptMessage则是携带的数据。</p>
+<h4 id="1-2-WKUserContentController"><a href="#1-2-WKUserContentController" class="headerlink" title="1.2 WKUserContentController"></a>1.2 WKUserContentController</h4><p>WKUserContentController有两个核心方法，也是它的核心功能。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)addUserScript:(<span class="built_in">WKUserScript</span> *)userScript;: js注入，即向网页中注入我们的js方法，这是一个非常强大的功能，开发中要慎用。</span><br><span class="line">- (<span class="keyword">void</span>)addScriptMessageHandler:(<span class="keyword">id</span> &lt;<span class="built_in">WKScriptMessageHandler</span>&gt;)scriptMessageHandler name:(<span class="built_in">NSString</span> *)name;：添加供js调用oc的桥梁。这里的name对应<span class="built_in">WKScriptMessage</span>中的name，多数情况下我们认为它就是方法名。</span><br></pre></td></tr></table></figure>
+<h4 id="1-3-WKScriptMessage"><a href="#1-3-WKScriptMessage" class="headerlink" title="1.3 WKScriptMessage"></a>1.3 WKScriptMessage</h4><p>WKScriptMessage就是js通知oc的数据。其中有两个核心属性用的很多。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">readonly</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *name; ：对应- (<span class="keyword">void</span>)addScriptMessageHandler:(<span class="keyword">id</span> &lt;<span class="built_in">WKScriptMessageHandler</span>&gt;)scriptMessageHandler name:(<span class="built_in">NSString</span> *)name;添加的name。</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">readonly</span>, <span class="keyword">copy</span>) <span class="keyword">id</span> body;：携带的核心数据。</span><br></pre></td></tr></table></figure>
+<p>js调用时只需</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">window</span><span class="selector-class">.webkit</span><span class="selector-class">.messageHandlers</span>.&lt;<span class="selector-tag">name</span>&gt;<span class="selector-class">.postMessage</span>(&lt;<span class="selector-tag">messageBody</span>&gt;)</span><br></pre></td></tr></table></figure>
+
+<p>这里的name就是我们添加的name。</p>
+<h3 id="二、JS调OC代码"><a href="#二、JS调OC代码" class="headerlink" title="二、JS调OC代码"></a>二、JS调OC代码</h3><p>JS代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">content</span>=<span class="string">"width=device-width,initial-scale=1,user-scalable=no"</span> <span class="attr">name</span>=<span class="string">"viewport"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span> <span class="attr">style</span>=<span class="string">"background-color: white;"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="actionscript">        <span class="function"><span class="keyword">function</span> <span class="title">jsCallNative</span><span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">           <span class="built_in">window</span>.webkit.messageHandlers.callNativeAndSend.postMessage(<span class="string">'callcallcall'</span>);</span></span><br><span class="line">           alert(callNative);</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">onclick</span> = <span class="string">"jsCallNative()"</span> <span class="attr">style</span>=<span class="string">"width:100%; height:30px;"</span>/&gt;</span>调用OC代码<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>注意：window.webkit.messageHandlers.callNativeAndSend.postMessage(‘callcallcall’);这行代码才是调用oc的方法，方法名：callNativeAndSend 参数就是：callcallcall</p>
+<p>OC代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">WKUserContentController</span> *userContentController = [[<span class="built_in">WKUserContentController</span> alloc] init];</span><br><span class="line">       [userContentController addScriptMessageHandler:<span class="keyword">self</span> name:<span class="string">@"callNativeAndSend"</span>];</span><br><span class="line">       [userContentController addScriptMessageHandler:<span class="keyword">self</span> name:<span class="string">@"NativeObject.shareString"</span>];</span><br><span class="line">       <span class="comment">// WKWebView的配置</span></span><br><span class="line">       <span class="built_in">WKWebViewConfiguration</span> *configuration = [[<span class="built_in">WKWebViewConfiguration</span> alloc] init];</span><br><span class="line">       configuration.userContentController   = userContentController;</span><br><span class="line">       <span class="comment">//创建WKWebView</span></span><br><span class="line">       </span><br><span class="line">       _webView = [[<span class="built_in">WKWebView</span> alloc]initWithFrame:<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, ScreenWidth, ScreenHeight) configuration:configuration];</span><br></pre></td></tr></table></figure>
+<p>上面代码，是创建webView，并且告诉JS有哪些方法。</p>
+<p>Adding a script message handler with name name causes the JavaScript function window.webkit.messageHandlers.name.postMessage(messageBody) to be defined in all frames in all web views that use the user content controller.<br>译：添加名称名称的脚本消息处理程序会导致在所有使用用户内容控制器的Web视图的所有框架中定义JavaScript函数window.webkit.messageHandlers.name.postMessage（messageBody）。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)addScriptMessageHandler:(<span class="keyword">id</span>&lt;<span class="built_in">WKScriptMessageHandler</span>&gt;)scriptMessageHandler name:(<span class="built_in">NSString</span> *)name;</span><br></pre></td></tr></table></figure>
+<p>但是 [userContentController addScriptMessageHandler:self name:@”NativeObject.shareString”];亲测是无效的，其只能像[userContentController addScriptMessageHandler:self name:@”callNativeAndSend”];添加这种。</p>
+<p>当JS调用OC方法后，会执行以下回调，name是方法名，可以用其作区分判断，body是参数</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message&#123;</span><br><span class="line">    <span class="constructor">NSLog(@<span class="string">"\n body:%@ \n name:%@"</span>,<span class="params">message</span>.<span class="params">body</span>,<span class="params">message</span>.<span class="params">name</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外还有一种注入JS的方式：</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- <span class="params">(void)</span>addUserScript:<span class="params">(WKUserScript *)</span>userScript;: js注入，即向网页中注入我们的js方法，这是一个非常强大的功能，开发中要慎用。</span><br></pre></td></tr></table></figure>
+<p><strong>注意：在UIWebview中，当我们第一次给h5注入js方法后，在后续的页面操作过程中可能会丢失这个方法，也就是js不再能拿到这个方法。可能原因是：在h5页面操作过程中，创建了两个window，而我们加的js方法仍在第一个window上，在新的window上就拿不到了。在WKWebview中，丢失方法是因为js调用方法调早了，而我们还没有注入；js延迟调用问题不存在了。</strong> <strong>在WKWebview中用上述方式注入代码后会避免此问题出现*！！！</strong></p>
+<h3 id="三、OC调JS代码"><a href="#三、OC调JS代码" class="headerlink" title="三、OC调JS代码"></a>三、OC调JS代码</h3><figure class="highlight hy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[webView evaluateJavaScript:@<span class="string">"globalObject.nativeCallJS('abc')"</span> completionHandler:^(<span class="name"><span class="builtin-name">id</span></span> _Nullable data, NSError * _Nullable error) &#123;</span><br><span class="line">        if (<span class="name">error</span>) &#123;</span><br><span class="line">            NSLog(@<span class="string">"error:%@"</span>,error)<span class="comment">;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;]<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>abc是传递给JS的参数，globalObject是JS中全局属性，nativeCallJS是其下的方法。</p>
+<h3 id="四、优化"><a href="#四、优化" class="headerlink" title="四、优化"></a>四、优化</h3><p>[userContentController addScriptMessageHandler:self name:@”callNativeAndSend”]<br>当我们添加注入方法时，以上代码会强引用self，即当前控制器，会导致再dealloc的时候self不会释放，解决办法是创建一个新类，并实现WKScriptMessageHandler代理方法。代码如下：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">WeakScriptMessageDelegate.h</span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;WebKit/WebKit.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">WeakScriptMessageDelegate</span> : <span class="title">NSObject</span>&lt;<span class="title">WKScriptMessageHandler</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="keyword">id</span>&lt;<span class="built_in">WKScriptMessageHandler</span>&gt; scriptDelegate;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithDelegate:(<span class="keyword">id</span>&lt;<span class="built_in">WKScriptMessageHandler</span>&gt;)scriptDelegate;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">WeakScriptMessageDelegate.m</span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">"WeakScriptMessageDelegate.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">WeakScriptMessageDelegate</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithDelegate:(<span class="keyword">id</span>&lt;<span class="built_in">WKScriptMessageHandler</span>&gt;)scriptDelegate</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> init];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _scriptDelegate = scriptDelegate;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)userContentController:(<span class="built_in">WKUserContentController</span> *)userContentController didReceiveScriptMessage:(<span class="built_in">WKScriptMessage</span> *)message</span><br><span class="line">&#123;</span><br><span class="line">    [<span class="keyword">self</span>.scriptDelegate userContentController:userContentController didReceiveScriptMessage:message];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>尽管如此，在self里还是要在dealloc的时候移除方法：</p>
+<figure class="highlight scheme"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[[<span class="name">_wkWebView</span> configuration].userContentController removeScriptMessageHandlerForName:@<span class="string">"jsCallNative"</span>]<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>执行上述代码之后，self和WeakScriptMessageDelegate都能安全释放。</p>
+<p>推荐一个强大的苹果官方库，JavaScriptCore 以及 <a href="https://www.ericlife.top/2017/11/14/iOS-JavaScriptCore%E4%BD%BF%E7%94%A8/" target="_blank" rel="noopener">iOS JavaScriptCore使用</a>。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.libsyk.com/iOS-WKWebView%E4%B8%8EJS%E4%BA%A4%E4%BA%92.html" title="iOS-WKWebView与JS交互">https://www.libsyk.com/iOS-WKWebView与JS交互.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/WKWebView/" rel="tag"># WKWebView</a>
+              <a href="/tags/js/" rel="tag"># js</a>
+              <a href="/tags/%E4%BA%A4%E4%BA%92/" rel="tag"># 交互</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/App-Store-%E5%AE%A1%E6%A0%B8%E6%8C%87%E5%8D%97.html" rel="prev" title="App-Store-审核指南">
+      <i class="fa fa-chevron-left"></i> App-Store-审核指南
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/iOS-JavaScriptCore%E4%BD%BF%E7%94%A8.html" rel="next" title="iOS-JavaScriptCore使用">
+      iOS-JavaScriptCore使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、WK协议"><span class="nav-text">一、WK协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-WKScriptMessageHandler协议"><span class="nav-text">1.1 WKScriptMessageHandler协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-WKUserContentController"><span class="nav-text">1.2 WKUserContentController</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-WKScriptMessage"><span class="nav-text">1.3 WKScriptMessage</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、JS调OC代码"><span class="nav-text">二、JS调OC代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、OC调JS代码"><span class="nav-text">三、OC调JS代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、优化"><span class="nav-text">四、优化</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">278k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:13</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>
