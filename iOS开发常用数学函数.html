@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
+<meta name="generator" content="Hexo 7.3.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
@@ -273,7 +273,7 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>994</span>
+              <span>1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -294,12 +294,12 @@
 
       
         <h3 id="1-三角函数"><a href="#1-三角函数" class="headerlink" title="1.  三角函数"></a>1.  三角函数</h3><p>　　double sin (double);正弦<br>　　double cos (double);余弦<br>　　double tan (double);正切 </p>
-<h3 id="2-反三角函数"><a href="#2-反三角函数" class="headerlink" title="2.  反三角函数"></a>2.  反三角函数</h3><p>　　double asin (double); 结果介于[-PI/2, PI/2]<br>　　double acos (double); 结果介于[0, PI]<br>　　double atan (double); 反正切(主值), 结果介于[-PI/2, PI/2]<br>　　double atan2 (double, double); 反正切(整圆值), 结果介于[-PI, PI] </p>
+<h3 id="2-反三角函数"><a href="#2-反三角函数" class="headerlink" title="2.  反三角函数"></a>2.  反三角函数</h3><p>　　double asin (double); 结果介于[-PI&#x2F;2, PI&#x2F;2]<br>　　double acos (double); 结果介于[0, PI]<br>　　double atan (double); 反正切(主值), 结果介于[-PI&#x2F;2, PI&#x2F;2]<br>　　double atan2 (double, double); 反正切(整圆值), 结果介于[-PI, PI] </p>
 <h3 id="3-双曲三角函数"><a href="#3-双曲三角函数" class="headerlink" title="3.  双曲三角函数"></a>3.  双曲三角函数</h3><p>　　double sinh (double);<br>　　double cosh (double);<br>　　double tanh (double); </p>
 <h3 id="4-指数与对数"><a href="#4-指数与对数" class="headerlink" title="4. 指数与对数"></a>4. 指数与对数</h3><p>　　double exp (double);求取自然数e的幂<br>　　double sqrt (double);开平方<br>　　double log (double); 以e为底的对数<br>　　double log10 (double);以10为底的对数<br>　　double pow(double x, double y）;计算以x为底数的y次幂<br>　　float powf(float x, float y); 功能与pow一致，只是输入与输出皆为浮点数 </p>
 <h3 id="5-取整"><a href="#5-取整" class="headerlink" title="5. 取整"></a>5. 取整</h3><p>　　double ceil (double); 取上整<br>　　double floor (double); 取下整 </p>
 <h3 id="6-绝对值"><a href="#6-绝对值" class="headerlink" title="6. 绝对值"></a>6. 绝对值</h3><p>　　double fabs (double);求绝对值<br>　　double cabs(struct complex znum) ;求复数的绝对值 </p>
-<h3 id="7-标准化浮点数"><a href="#7-标准化浮点数" class="headerlink" title="7.  标准化浮点数"></a>7.  标准化浮点数</h3><p>　　double frexp (double f, int *p); 标准化浮点数, f = x * 2^p, 已知f求x, p ( x介于[0.5, 1] )<br>　　double ldexp (double x, int p); 与frexp相反, 已知x, p求f </p>
+<h3 id="7-标准化浮点数"><a href="#7-标准化浮点数" class="headerlink" title="7.  标准化浮点数"></a>7.  标准化浮点数</h3><p>　　double frexp (double f, int *p); 标准化浮点数, f &#x3D; x * 2^p, 已知f求x, p ( x介于[0.5, 1] )<br>　　double ldexp (double x, int p); 与frexp相反, 已知x, p求f </p>
 <h3 id="8-取整与取余"><a href="#8-取整与取余" class="headerlink" title="8. 取整与取余"></a>8. 取整与取余</h3><p>　　double modf (double, double*); 将参数的整数部分通过指针回传, 返回小数部分<br>　　double fmod (double, double); 返回两参数相除的余数 </p>
 <h3 id="9-其他"><a href="#9-其他" class="headerlink" title="9. 其他"></a>9. 其他</h3><p>　　double hypot(double x, double y);已知直角三角形两个直角边长度，求斜边长度<br>　　double ldexp(double x, int exponent);计算x*(2的exponent次幂)<br>　　double poly(double x, int degree, double coeffs [] );计算多项式<br>　　nt matherr(struct exception *e);数学错误计算处理程序</p>
 
@@ -400,7 +400,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-三角函数"><span class="nav-text">1.  三角函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-反三角函数"><span class="nav-text">2.  反三角函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-双曲三角函数"><span class="nav-text">3.  双曲三角函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-指数与对数"><span class="nav-text">4. 指数与对数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-取整"><span class="nav-text">5. 取整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-绝对值"><span class="nav-text">6. 绝对值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-标准化浮点数"><span class="nav-text">7.  标准化浮点数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-取整与取余"><span class="nav-text">8. 取整与取余</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-其他"><span class="nav-text">9. 其他</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%89%E8%A7%92%E5%87%BD%E6%95%B0"><span class="nav-text">1.  三角函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8F%8D%E4%B8%89%E8%A7%92%E5%87%BD%E6%95%B0"><span class="nav-text">2.  反三角函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8F%8C%E6%9B%B2%E4%B8%89%E8%A7%92%E5%87%BD%E6%95%B0"><span class="nav-text">3.  双曲三角函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%8C%87%E6%95%B0%E4%B8%8E%E5%AF%B9%E6%95%B0"><span class="nav-text">4. 指数与对数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%8F%96%E6%95%B4"><span class="nav-text">5. 取整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E7%BB%9D%E5%AF%B9%E5%80%BC"><span class="nav-text">6. 绝对值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E6%A0%87%E5%87%86%E5%8C%96%E6%B5%AE%E7%82%B9%E6%95%B0"><span class="nav-text">7.  标准化浮点数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%8F%96%E6%95%B4%E4%B8%8E%E5%8F%96%E4%BD%99"><span class="nav-text">8. 取整与取余</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E5%85%B6%E4%BB%96"><span class="nav-text">9. 其他</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -414,20 +414,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -464,12 +464,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">278k</span>
+    <span title="站点总字数">300k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:13</span>
+    <span title="站点阅读时长">4:33</span>
 </div>
 
         
