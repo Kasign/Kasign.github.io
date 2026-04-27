@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <author>
+    <name>Eric</name>
+  </author>
+  <generator uri="https://hexo.io/">Hexo</generator>
+  <id>https://blog.libd.cn/</id>
+  <link href="https://blog.libd.cn/" rel="alternate"/>
+  <link href="https://blog.libd.cn/atom.xml" rel="self"/>
+  <rights>All rights reserved 2026, Eric</rights>
+  <subtitle>将来的自己,会感谢现在努力的自己!</subtitle>
+  <title>时光书馆</title>
+  <updated>2026-04-27T08:40:46.000Z</updated>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="Hexo" scheme="https://blog.libd.cn/tags/Hexo/"/>
+    <id>https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html</id>
+    <link href="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html"/>
+    <published>2026-04-27T08:40:46.000Z</published>
+    <summary>__weak指针能够在所指向的对象被销毁时自动置为 `nil`，避免野指针。这个“自动归零”（zeroing）行为的底层实现依赖于**运行时维护的一组全局哈希表**，记录了所有 weak 指针与被指向对象之间的映射关系。</summary>
+    <title>Weak底层原理</title>
+    <updated>2026-04-27T08:40:46.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="Hexo" scheme="https://blog.libd.cn/tags/Hexo/"/>
+    <id>https://blog.libd.cn/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html</id>
+    <link href="https://blog.libd.cn/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html"/>
+    <published>2026-04-27T08:05:57.000Z</published>
+    <summary>AutoreleasePool是 Objective‑C 中用于管理临时对象生命周期的语法糖。它能够将对象延迟释放到作用域结束，避免在大量临时对象的场景下频繁创建/释放对象导致性能下降。</summary>
+    <title>AutoreleasePool底层原理</title>
+    <updated>2026-04-27T08:05:57.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="MarkDown" scheme="https://blog.libd.cn/categories/MarkDown/"/>
+    <category term="MarkDown hoedown 解析" scheme="https://blog.libd.cn/tags/MarkDown-hoedown-%E8%A7%A3%E6%9E%90/"/>
+    <id>https://blog.libd.cn/hoedown%E8%A7%A3%E6%9E%90%E5%9B%B4%E6%A0%8F%E4%BB%A3%E7%A0%81%E5%8E%9F%E7%90%86.html</id>
+    <link href="https://blog.libd.cn/hoedown%E8%A7%A3%E6%9E%90%E5%9B%B4%E6%A0%8F%E4%BB%A3%E7%A0%81%E5%8E%9F%E7%90%86.html"/>
+    <published>2024-07-10T12:39:28.000Z</published>
+    <summary>hoedown解析围栏代码原理</summary>
+    <title>hoedown解析围栏代码原理</title>
+    <updated>2024-07-10T12:39:28.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="MarkDown" scheme="https://blog.libd.cn/categories/MarkDown/"/>
+    <category term="MarkDown" scheme="https://blog.libd.cn/tags/MarkDown/"/>
+    <id>https://blog.libd.cn/MarkDown%E8%AF%AD%E6%B3%95.html</id>
+    <link href="https://blog.libd.cn/MarkDown%E8%AF%AD%E6%B3%95.html"/>
+    <published>2024-07-10T03:52:55.000Z</published>
+    <summary>记录MarkDown语法</summary>
+    <title>MarkDown语法</title>
+    <updated>2024-07-10T03:52:55.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="Metal开发" scheme="https://blog.libd.cn/categories/Metal%E5%BC%80%E5%8F%91/"/>
+    <category term="iOS Metal" scheme="https://blog.libd.cn/tags/iOS-Metal/"/>
+    <id>https://blog.libd.cn/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%E4%B8%80.html</id>
+    <link href="https://blog.libd.cn/Metal%E5%BC%80%E5%8F%91%E6%95%99%E7%A8%8B%E4%B8%80.html"/>
+    <published>2024-03-11T03:40:35.000Z</published>
+    <summary>iOS中Metal开发从0到1教程</summary>
+    <title>Metal开发教程（一）- 预备知识</title>
+    <updated>2024-03-11T03:40:35.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
+    <category term="方法的本质" scheme="https://blog.libd.cn/tags/%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8/"/>
+    <id>https://blog.libd.cn/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8.html</id>
+    <link href="https://blog.libd.cn/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E7%9A%84%E6%9C%AC%E8%B4%A8.html"/>
+    <published>2020-01-14T02:39:50.000Z</published>
+    <summary>探索iOS底层探索系列--方法的本质，一个对象是如果调用自己的方法，以及方法转发。</summary>
+    <title>iOS底层探索系列--方法的本质</title>
+    <updated>2020-01-14T02:39:50.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
+    <category term="类的本质" scheme="https://blog.libd.cn/tags/%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8/"/>
+    <id>https://blog.libd.cn/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8.html</id>
+    <link href="https://blog.libd.cn/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E7%B1%BB%E7%9A%84%E6%9C%AC%E8%B4%A8.html"/>
+    <published>2019-12-22T07:08:19.000Z</published>
+    <summary>探索iOS底层探索系列--类的本质，一个对象是如果分配自己的属性，成员变量，以及方法存储区域的。</summary>
+    <title>iOS底层探索系列--类的本质</title>
+    <updated>2019-12-22T07:08:19.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
+    <category term="创建对象过程" scheme="https://blog.libd.cn/tags/%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E8%BF%87%E7%A8%8B/"/>
+    <id>https://blog.libd.cn/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E8%BF%87%E7%A8%8B.html</id>
+    <link href="https://blog.libd.cn/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97--%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E8%BF%87%E7%A8%8B.html"/>
+    <published>2019-12-20T06:46:51.000Z</published>
+    <summary>探索iOS中对象创建的过程，对象内存分布情况，以及isa。</summary>
+    <title>iOS底层探索系列--创建对象过程</title>
+    <updated>2019-12-20T06:46:51.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="绘制" scheme="https://blog.libd.cn/tags/%E7%BB%98%E5%88%B6/"/>
+    <id>https://blog.libd.cn/CGContextRef%E8%AF%A6%E8%A7%A3.html</id>
+    <link href="https://blog.libd.cn/CGContextRef%E8%AF%A6%E8%A7%A3.html"/>
+    <published>2019-10-22T03:39:22.000Z</published>
+    <summary>在iOS中，CGContextRef的所有API。</summary>
+    <title>CGContextRef详解</title>
+    <updated>2019-10-22T03:39:22.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="计算机基础知识" scheme="https://blog.libd.cn/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    <category term="正则" scheme="https://blog.libd.cn/tags/%E6%AD%A3%E5%88%99/"/>
+    <id>https://blog.libd.cn/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F.html</id>
+    <link href="https://blog.libd.cn/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F.html"/>
+    <published>2019-05-27T07:01:50.000Z</published>
+    <summary>几乎涵盖了所有的正则表达形式。</summary>
+    <title>正则表达式</title>
+    <updated>2019-05-27T07:01:50.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="计算机基础知识" scheme="https://blog.libd.cn/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    <category term="算法" scheme="https://blog.libd.cn/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="排序" scheme="https://blog.libd.cn/tags/%E6%8E%92%E5%BA%8F/"/>
+    <id>https://blog.libd.cn/%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E5%87%A0%E7%A7%8D%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95.html</id>
+    <link href="https://blog.libd.cn/%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E5%87%A0%E7%A7%8D%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95.html"/>
+    <published>2019-05-20T02:03:34.000Z</published>
+    <summary>常用的几种算法。</summary>
+    <title>最基本的几种排序算法</title>
+    <updated>2019-05-20T02:03:34.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="Unicode-编码" scheme="https://blog.libd.cn/tags/Unicode-%E7%BC%96%E7%A0%81/"/>
+    <id>https://blog.libd.cn/Unicode%E3%80%81UTF-8%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98.html</id>
+    <link href="https://blog.libd.cn/Unicode%E3%80%81UTF-8%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98.html"/>
+    <published>2018-11-22T06:44:51.000Z</published>
+    <summary>记录iOS中文字、字符编码的问题，写这篇文章主要是为了解决emoji的编码问题，能够正确处理emoji。</summary>
+    <title>Unicode、UTF-8编码问题</title>
+    <updated>2018-11-22T06:44:51.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="FPS" scheme="https://blog.libd.cn/tags/FPS/"/>
+    <category term="界面流畅" scheme="https://blog.libd.cn/tags/%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85/"/>
+    <id>https://blog.libd.cn/iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85%E7%9A%84%E6%8A%80%E5%B7%A7.html</id>
+    <link href="https://blog.libd.cn/iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85%E7%9A%84%E6%8A%80%E5%B7%A7.html"/>
+    <published>2018-07-25T05:23:30.000Z</published>
+    <summary>从硬件和软件的角度记录iOS界面绘制原理，为保持iOS页面流畅作为理论基础。</summary>
+    <title>iOS保持界面流畅的技巧</title>
+    <updated>2018-07-25T05:23:30.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="Unity" scheme="https://blog.libd.cn/tags/Unity/"/>
+    <category term="打包" scheme="https://blog.libd.cn/tags/%E6%89%93%E5%8C%85/"/>
+    <id>https://blog.libd.cn/%E3%80%90Unity%E3%80%91Unity-%E5%B7%A5%E7%A8%8B%E9%85%8D%E7%BD%AE%E6%89%93%E5%8C%85%E6%88%90-iOS-%E5%B7%A5%E7%A8%8B.html</id>
+    <link href="https://blog.libd.cn/%E3%80%90Unity%E3%80%91Unity-%E5%B7%A5%E7%A8%8B%E9%85%8D%E7%BD%AE%E6%89%93%E5%8C%85%E6%88%90-iOS-%E5%B7%A5%E7%A8%8B.html"/>
+    <published>2018-07-17T02:05:45.000Z</published>
+    <summary>记录iOS项目与Unity交互打包代码的一些配置。</summary>
+    <title>【Unity】Unity 工程配置打包成 iOS 工程</title>
+    <updated>2018-07-17T02:05:45.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="iPhone型号" scheme="https://blog.libd.cn/tags/iPhone%E5%9E%8B%E5%8F%B7/"/>
+    <category term="cpu" scheme="https://blog.libd.cn/tags/cpu/"/>
+    <category term="内存" scheme="https://blog.libd.cn/tags/%E5%86%85%E5%AD%98/"/>
+    <id>https://blog.libd.cn/iOS%E8%8E%B7%E5%8F%96%E5%90%84%E7%B1%BB%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF%EF%BC%88%E5%9E%8B%E5%8F%B7%EF%BC%8Ccpu%EF%BC%89.html</id>
+    <link href="https://blog.libd.cn/iOS%E8%8E%B7%E5%8F%96%E5%90%84%E7%B1%BB%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF%EF%BC%88%E5%9E%8B%E5%8F%B7%EF%BC%8Ccpu%EF%BC%89.html"/>
+    <published>2018-06-13T05:21:05.000Z</published>
+    <summary>获取iOS设备的一些信息，随着设备的不断更新，有些方法可能会有过时的情况。</summary>
+    <title>iOS获取各类基本信息（型号，cpu）</title>
+    <updated>2018-06-13T05:21:05.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="textField" scheme="https://blog.libd.cn/tags/textField/"/>
+    <id>https://blog.libd.cn/TextField%E6%A0%87%E8%AE%B0%E5%8C%BA%E9%80%89%E6%8B%A9%E5%8C%BA.html</id>
+    <link href="https://blog.libd.cn/TextField%E6%A0%87%E8%AE%B0%E5%8C%BA%E9%80%89%E6%8B%A9%E5%8C%BA.html"/>
+    <published>2018-05-25T03:09:48.000Z</published>
+    <summary>记录iOS中TextField标记区选择区的问题，有时候在编辑文字的时候会用到。</summary>
+    <title>TextField标记区选择区</title>
+    <updated>2018-05-25T03:09:48.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="Git" scheme="https://blog.libd.cn/tags/Git/"/>
+    <category term="SSH" scheme="https://blog.libd.cn/tags/SSH/"/>
+    <id>https://blog.libd.cn/Git%E4%B8%ADssh%E9%85%8D%E7%BD%AE%EF%BC%88%E5%AE%8C%E7%BE%8E%E8%A7%A3%E5%86%B3%EF%BC%89.html</id>
+    <link href="https://blog.libd.cn/Git%E4%B8%ADssh%E9%85%8D%E7%BD%AE%EF%BC%88%E5%AE%8C%E7%BE%8E%E8%A7%A3%E5%86%B3%EF%BC%89.html"/>
+    <published>2018-05-23T05:10:02.000Z</published>
+    <summary>有时候更换电脑需要重新配置各种git库，这个时候需要设置ssh，主要是因为方便，以及为了解决同一个库有不同账号带来的冲突，本文能够完美解决这些问题。在此记录一下。</summary>
+    <title>Git中ssh配置（完美解决）</title>
+    <updated>2018-05-23T05:10:02.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="3D" scheme="https://blog.libd.cn/tags/3D/"/>
+    <id>https://blog.libd.cn/CATransform3D%E8%AF%A6%E8%A7%A3.html</id>
+    <link href="https://blog.libd.cn/CATransform3D%E8%AF%A6%E8%A7%A3.html"/>
+    <published>2018-05-08T02:47:57.000Z</published>
+    <summary>探索iOS中view的3D变换原理，CATransform3D中每个值代表的意义。</summary>
+    <title>CATransform3D详解</title>
+    <updated>2018-05-08T02:47:57.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="调试" scheme="https://blog.libd.cn/tags/%E8%B0%83%E8%AF%95/"/>
+    <category term="LLDB" scheme="https://blog.libd.cn/tags/LLDB/"/>
+    <id>https://blog.libd.cn/Xcode%E8%B0%83%E8%AF%95LLDB.html</id>
+    <link href="https://blog.libd.cn/Xcode%E8%B0%83%E8%AF%95LLDB.html"/>
+    <published>2018-02-02T03:16:34.000Z</published>
+    <summary>Xcode中所有LLDB的调试指令，不涵盖组合指令，后续会更新。</summary>
+    <title>Xcode调试LLDB</title>
+    <updated>2018-06-19T07:20:34.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="iOS审核" scheme="https://blog.libd.cn/tags/iOS%E5%AE%A1%E6%A0%B8/"/>
+    <id>https://blog.libd.cn/App-Store-%E5%AE%A1%E6%A0%B8%E6%8C%87%E5%8D%97.html</id>
+    <link href="https://blog.libd.cn/App-Store-%E5%AE%A1%E6%A0%B8%E6%8C%87%E5%8D%97.html"/>
+    <published>2017-12-08T00:56:13.000Z</published>
+    <summary>记录iOS审核指南，最新版需要去官网查看。</summary>
+    <title>App-Store-审核指南</title>
+    <updated>2018-06-13T05:21:05.000Z</updated>
+  </entry>
+</feed>

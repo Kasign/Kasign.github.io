@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.libd.cn').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.json',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="__weak指针能够在所指向的对象被销毁时自动置为 &#96;nil&#96;，避免野指针。这个“自动归零”（zeroing）行为的底层实现依赖于**运行时维护的一组全局哈希表**，记录了所有 weak 指针与被指向对象之间的映射关系。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Weak底层原理">
+<meta property="og:url" content="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="__weak指针能够在所指向的对象被销毁时自动置为 &#96;nil&#96;，避免野指针。这个“自动归零”（zeroing）行为的底层实现依赖于**运行时维护的一组全局哈希表**，记录了所有 weak 指针与被指向对象之间的映射关系。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-27T08:40:46.000Z">
+<meta property="article:modified_time" content="2026-04-27T08:40:46.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="Hexo">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Weak底层原理 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Weak底层原理
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-04-27 16:40:46" itemprop="dateCreated datePublished" datetime="2026-04-27T16:40:46+08:00">2026-04-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+            <div class="post-description">__weak指针能够在所指向的对象被销毁时自动置为 `nil`，避免野指针。这个“自动归零”（zeroing）行为的底层实现依赖于**运行时维护的一组全局哈希表**，记录了所有 weak 指针与被指向对象之间的映射关系。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Weak-底层原理完全解析"><a href="#Weak-底层原理完全解析" class="headerlink" title="Weak 底层原理完全解析"></a>Weak 底层原理完全解析</h1><h2 id="一、总览：Weak-的核心问题"><a href="#一、总览：Weak-的核心问题" class="headerlink" title="一、总览：Weak 的核心问题"></a>一、总览：Weak 的核心问题</h2><p><code>__weak</code> 指针能够在所指向的对象被销毁时自动置为 <code>nil</code>，避免野指针。这个“自动归零”（zeroing）行为的底层实现依赖于<strong>运行时维护的一组全局哈希表</strong>，记录了所有 weak 指针与被指向对象之间的映射关系。</p>
+<p>当一个对象开始执行 <code>dealloc</code> 时，runtime 会通过这张映射表找到所有指向该对象的 weak 指针，并将它们一一赋值为 <code>nil</code>。</p>
+<hr>
+<h2 id="二、全局数据结构体系"><a href="#二、全局数据结构体系" class="headerlink" title="二、全局数据结构体系"></a>二、全局数据结构体系</h2><h3 id="2-1-SideTables-–-全局桶数组"><a href="#2-1-SideTables-–-全局桶数组" class="headerlink" title="2.1 SideTables – 全局桶数组"></a>2.1 SideTables – 全局桶数组</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> StripedMap&lt;SideTable&gt; SideTables;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>StripedMap&lt;T&gt;</code> 是一个模板类，内部是一个<strong>固定长度的数组</strong>。</li>
+<li>在真机（arm64）上数组长度为 <strong>8</strong>，在模拟器上为 <strong>64</strong>。</li>
+<li>通过 <strong>对象地址哈希</strong> 计算出数组下标，将不同对象的 SideTable 分散到不同桶中，减少锁竞争。</li>
+</ul>
+<p><strong>为什么长度是 8？</strong><br>真机核心数有限，8 个桶足以让多线程操作不同的对象时大概率命中不同的桶，从而<strong>只锁住一个桶</strong>，其他桶不受影响，提升并发性能。</p>
+<h3 id="2-2-SideTable-–-单个桶的结构"><a href="#2-2-SideTable-–-单个桶的结构" class="headerlink" title="2.2 SideTable – 单个桶的结构"></a>2.2 SideTable – 单个桶的结构</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SideTable</span> &#123;</span><br><span class="line">    os_unfair_lock slock;        <span class="comment">// 保护本桶内所有操作的锁（自旋锁，实际为 unfair_lock）</span></span><br><span class="line">    RefcountMap refcnts;         <span class="comment">// 存放对象的额外引用计数（当 isa 的 extra_rc 溢出时使用）</span></span><br><span class="line">    <span class="type">weak_table_t</span> weak_table;     <span class="comment">// 存放所有 weak 引用的哈希表（本节核心）</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>os_unfair_lock</code> 用于保护对 <code>refcnts</code> 和 <code>weak_table</code> 的并发访问（注意：历史版本曾用 <code>spinlock_t</code>，现已被 <code>os_unfair_lock</code> 替代）。</li>
+<li>每个对象根据其地址唯一归属到一个 SideTable。</li>
+</ul>
+<h3 id="2-3-weak-table-t-–-weak-条目的主哈希表"><a href="#2-3-weak-table-t-–-weak-条目的主哈希表" class="headerlink" title="2.3 weak_table_t – weak 条目的主哈希表"></a>2.3 weak_table_t – weak 条目的主哈希表</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">weak_table_t</span> &#123;</span><br><span class="line">    <span class="type">weak_entry_t</span> *weak_entries;      <span class="comment">// 动态数组，存储所有 weak_entry_t</span></span><br><span class="line">    <span class="type">size_t</span>    num_entries;           <span class="comment">// 已用元素个数</span></span><br><span class="line">    <span class="type">uintptr_t</span> mask;                  <span class="comment">// 掩码，用于哈希计算（capacity - 1）</span></span><br><span class="line">    <span class="type">uintptr_t</span> max_hash_displacement; <span class="comment">// 最大哈希偏移量（用于优化查找）</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>weak_entries</code> 是一个数组，存储的是 <code>weak_entry_t</code> 的指针或内嵌对象（取决于实现）。</li>
+<li>通过 <strong>对象地址（referent）</strong> 作为 key 进行哈希查找，快速找到对应的 <code>weak_entry_t</code>。</li>
+</ul>
+<h3 id="2-4-weak-entry-t-–-单个对象的所有-weak-引用"><a href="#2-4-weak-entry-t-–-单个对象的所有-weak-引用" class="headerlink" title="2.4 weak_entry_t – 单个对象的所有 weak 引用"></a>2.4 weak_entry_t – 单个对象的所有 weak 引用</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> WEAK_INLINE_COUNT 4</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">weak_entry_t</span> &#123;</span><br><span class="line">    DisguisedPtr&lt;objc_object&gt; referent;          <span class="comment">// 被指向的对象地址（伪装指针）</span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="keyword">struct</span> &#123;</span><br><span class="line">            <span class="type">weak_referrer_t</span> *referrers;           <span class="comment">// 动态数组，存放所有 weak 指针的地址</span></span><br><span class="line">            <span class="type">uintptr_t</span>        out_of_line : <span class="number">1</span>;     <span class="comment">// 标志位：1 表示使用动态数组</span></span><br><span class="line">            <span class="type">uintptr_t</span>        num_refs : PTR_MINUS_1; <span class="comment">// 当前 weak 指针数量</span></span><br><span class="line">            <span class="type">uintptr_t</span>        mask;</span><br><span class="line">            <span class="type">uintptr_t</span>        max_hash_displacement;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">struct</span> &#123;</span><br><span class="line">            <span class="type">weak_referrer_t</span>  inline_referrers[WEAK_INLINE_COUNT]; <span class="comment">// 内嵌数组，最多 4 个</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>referent</code>：指向原对象（例如 <code>Person</code> 实例）。</li>
+<li><code>referrers</code>：存放所有指向该对象的 <code>__weak</code> 指针的<strong>地址</strong>（注意：是 weak 变量自身的地址，不是对象地址）。</li>
+<li><strong>内存优化</strong>：如果 weak 指针数量 ≤ 4，使用内嵌数组 <code>inline_referrers</code>，避免额外的堆分配。超过 4 个时，自动切换为动态哈希表（<code>out_of_line = 1</code>）。</li>
+</ul>
+<hr>
+<h2 id="三、Weak-指针的注册流程"><a href="#三、Weak-指针的注册流程" class="headerlink" title="三、Weak 指针的注册流程"></a>三、Weak 指针的注册流程</h2><h3 id="3-1-从代码到运行时"><a href="#3-1-从代码到运行时" class="headerlink" title="3.1 从代码到运行时"></a>3.1 从代码到运行时</h3><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__<span class="keyword">weak</span> <span class="type">id</span> weakPtr = obj;</span><br></pre></td></tr></table></figure>
+
+<p>在 ARC 下，编译器将其转换为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">id weakPtr;</span><br><span class="line"><span class="built_in">objc_initWeak</span>(&amp;weakPtr, obj);</span><br></pre></td></tr></table></figure>
+
+<p><code>objc_initWeak</code> 执行完毕后，<code>weakPtr</code> 就指向了 <code>obj</code>（如果 <code>obj</code> 非空）。</p>
+<h3 id="3-2-objc-initWeak-简化实现"><a href="#3-2-objc-initWeak-简化实现" class="headerlink" title="3.2 objc_initWeak 简化实现"></a>3.2 <code>objc_initWeak</code> 简化实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">id <span class="title">objc_initWeak</span><span class="params">(id *location, id newObj)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!newObj) &#123;</span><br><span class="line">        *location = nil;</span><br><span class="line">        <span class="keyword">return</span> nil;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 1. 调用 storeWeak 执行注册</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">storeWeak</span>&lt;DontHaveOld, DoHaveNew, DoCrashIfDeallocating&gt;(location, newObj);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-storeWeak-的核心步骤"><a href="#3-3-storeWeak-的核心步骤" class="headerlink" title="3.3 storeWeak 的核心步骤"></a>3.3 <code>storeWeak</code> 的核心步骤</h3><p><code>storeWeak</code> 是一个模板函数，负责：</p>
+<ol>
+<li>获取 <code>newObj</code> 对应的 SideTable。</li>
+<li>加锁。</li>
+<li>如果 <code>location</code> 之前已经指向某个旧对象（且不是 <code>nil</code>），先调用 <code>weak_unregister_no_lock</code> 将其从旧对象的 weak 表中移除。</li>
+<li>如果 <code>newObj</code> 非空，调用 <code>weak_register_no_lock</code> 将 <code>location</code> 注册到 <code>newObj</code> 的 weak 表中。</li>
+<li>将 <code>newObj</code> 赋值给 <code>*location</code>。</li>
+<li>解锁。</li>
+</ol>
+<h3 id="3-4-weak-register-no-lock-关键逻辑"><a href="#3-4-weak-register-no-lock-关键逻辑" class="headerlink" title="3.4 weak_register_no_lock 关键逻辑"></a>3.4 <code>weak_register_no_lock</code> 关键逻辑</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">id <span class="title">weak_register_no_lock</span><span class="params">(<span class="type">weak_table_t</span> *weak_table, id referent, id *referrer, <span class="type">bool</span> crashIfDeallocating)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 1. 如果 referent 正在 dealloc 且 crashIfDeallocating 为 true，则 crash</span></span><br><span class="line">    <span class="comment">// 2. 在 weak_table 中查找 referent 对应的 weak_entry_t</span></span><br><span class="line">    <span class="type">weak_entry_t</span> *entry = <span class="built_in">weak_entry_for_referent</span>(weak_table, referent);</span><br><span class="line">    <span class="keyword">if</span> (entry == nil) &#123;</span><br><span class="line">        <span class="comment">// 3. 创建新的 weak_entry_t，并插入 weak_table</span></span><br><span class="line">        entry = new_entry;</span><br><span class="line">        <span class="built_in">weak_entry_insert</span>(weak_table, entry);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 4. 将 referrer（即 weak 指针的地址）加入到 entry 的 referrers 集合中</span></span><br><span class="line">    <span class="built_in">weak_entry_add_referrer</span>(entry, referrer);</span><br><span class="line">    <span class="keyword">return</span> referent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>weak_entry_add_referrer</code> 会根据当前 <code>out_of_line</code> 状态，决定是放入内嵌数组还是动态哈希表。</li>
+<li>若动态哈希表负载过高，会自动扩容。</li>
+</ul>
+<hr>
+<h2 id="四、对象销毁时的自动置-nil-流程"><a href="#四、对象销毁时的自动置-nil-流程" class="headerlink" title="四、对象销毁时的自动置 nil 流程"></a>四、对象销毁时的自动置 nil 流程</h2><h3 id="4-1-销毁入口"><a href="#4-1-销毁入口" class="headerlink" title="4.1 销毁入口"></a>4.1 销毁入口</h3><p>当对象的引用计数降为 0 时，会调用 <code>dealloc</code> → <code>_objc_rootDealloc</code> → <code>rootDealloc</code> → <code>object_dispose</code> → <code>objc_destructInstance</code>。</p>
+<h3 id="4-2-objc-destructInstance-中的清理"><a href="#4-2-objc-destructInstance-中的清理" class="headerlink" title="4.2 objc_destructInstance 中的清理"></a>4.2 <code>objc_destructInstance</code> 中的清理</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> *<span class="title">objc_destructInstance</span><span class="params">(id obj)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj-&gt;<span class="built_in">hasCxxDtor</span>()) obj-&gt;<span class="built_in">cxxDestruct</span>();</span><br><span class="line">    <span class="keyword">if</span> (obj-&gt;<span class="built_in">hasAssociatedObjects</span>()) _object_remove_assocations(obj);</span><br><span class="line">    obj-&gt;<span class="built_in">clearDeallocating</span>();   <span class="comment">// 关键：处理 weak 和 sideTable 引用计数</span></span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-clearDeallocating-与-clearDeallocating-slow"><a href="#4-3-clearDeallocating-与-clearDeallocating-slow" class="headerlink" title="4.3 clearDeallocating 与 clearDeallocating_slow"></a>4.3 <code>clearDeallocating</code> 与 <code>clearDeallocating_slow</code></h3><ul>
+<li><code>clearDeallocating</code> 会检查 <code>isa</code> 中的两个标志位：<ul>
+<li><code>weakly_referenced</code>：是否有 weak 指针指向该对象</li>
+<li><code>has_sidetable_rc</code>：是否使用了 SideTable 存储额外引用计数</li>
+</ul>
+</li>
+<li>如果二者均为 false，则直接返回（无需清理）。</li>
+<li>否则调用 <code>clearDeallocating_slow</code>。</li>
+</ul>
+<h3 id="4-4-clearDeallocating-slow-核心逻辑"><a href="#4-4-clearDeallocating-slow-核心逻辑" class="headerlink" title="4.4 clearDeallocating_slow 核心逻辑"></a>4.4 <code>clearDeallocating_slow</code> 核心逻辑</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">clearDeallocating_slow</span><span class="params">(id obj)</span> </span>&#123;</span><br><span class="line">    SideTable&amp; table = <span class="built_in">SideTables</span>()[obj];</span><br><span class="line">    table.<span class="built_in">lock</span>();</span><br><span class="line">    <span class="comment">// 1. 如果有 weak 引用，清理 weak 表</span></span><br><span class="line">    <span class="keyword">if</span> (obj-&gt;<span class="built_in">isWeaklyReferenced</span>()) &#123;</span><br><span class="line">        <span class="built_in">weak_clear_no_lock</span>(&amp;table.weak_table, obj);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2. 如果有 sideTable 引用计数，擦除</span></span><br><span class="line">    <span class="keyword">if</span> (obj-&gt;<span class="built_in">hasSidetableRc</span>()) &#123;</span><br><span class="line">        table.refcnts.<span class="built_in">erase</span>(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    table.<span class="built_in">unlock</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-weak-clear-no-lock-–-真正的归零操作"><a href="#4-5-weak-clear-no-lock-–-真正的归零操作" class="headerlink" title="4.5 weak_clear_no_lock – 真正的归零操作"></a>4.5 <code>weak_clear_no_lock</code> – 真正的归零操作</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">weak_clear_no_lock</span><span class="params">(<span class="type">weak_table_t</span> *weak_table, id referent)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 1. 找到 referent 对应的 weak_entry_t</span></span><br><span class="line">    <span class="type">weak_entry_t</span> *entry = <span class="built_in">weak_entry_for_referent</span>(weak_table, referent);</span><br><span class="line">    <span class="keyword">if</span> (entry == nil) <span class="keyword">return</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 2. 获取 referrers 集合（可能是内嵌数组或动态表）</span></span><br><span class="line">    <span class="type">weak_referrer_t</span> *referrers;</span><br><span class="line">    <span class="type">size_t</span> count;</span><br><span class="line">    <span class="keyword">if</span> (entry-&gt;out_of_line) &#123;</span><br><span class="line">        referrers = entry-&gt;referrers;</span><br><span class="line">        count = entry-&gt;num_refs;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        referrers = entry-&gt;inline_referrers;</span><br><span class="line">        count = WEAK_INLINE_COUNT;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 3. 遍历所有 weak 指针的地址，将其赋值为 nil</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; count; ++i) &#123;</span><br><span class="line">        id *referrer = referrers[i];</span><br><span class="line">        <span class="keyword">if</span> (referrer) &#123;</span><br><span class="line">            *referrer = nil;   <span class="comment">// 关键：将 weak 变量置为 nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4. 从全局 weak_table 中移除该 entry</span></span><br><span class="line">    <span class="built_in">weak_entry_remove</span>(weak_table, entry);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：<code>*referrer = nil</code> 修改的是 weak 指针自身的内存，而不是原对象的内存。这个操作是安全的，因为此时原对象已经处于正在销毁的状态，但内存尚未回收。</p>
+<hr>
+<h2 id="五、关键优化与细节"><a href="#五、关键优化与细节" class="headerlink" title="五、关键优化与细节"></a>五、关键优化与细节</h2><h3 id="5-1-内嵌数组（inline-referrers）"><a href="#5-1-内嵌数组（inline-referrers）" class="headerlink" title="5.1 内嵌数组（inline_referrers）"></a>5.1 内嵌数组（inline_referrers）</h3><ul>
+<li>大多数对象的 weak 引用数量极少（通常为 1-2 个）。</li>
+<li>使用固定大小的数组（4 个槽位）避免了堆分配，减少了内存碎片和 malloc 开销。</li>
+<li>当添加第 5 个 weak 指针时，才会动态扩容为哈希表，并将原内嵌数据迁移过去。</li>
+</ul>
+<h3 id="5-2-全局桶（StripedMap）的锁策略"><a href="#5-2-全局桶（StripedMap）的锁策略" class="headerlink" title="5.2 全局桶（StripedMap）的锁策略"></a>5.2 全局桶（StripedMap）的锁策略</h3><ul>
+<li>每个 SideTable 有自己独立的锁。</li>
+<li>操作不同对象的 weak&#x2F;引用计数时，只需要锁住对应的桶，其他桶可以并发访问。</li>
+<li>这大大降低了多线程环境下的锁争用。</li>
+</ul>
+<h3 id="5-3-weak-标志位的作用"><a href="#5-3-weak-标志位的作用" class="headerlink" title="5.3 weak 标志位的作用"></a>5.3 weak 标志位的作用</h3><p>对象 <code>isa</code> 中有一个比特位 <code>weakly_referenced</code>，默认为 0。</p>
+<ul>
+<li>当第一次有 weak 指针指向该对象时，<code>weak_register_no_lock</code> 会将该位置为 1。</li>
+<li>在 <code>dealloc</code> 时，如果该位为 0，可以跳过 weak 表的查找，快速返回。这是一个微小但有效的优化。</li>
+</ul>
+<h3 id="5-4-线程安全与崩溃处理"><a href="#5-4-线程安全与崩溃处理" class="headerlink" title="5.4 线程安全与崩溃处理"></a>5.4 线程安全与崩溃处理</h3><ul>
+<li>在 <code>weak_register_no_lock</code> 中，如果对象正在执行 <code>dealloc</code> 且传入的 <code>crashIfDeallocating</code> 为真，则会触发断言或 crash。这对应了“不能对正在销毁的对象再创建新的 weak 引用”的语义。</li>
+<li>在 <code>weak_clear_no_lock</code> 中，虽然遍历弱引用地址并置 nil，但如果某个弱引用地址在遍历前被非法修改（如已被释放），可能会导致 crash。这种情况极少发生，通常是由于多线程竞争或内存越界。</li>
+</ul>
+<hr>
+<h2 id="六、与-unsafe-unretained-的对比"><a href="#六、与-unsafe-unretained-的对比" class="headerlink" title="六、与 __unsafe_unretained 的对比"></a>六、与 <code>__unsafe_unretained</code> 的对比</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>__weak</code></th>
+<th><code>__unsafe_unretained</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>是否注册到 weak 表</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>对象销毁后指针值</td>
+<td>自动变为 <code>nil</code></td>
+<td>不变（野指针）</td>
+</tr>
+<tr>
+<td>访问已销毁对象</td>
+<td>安全（访问 <code>nil</code>）</td>
+<td>大概率 crash</td>
+</tr>
+<tr>
+<td>性能开销</td>
+<td>有（注册 + 清理）</td>
+<td>无</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>避免循环引用，大多数情况</td>
+<td>极少数对性能极端敏感且能保证生命周期安全的场景</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、总结与代码路径速查"><a href="#七、总结与代码路径速查" class="headerlink" title="七、总结与代码路径速查"></a>七、总结与代码路径速查</h2><table>
+<thead>
+<tr>
+<th>操作</th>
+<th>关键函数</th>
+<th>主要任务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>注册 weak</td>
+<td><code>objc_initWeak</code> → <code>storeWeak</code> → <code>weak_register_no_lock</code></td>
+<td>将 weak 指针地址加入对象的 weak_entry_t</td>
+</tr>
+<tr>
+<td>移除 weak（重新赋值时）</td>
+<td><code>weak_unregister_no_lock</code></td>
+<td>从对象的 weak_entry_t 中删除 weak 指针地址</td>
+</tr>
+<tr>
+<td>销毁时置 nil</td>
+<td><code>dealloc</code> → <code>clearDeallocating_slow</code> → <code>weak_clear_no_lock</code></td>
+<td>遍历 referrers，将每个 weak 指针赋值为 nil，并删除 entry</td>
+</tr>
+</tbody></table>
+<p><strong>思考题</strong>：<br>一个对象可以被多个 weak 指针指向，但一个 weak 指针只能指向一个对象。因此，映射关系是 <strong>对象 → 弱引用指针地址集合</strong>。这解释了为什么 <code>weak_entry_t</code> 以 <code>referent</code> 为 key，而 <code>referrers</code> 是地址数组。</p>
+<p><strong>一句话记忆</strong>：<br>Weak 的实现依赖于一个全局的二级哈希表（对象 → 弱指针地址列表），当对象销毁时，runtime 遍历该列表，将所有弱指针置为 <code>nil</code>。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html" title="Weak底层原理">https://blog.libd.cn/Weak底层原理.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html" rel="next" title="AutoreleasePool底层原理">
+      AutoreleasePool底层原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Weak-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90"><span class="nav-text">Weak 底层原理完全解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%80%BB%E8%A7%88%EF%BC%9AWeak-%E7%9A%84%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98"><span class="nav-text">一、总览：Weak 的核心问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%85%A8%E5%B1%80%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%BD%93%E7%B3%BB"><span class="nav-text">二、全局数据结构体系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-SideTables-%E2%80%93-%E5%85%A8%E5%B1%80%E6%A1%B6%E6%95%B0%E7%BB%84"><span class="nav-text">2.1 SideTables – 全局桶数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-SideTable-%E2%80%93-%E5%8D%95%E4%B8%AA%E6%A1%B6%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-text">2.2 SideTable – 单个桶的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-weak-table-t-%E2%80%93-weak-%E6%9D%A1%E7%9B%AE%E7%9A%84%E4%B8%BB%E5%93%88%E5%B8%8C%E8%A1%A8"><span class="nav-text">2.3 weak_table_t – weak 条目的主哈希表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-weak-entry-t-%E2%80%93-%E5%8D%95%E4%B8%AA%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%89%80%E6%9C%89-weak-%E5%BC%95%E7%94%A8"><span class="nav-text">2.4 weak_entry_t – 单个对象的所有 weak 引用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Weak-%E6%8C%87%E9%92%88%E7%9A%84%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">三、Weak 指针的注册流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E4%BB%8E%E4%BB%A3%E7%A0%81%E5%88%B0%E8%BF%90%E8%A1%8C%E6%97%B6"><span class="nav-text">3.1 从代码到运行时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-objc-initWeak-%E7%AE%80%E5%8C%96%E5%AE%9E%E7%8E%B0"><span class="nav-text">3.2 objc_initWeak 简化实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-storeWeak-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A5%E9%AA%A4"><span class="nav-text">3.3 storeWeak 的核心步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-weak-register-no-lock-%E5%85%B3%E9%94%AE%E9%80%BB%E8%BE%91"><span class="nav-text">3.4 weak_register_no_lock 关键逻辑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AF%B9%E8%B1%A1%E9%94%80%E6%AF%81%E6%97%B6%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BD%AE-nil-%E6%B5%81%E7%A8%8B"><span class="nav-text">四、对象销毁时的自动置 nil 流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E9%94%80%E6%AF%81%E5%85%A5%E5%8F%A3"><span class="nav-text">4.1 销毁入口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-objc-destructInstance-%E4%B8%AD%E7%9A%84%E6%B8%85%E7%90%86"><span class="nav-text">4.2 objc_destructInstance 中的清理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-clearDeallocating-%E4%B8%8E-clearDeallocating-slow"><span class="nav-text">4.3 clearDeallocating 与 clearDeallocating_slow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-clearDeallocating-slow-%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91"><span class="nav-text">4.4 clearDeallocating_slow 核心逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-weak-clear-no-lock-%E2%80%93-%E7%9C%9F%E6%AD%A3%E7%9A%84%E5%BD%92%E9%9B%B6%E6%93%8D%E4%BD%9C"><span class="nav-text">4.5 weak_clear_no_lock – 真正的归零操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96%E4%B8%8E%E7%BB%86%E8%8A%82"><span class="nav-text">五、关键优化与细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E5%86%85%E5%B5%8C%E6%95%B0%E7%BB%84%EF%BC%88inline-referrers%EF%BC%89"><span class="nav-text">5.1 内嵌数组（inline_referrers）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E5%85%A8%E5%B1%80%E6%A1%B6%EF%BC%88StripedMap%EF%BC%89%E7%9A%84%E9%94%81%E7%AD%96%E7%95%A5"><span class="nav-text">5.2 全局桶（StripedMap）的锁策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-weak-%E6%A0%87%E5%BF%97%E4%BD%8D%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-text">5.3 weak 标志位的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E5%B4%A9%E6%BA%83%E5%A4%84%E7%90%86"><span class="nav-text">5.4 线程安全与崩溃处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%8E-unsafe-unretained-%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-text">六、与 __unsafe_unretained 的对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%80%BB%E7%BB%93%E4%B8%8E%E4%BB%A3%E7%A0%81%E8%B7%AF%E5%BE%84%E9%80%9F%E6%9F%A5"><span class="nav-text">七、总结与代码路径速查</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">310k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>
