@@ -16,7 +16,7 @@
       <name>Eric</name>
     </author>
     <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="Hexo" scheme="https://blog.libd.cn/tags/Hexo/"/>
+    <category term="iOS底层原理" scheme="https://blog.libd.cn/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
     <id>https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html</id>
     <link href="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html"/>
     <published>2026-04-27T09:23:18.000Z</published>
@@ -29,7 +29,7 @@
       <name>Eric</name>
     </author>
     <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="Hexo" scheme="https://blog.libd.cn/tags/Hexo/"/>
+    <category term="iOS底层原理" scheme="https://blog.libd.cn/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
     <id>https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html</id>
     <link href="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html"/>
     <published>2026-04-27T08:40:46.000Z</published>
@@ -42,7 +42,7 @@
       <name>Eric</name>
     </author>
     <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="Hexo" scheme="https://blog.libd.cn/tags/Hexo/"/>
+    <category term="iOS底层原理" scheme="https://blog.libd.cn/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
     <id>https://blog.libd.cn/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html</id>
     <link href="https://blog.libd.cn/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html"/>
     <published>2026-04-27T08:05:57.000Z</published>
