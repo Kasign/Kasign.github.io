@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.libd.cn').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.json',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="Mach‑O 是 macOS、iOS、watchOS 等苹果平台上的可执行文件、动态库和对象文件的底层格式。理解它的结构是理解应用启动、动态链接、符号绑定乃至包体积优化的基础。下面从整体布局到各个核心机制逐一拆解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mach‑O 文件格式完全解析">
+<meta property="og:url" content="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="Mach‑O 是 macOS、iOS、watchOS 等苹果平台上的可执行文件、动态库和对象文件的底层格式。理解它的结构是理解应用启动、动态链接、符号绑定乃至包体积优化的基础。下面从整体布局到各个核心机制逐一拆解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-27T09:23:18.000Z">
+<meta property="article:modified_time" content="2026-04-27T09:23:18.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="Hexo">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Mach‑O 文件格式完全解析 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Mach‑O 文件格式完全解析
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-04-27 17:23:18" itemprop="dateCreated datePublished" datetime="2026-04-27T17:23:18+08:00">2026-04-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+            <div class="post-description">Mach‑O 是 macOS、iOS、watchOS 等苹果平台上的可执行文件、动态库和对象文件的底层格式。理解它的结构是理解应用启动、动态链接、符号绑定乃至包体积优化的基础。下面从整体布局到各个核心机制逐一拆解。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Mach‑O-文件格式完全解析"><a href="#Mach‑O-文件格式完全解析" class="headerlink" title="Mach‑O 文件格式完全解析"></a>Mach‑O 文件格式完全解析</h1><p>Mach‑O 是 macOS、iOS、watchOS 等苹果平台上的可执行文件、动态库和对象文件的底层格式。理解它的结构是理解应用启动、动态链接、符号绑定乃至包体积优化的基础。下面从整体布局到各个核心机制逐一拆解。</p>
+<hr>
+<h2 id="一、整体布局：三块核心区域"><a href="#一、整体布局：三块核心区域" class="headerlink" title="一、整体布局：三块核心区域"></a>一、整体布局：三块核心区域</h2><p>一个标准 Mach‑O 文件由三个逻辑区域组成，后面所有概念都建立在这个布局之上。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="code">+----------------------------------+</span></span><br><span class="line"><span class="section">|            Header                |  （文件头）</span></span><br><span class="line"><span class="section">+----------------------------------+</span></span><br><span class="line"><span class="section">|          Load Commands           |  （加载命令表）</span></span><br><span class="line"><span class="section">+----------------------------------+</span></span><br><span class="line">|               Data               |</span><br><span class="line"><span class="section">|         （Segment 数据区）        |</span></span><br><span class="line"><span class="section">+----------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-Header（文件头）"><a href="#1-Header（文件头）" class="headerlink" title="1. Header（文件头）"></a>1. Header（文件头）</h3><p>位于文件最开头，固定长度。64 位真机上为 <strong>32 字节</strong>，32 位为 28 字节。<br>主要字段包括：</p>
+<ul>
+<li><code>magic</code>：标识文件格式和字节序。<code>0xfeedfacf</code> 表示 64 位，<code>0xfeedface</code> 表示 32 位。</li>
+<li><code>cputype</code> &#x2F; <code>cpusubtype</code>：目标 CPU 架构（如 <code>ARM64</code>、<code>x86_64</code>）。</li>
+<li><code>filetype</code>：文件用途。常见值有：<code>MH_OBJECT</code>（.o 目标文件）、<code>MH_EXECUTABLE</code>（可执行文件）、<code>MH_DYLIB</code>（动态库）、<code>MH_DYLINKER</code>（dyld 自身）。</li>
+<li><code>ncmds</code>：后面紧接着的 Load Command 的数量。</li>
+<li><code>flags</code>：dyld 加载标志，如 <code>MH_PIE</code> 表示开启 ASLR（地址空间布局随机化），<code>MH_NO_HEAP_EXECUTION</code> 表示堆不可执行。</li>
+</ul>
+<h3 id="2-Load-Commands（加载命令表）"><a href="#2-Load-Commands（加载命令表）" class="headerlink" title="2. Load Commands（加载命令表）"></a>2. Load Commands（加载命令表）</h3><p>紧跟在 Header 之后，长度和条目数由 Header 中的 <code>ncmds</code> 和 <code>sizeofcmds</code> 指明。每条命令的结构非常简单：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">load_command</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span> cmd;      <span class="comment">// 命令类型，如 LC_SEGMENT_64</span></span><br><span class="line">    <span class="type">uint32_t</span> cmdsize;  <span class="comment">// 命令本身的长度</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>具体功能由 <code>cmd</code> 的值决定。部分核心命令及其作用如下：</p>
+<table>
+<thead>
+<tr>
+<th>命令类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>LC_SEGMENT_64</code></td>
+<td>描述一个段（Segment）的加载方式：文件偏移、虚拟地址、大小、权限等</td>
+</tr>
+<tr>
+<td><code>LC_DYLD_INFO_ONLY</code></td>
+<td>指向 dyld 所需的压缩信息：rebase、binding、export 等</td>
+</tr>
+<tr>
+<td><code>LC_SYMTAB</code></td>
+<td>符号表和字符串表在 <code>__LINKEDIT</code> 段中的位置</td>
+</tr>
+<tr>
+<td><code>LC_DYSYMTAB</code></td>
+<td>动态符号表的详细信息</td>
+</tr>
+<tr>
+<td><code>LC_LOAD_DYLINKER</code></td>
+<td>指定动态链接器的路径（<code>/usr/lib/dyld</code>）</td>
+</tr>
+<tr>
+<td><code>LC_UUID</code></td>
+<td>文件的唯一标识，用于符号化时匹配 dSYM</td>
+</tr>
+<tr>
+<td><code>LC_CODE_SIGNATURE</code></td>
+<td>代码签名数据的位置</td>
+</tr>
+<tr>
+<td><code>LC_ENCRYPTION_INFO_64</code></td>
+<td>加密信息（App Store 加密）</td>
+</tr>
+</tbody></table>
+<p>Load Commands 本质上是一份 <strong>“加载说明书”</strong> ，内核和 dyld 不依赖文件名的语义，只需要按这份指令表去映射内存即可。</p>
+<h3 id="3-Data（数据区）"><a href="#3-Data（数据区）" class="headerlink" title="3. Data（数据区）"></a>3. Data（数据区）</h3><p>真正存放代码、常量、变量以及链接信息的区域。逻辑上被划分为多个 <strong>段 (Segment)</strong>，每个段再细分为 <strong>节 (Section)</strong>。下面重点介绍最常见的几个段和节。</p>
+<hr>
+<h2 id="二、段与节：内存布局的核心单元"><a href="#二、段与节：内存布局的核心单元" class="headerlink" title="二、段与节：内存布局的核心单元"></a>二、段与节：内存布局的核心单元</h2><h3 id="2-1-命名规范"><a href="#2-1-命名规范" class="headerlink" title="2.1 命名规范"></a>2.1 命名规范</h3><ul>
+<li>段名：大写字母 + 双下划线前缀，例如 <code>__TEXT</code>、<code>__DATA</code>。</li>
+<li>节名：小写字母 + 双下划线前缀，例如 <code>__text</code>、<code>__data</code>。</li>
+</ul>
+<p>常见段及权限如下：</p>
+<table>
+<thead>
+<tr>
+<th>段名</th>
+<th>权限</th>
+<th>文件占用</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__PAGEZERO</code></td>
+<td>无（—）</td>
+<td>0 字节（仅占虚拟内存）</td>
+<td>捕获空指针解引用（64 位下 4 GB 陷阱页）</td>
+</tr>
+<tr>
+<td><code>__TEXT</code></td>
+<td>R-X</td>
+<td>有</td>
+<td>可执行代码和只读常量</td>
+</tr>
+<tr>
+<td><code>__DATA</code></td>
+<td>RW-</td>
+<td>有</td>
+<td>可读写的数据（全局变量、静态变量等）</td>
+</tr>
+<tr>
+<td><code>__DATA_CONST</code></td>
+<td>R–</td>
+<td>有</td>
+<td>高级裁断可优化归集 iOS13+ 后编译时常量数据，运行时只读</td>
+</tr>
+<tr>
+<td><code>__LINKEDIT</code></td>
+<td>R–</td>
+<td>有</td>
+<td>符号表、字符串表、重定位信息、代码签名数据等</td>
+</tr>
+</tbody></table>
+<p><code>__PAGEZERO</code> 在文件里不占空间，但占用虚拟地址空间，避免访问低地址导致的权限异常。</p>
+<hr>
+<h2 id="三、-TEXT-段与-DATA-段中的关键节"><a href="#三、-TEXT-段与-DATA-段中的关键节" class="headerlink" title="三、__TEXT 段与 __DATA 段中的关键节"></a>三、<code>__TEXT</code> 段与 <code>__DATA</code> 段中的关键节</h2><h3 id="3-1-TEXT-段中的常见节"><a href="#3-1-TEXT-段中的常见节" class="headerlink" title="3.1 __TEXT 段中的常见节"></a>3.1 <code>__TEXT</code> 段中的常见节</h3><table>
+<thead>
+<tr>
+<th>节名</th>
+<th>内容说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__text</code></td>
+<td>程序的主代码（机器指令），编译后所有函数的二进制都落在这里</td>
+</tr>
+<tr>
+<td><code>__stubs</code></td>
+<td>动态链接的“桩代码”，用于懒加载调用外部函数</td>
+</tr>
+<tr>
+<td><code>__stub_helper</code></td>
+<td>桩代码的辅助函数，在第一次调用时跳转到 dyld 做符号绑定</td>
+</tr>
+<tr>
+<td><code>__cstring</code></td>
+<td>C 风格的字符串常量（如 <code>@&quot;Hello&quot;</code> 的字面量部分）</td>
+</tr>
+<tr>
+<td><code>__const</code></td>
+<td>编译期确定的常量</td>
+</tr>
+<tr>
+<td><code>__objc_methname</code></td>
+<td>Objective‑C 方法名字符串</td>
+</tr>
+<tr>
+<td><code>__objc_classname</code></td>
+<td>Objective‑C 类名字符串</td>
+</tr>
+<tr>
+<td><code>__objc_methtype</code></td>
+<td>Objective‑C 方法类型编码（Type Encoding）</td>
+</tr>
+</tbody></table>
+<h3 id="3-2-DATA-段中的常见节"><a href="#3-2-DATA-段中的常见节" class="headerlink" title="3.2 __DATA 段中的常见节"></a>3.2 <code>__DATA</code> 段中的常见节</h3><table>
+<thead>
+<tr>
+<th>节名</th>
+<th>内容说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__data</code></td>
+<td>已初始化的全局变量和静态变量</td>
+</tr>
+<tr>
+<td><code>__bss</code></td>
+<td>未初始化的静态&#x2F;全局变量，在文件中不占空间，仅分配虚拟内存</td>
+</tr>
+<tr>
+<td><code>__la_symbol_ptr</code></td>
+<td><strong>懒加载符号指针表</strong>，初次调用时由 dyld 替换为真实函数地址</td>
+</tr>
+<tr>
+<td><code>__nl_symbol_ptr</code></td>
+<td><strong>非懒加载符号指针表</strong>，启动时 dyld 即绑定的符号（如 C++ 静态初始化器）</td>
+</tr>
+<tr>
+<td><code>__got</code></td>
+<td>全局偏移表，用于非懒加载的间接寻址</td>
+</tr>
+<tr>
+<td><code>__objc_classlist</code></td>
+<td>项目中所有的 Objective‑C 类列表</td>
+</tr>
+<tr>
+<td><code>__objc_classrefs</code></td>
+<td>被引用的类列表，可用于查找未使用的类并瘦身</td>
+</tr>
+<tr>
+<td><code>__objc_protolist</code></td>
+<td>协议列表</td>
+</tr>
+<tr>
+<td><code>__objc_catlist</code></td>
+<td>Category 列表</td>
+</tr>
+<tr>
+<td><code>__mod_init_func</code></td>
+<td>C++ 全局构造器（标记 <code>__attribute__((constructor))</code>）的列表</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四、动态链接：Rebase、Bind、Lazy-Binding"><a href="#四、动态链接：Rebase、Bind、Lazy-Binding" class="headerlink" title="四、动态链接：Rebase、Bind、Lazy Binding"></a>四、动态链接：Rebase、Bind、Lazy Binding</h2><p>当 Mach‑O 被加载到内存时，ASLR 会让镜像加载到随机的基址。所有内部指针和外部符号的引用都需要修正，这个过程分为两步：<strong>Rebase</strong> 和 <strong>Bind</strong>。两者的目标虽然不同，但都通过压缩的 opcode 序列（由 <code>LC_DYLD_INFO_ONLY</code> 命令描述）来描述待修正的位置。</p>
+<h3 id="4-1-Rebase（内部指针修正）"><a href="#4-1-Rebase（内部指针修正）" class="headerlink" title="4.1 Rebase（内部指针修正）"></a>4.1 Rebase（内部指针修正）</h3><p>Mach‑O 在 __TEXT 段中的地址是按偏移量计算的，由于 ASLR，实际加载地址 &#x3D; 偏移量 + 随机基址。Rebase 将可执行文件中指向<strong>自身内部</strong>的指针，统一加上 ASLR 偏移量。</p>
+<p>如果开启了 ASLR，Rebase 是必须的。如果关闭（极少见），则可以跳过。</p>
+<h3 id="4-2-Bind（外部符号绑定）"><a href="#4-2-Bind（外部符号绑定）" class="headerlink" title="4.2 Bind（外部符号绑定）"></a>4.2 Bind（外部符号绑定）</h3><p>处理对<strong>外部符号</strong>（例如 <code>NSLog</code>、<code>printf</code>）的依赖，这些符号存在于系统动态库（如 Foundation、libSystem）中。dyld 需要在启动时或首次调用时，将真实函数地址写入对应的符号指针（位于 <code>__DATA</code> 段）。</p>
+<h3 id="4-3-Lazy-Binding（懒加载）"><a href="#4-3-Lazy-Binding（懒加载）" class="headerlink" title="4.3 Lazy Binding（懒加载）"></a>4.3 Lazy Binding（懒加载）</h3><p>为了加速启动，大部分外部符号采用懒加载机制。其流程如下：</p>
+<ol>
+<li>编译时，对外部函数（如 <code>printf</code>）的调用指向 <code>__TEXT,__stubs</code> 中的一段桩代码。</li>
+<li><code>__stubs</code> 中的代码跳转到 <code>__la_symbol_ptr</code> 表中该函数对应的槽位。</li>
+<li>在启动时，这个槽位初始指向 <code>__stub_helper</code> 中的解析函数。</li>
+<li><strong>首次调用时</strong>：<code>__stub_helper</code> 调用 <code>dyld_stub_binder</code>，由 dyld 查找真实函数地址，写入 <code>__la_symbol_ptr</code>。</li>
+<li><strong>后续调用</strong>：直接通过 <code>__la_symbol_ptr</code> 跳转到真实函数，不再经过 dyld。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[&quot;调用 printf()&quot;] --&gt; B[&quot;__TEXT,__stubs (桩)&quot;]</span><br><span class="line">    B --&gt; C&#123;&quot;首次调用？&quot;&#125;</span><br><span class="line">    C -- 是 --&gt; D[&quot;跳转至 __stub_helper&quot;]</span><br><span class="line">    D --&gt; E[&quot;dyld_stub_binder 查找符号&quot;]</span><br><span class="line">    E --&gt; F[&quot;将真实地址写入 __la_symbol_ptr&quot;]</span><br><span class="line">    F --&gt; G[&quot;执行 printf&quot;]</span><br><span class="line">    C -- 否 --&gt; H[&quot;直接通过 __la_symbol_ptr 跳转&quot;]</span><br><span class="line">    H --&gt; G</span><br></pre></td></tr></table></figure>
+
+<p>Non‑Lazy Binding 则相反：dyld 在加载时就完成符号绑定，主要用于那些在启动时必须就绪的符号（例如 C++ 静态对象构造器）。</p>
+<h3 id="4-4-压缩信息格式"><a href="#4-4-压缩信息格式" class="headerlink" title="4.4 压缩信息格式"></a>4.4 压缩信息格式</h3><p>传统上，Rebase 和 Bind 信息各自由独立的 opcode 流描述，dyld 顺序执行这些操作码来完成修正。从 iOS 13 &#x2F; macOS 10.15 开始，还引入了 <code>__chain_fixups</code> 压缩格式，将修正信息直接嵌入数据页的指针链中，进一步减少启动时间。</p>
+<hr>
+<h2 id="五、代码签名与加密"><a href="#五、代码签名与加密" class="headerlink" title="五、代码签名与加密"></a>五、代码签名与加密</h2><h3 id="5-1-签名结构"><a href="#5-1-签名结构" class="headerlink" title="5.1 签名结构"></a>5.1 签名结构</h3><p>签名数据存放在 <code>__LINKEDIT</code> 段中，通过 <code>LC_CODE_SIGNATURE</code> 命令定位。签名本身是一个 SuperBlob 结构，包含：</p>
+<ul>
+<li><strong>Code Directory</strong>：包含所有重要内容的哈希值（每个 <code>__TEXT</code> 页单独哈希），以及代码大小、页大小、团队 ID、平台标识等。</li>
+<li><strong>Entitlements</strong>：权限文件，可以是 XML 或 DER 格式。</li>
+<li><strong>CMS Signature</strong>：使用开发者证书对 Code Directory 的哈希值进行签名。</li>
+<li><strong>Requirements</strong>：验证签名的条件表达式（如必须由 Apple 根证书签名）。</li>
+</ul>
+<p><code>__LINKEDIT</code> 段中的签名区域在计算哈希时会被排除，避免自指问题。</p>
+<h3 id="5-2-FairPlay-加密"><a href="#5-2-FairPlay-加密" class="headerlink" title="5.2 FairPlay 加密"></a>5.2 FairPlay 加密</h3><p>从 App Store 下载的应用，其二进制文件被 FairPlay DRM 加密。加密信息由 <code>LC_ENCRYPTION_INFO_64</code> 命令描述（包括 <code>cryptid</code> 标识和偏移量）。解密发生在内核级，应用运行时看到的是已解密的内存页。这是越狱检测重点关注的区域之一。</p>
+<hr>
+<h2 id="六、多架构二进制（Fat-Binary-Universal-Binary）"><a href="#六、多架构二进制（Fat-Binary-Universal-Binary）" class="headerlink" title="六、多架构二进制（Fat Binary &#x2F; Universal Binary）"></a>六、多架构二进制（Fat Binary &#x2F; Universal Binary）</h2><p>为了同时支持多种设备（如 armv7、arm64、x86_64），Mach‑O 允许将多个单架构二进制文件打包成一个文件，格式在 <code>&lt;mach-o/fat.h&gt;</code> 中定义。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="code">+------------------+</span></span><br><span class="line"><span class="section">|   fat_header     |  包含 magic (0xcafebabe) 和架构数量</span></span><br><span class="line"><span class="section">+------------------+</span></span><br><span class="line"><span class="section">|   fat_arch_1     |  描述第1个架构（CPU类型、偏移、大小、对齐）</span></span><br><span class="line"><span class="section">+------------------+</span></span><br><span class="line"><span class="section">|   fat_arch_2     |  描述第2个架构</span></span><br><span class="line"><span class="section">+------------------+</span></span><br><span class="line"><span class="section">|   ...            |</span></span><br><span class="line"><span class="section">+------------------+</span></span><br><span class="line"><span class="section">|   Mach‑O 数据1   |  实际二进制（偏移由 fat_arch_1 指定）</span></span><br><span class="line"><span class="section">+------------------+</span></span><br><span class="line"><span class="section">|   Mach‑O 数据2   |</span></span><br><span class="line"><span class="section">+------------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>iOS 真机的 macOS 运行 iOS 模拟器 App 时也是在 x86_64&#x2F;arm64 切片之间根据运行环境自动选择。MachOView 打开一个通用的 .app 可执行文件，可以看到 <code>Fat Binary</code> 下包含多个架构的切片。</p>
+<hr>
+<h2 id="七、常见工具与调试方法"><a href="#七、常见工具与调试方法" class="headerlink" title="七、常见工具与调试方法"></a>七、常见工具与调试方法</h2><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+<th>命令示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>file</code></td>
+<td>查看文件类型和架构</td>
+<td><code>file MyApp</code></td>
+</tr>
+<tr>
+<td><code>otool</code></td>
+<td>查看 Load Commands、段&#x2F;节信息、符号表等</td>
+<td><code>otool -l MyApp</code>（显示所有 Load Commands）</td>
+</tr>
+<tr>
+<td><code>otool -L</code></td>
+<td>查看依赖的动态库列表</td>
+<td><code>otool -L MyApp</code></td>
+</tr>
+<tr>
+<td><code>otool -v -s __DATA __objc_classlist</code></td>
+<td>查看 OC 类列表</td>
+<td></td>
+</tr>
+<tr>
+<td><code>nm</code></td>
+<td>查看符号表</td>
+<td><code>nm -m MyApp</code></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>查看各段大小</td>
+<td><code>xcrun size -x -l -m MyApp</code></td>
+</tr>
+<tr>
+<td><code>codesign</code></td>
+<td>查看&#x2F;验证签名</td>
+<td><code>codesign -dvvv MyApp</code></td>
+</tr>
+<tr>
+<td><strong>MachOView</strong></td>
+<td>图形化查看完整结构</td>
+<td>开源 GUI 工具，适合初学者</td>
+</tr>
+</tbody></table>
+<p>此外，在编译过程中可以生成 <strong>Link Map</strong> 文件（通过 <code>-Xlinker -map</code> 开启），用于精确分析每个符号在 <code>__TEXT</code> 和 <code>__DATA</code> 段中的位置，是包体积优化的重要手段。</p>
+<hr>
+<h2 id="八、优化与瘦身"><a href="#八、优化与瘦身" class="headerlink" title="八、优化与瘦身"></a>八、优化与瘦身</h2><p>理解 Mach‑O 结构后，可以采取多种手段减小包体积：</p>
+<ol>
+<li><strong>编译器优化</strong>：Release 下使用 <code>-Os</code>（折衷大小和性能）。Swift 可使用 <code>-Osize</code> 模式。</li>
+<li><strong>删除无用代码</strong>：<ul>
+<li>对比 <code>__objc_classlist</code> 和 <code>__objc_classrefs</code>，找出未被引用的类（OC 动态特性需注意字符串调用的类）。</li>
+<li>利用 <code>__DATA,__objc_catlist</code> 合并冗余的 Category，减少 <code>__DATA</code> 指针数量。</li>
+</ul>
+</li>
+<li><strong>段迁移</strong>（需关闭 Bitcode）：将部分只读数据从 <code>__TEXT</code> 迁到 <code>__DATA_CONST</code>，减少 <code>__TEXT</code> 段大小。</li>
+<li><strong>减少动态库数量</strong>：内嵌的动态库加载速度较慢，合并内嵌 Framework 可以加快启动。</li>
+<li><strong>App Thinning</strong>：<ul>
+<li><strong>Slicing</strong>：App Store 根据目标设备架构（arm64 &#x2F; armv7）和分辨率（@2x &#x2F; @3x）生成专用变体。</li>
+<li><strong>Bitcode</strong>：提交 LLVM IR 给 App Store，苹果在未来可针对新硬件重新优化生成最终二进制，无需开发者重新上传。</li>
+<li><strong>On‑Demand Resources</strong>：资源按需下载，不占用初始安装包。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="九、启动过程与-dyld-的角色"><a href="#九、启动过程与-dyld-的角色" class="headerlink" title="九、启动过程与 dyld 的角色"></a>九、启动过程与 dyld 的角色</h2><p>当一个 Mach‑O 可执行文件被启动时，主要经过以下流程：</p>
+<ol>
+<li><strong>内核解析 Mach‑O Header</strong>，找到 <code>LC_LOAD_DYLINKER</code> 命令，定位 dyld 路径并加载它。</li>
+<li><strong>dyld 初始化</strong>，读取主二进制及所有依赖动态库（递归构建依赖图）。</li>
+<li><strong>加载所有镜像</strong>，映射到虚拟内存。</li>
+<li><strong>执行 Rebase &amp; Bind</strong>：<ul>
+<li>先对所有内部指针做 Rebase（加上 ASLR 偏移）。</li>
+<li>处理 Non‑Lazy 符号的 Bind。</li>
+<li>Lazy 符号保留，留待首次调用时绑定。</li>
+</ul>
+</li>
+<li><strong>运行初始化器</strong>：<ul>
+<li>执行 C++ 静态构造函数（<code>__mod_init_func</code>）。</li>
+<li>调用 <code>+load</code> 方法（已废弃，但仍被理解）。</li>
+<li>初始化 Objective‑C Runtime。</li>
+</ul>
+</li>
+<li><strong>跳转到入口点</strong>（<code>LC_MAIN</code> 或 <code>LC_UNIXTHREAD</code> 指定），最终执行 <code>main()</code> 函数。</li>
+</ol>
+<p>每一步的时间都可以通过 Instruments 的 <strong>System Trace</strong> 或 <code>dyld</code> 的环境变量（如 <code>DYLD_PRINT_STATISTICS</code>）进行分析和调优。</p>
+<hr>
+<h2 id="十、总结：结构-—-命令-—-段的层级关系"><a href="#十、总结：结构-—-命令-—-段的层级关系" class="headerlink" title="十、总结：结构 — 命令 — 段的层级关系"></a>十、总结：结构 — 命令 — 段的层级关系</h2><figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Mach‑O 文件</span><br><span class="line">├── Header                   （文件属性、类型、架构）</span><br><span class="line">├── <span class="built_in">Load</span> Commands Table      （加载说明书）</span><br><span class="line">│   ├── LC_SEGMENT_64(<span class="variable">__PAGEZERO</span>)</span><br><span class="line">│   ├── LC_SEGMENT_64(<span class="variable">__TEXT</span>)</span><br><span class="line">│   ├── LC_SEGMENT_64(<span class="variable">__DATA</span>)</span><br><span class="line">│   ├── LC_SEGMENT_64(<span class="variable">__LINKEDIT</span>)</span><br><span class="line">│   ├── LC_DYLD_INFO_ONLY</span><br><span class="line">│   ├── LC_SYMTAB</span><br><span class="line">│   └── LC_CODE_SIGNATURE</span><br><span class="line">└── Data (Segment 实际数据)</span><br><span class="line">    ├── <span class="variable">__PAGEZERO</span> (虚拟)</span><br><span class="line">    ├── <span class="variable">__TEXT</span></span><br><span class="line">    │   ├── <span class="variable">__text</span></span><br><span class="line">    │   ├── <span class="variable">__stubs</span></span><br><span class="line">    │   ├── <span class="variable">__cstring</span></span><br><span class="line">    │   └── <span class="variable">__objc_</span>*</span><br><span class="line">    ├── <span class="variable">__DATA</span></span><br><span class="line">    │   ├── <span class="variable">__data</span></span><br><span class="line">    │   ├── <span class="variable">__bss</span></span><br><span class="line">    │   ├── <span class="variable">__la_symbol_ptr</span>   (懒加载符号表)</span><br><span class="line">    │   ├── <span class="variable">__nl_symbol_ptr</span>   (非懒加载符号表)</span><br><span class="line">    │   ├── <span class="variable">__objc_classlist</span></span><br><span class="line">    │   └── <span class="variable">__objc_classrefs</span></span><br><span class="line">    └── <span class="variable">__LINKEDIT</span></span><br><span class="line">        ├── dyld 压缩信息</span><br><span class="line">        ├── 符号表 + 字符串表</span><br><span class="line">        └── 代码签名数据</span><br></pre></td></tr></table></figure>
+
+<p>Mach‑O 将“描述信息”（Header + Load Commands）与“实际内容”（Segment Data）清晰分离，通过段与节的组织满足只读&#x2F;可写、运行时&#x2F;链接时等不同需求。理解这一结构是洞悉 iOS 底层运行机制的必经关口，也是成为 iOS 高级专家的核心能力之一。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html" title="Mach‑O 文件格式完全解析">https://blog.libd.cn/Mach‑O-文件格式完全解析.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html" rel="next" title="Weak底层原理">
+      Weak底层原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90"><span class="nav-text">Mach‑O 文件格式完全解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%95%B4%E4%BD%93%E5%B8%83%E5%B1%80%EF%BC%9A%E4%B8%89%E5%9D%97%E6%A0%B8%E5%BF%83%E5%8C%BA%E5%9F%9F"><span class="nav-text">一、整体布局：三块核心区域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Header%EF%BC%88%E6%96%87%E4%BB%B6%E5%A4%B4%EF%BC%89"><span class="nav-text">1. Header（文件头）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Load-Commands%EF%BC%88%E5%8A%A0%E8%BD%BD%E5%91%BD%E4%BB%A4%E8%A1%A8%EF%BC%89"><span class="nav-text">2. Load Commands（加载命令表）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Data%EF%BC%88%E6%95%B0%E6%8D%AE%E5%8C%BA%EF%BC%89"><span class="nav-text">3. Data（数据区）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%AE%B5%E4%B8%8E%E8%8A%82%EF%BC%9A%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8D%95%E5%85%83"><span class="nav-text">二、段与节：内存布局的核心单元</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83"><span class="nav-text">2.1 命名规范</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81-TEXT-%E6%AE%B5%E4%B8%8E-DATA-%E6%AE%B5%E4%B8%AD%E7%9A%84%E5%85%B3%E9%94%AE%E8%8A%82"><span class="nav-text">三、__TEXT 段与 __DATA 段中的关键节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-TEXT-%E6%AE%B5%E4%B8%AD%E7%9A%84%E5%B8%B8%E8%A7%81%E8%8A%82"><span class="nav-text">3.1 __TEXT 段中的常见节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-DATA-%E6%AE%B5%E4%B8%AD%E7%9A%84%E5%B8%B8%E8%A7%81%E8%8A%82"><span class="nav-text">3.2 __DATA 段中的常见节</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%EF%BC%9ARebase%E3%80%81Bind%E3%80%81Lazy-Binding"><span class="nav-text">四、动态链接：Rebase、Bind、Lazy Binding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-Rebase%EF%BC%88%E5%86%85%E9%83%A8%E6%8C%87%E9%92%88%E4%BF%AE%E6%AD%A3%EF%BC%89"><span class="nav-text">4.1 Rebase（内部指针修正）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Bind%EF%BC%88%E5%A4%96%E9%83%A8%E7%AC%A6%E5%8F%B7%E7%BB%91%E5%AE%9A%EF%BC%89"><span class="nav-text">4.2 Bind（外部符号绑定）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-Lazy-Binding%EF%BC%88%E6%87%92%E5%8A%A0%E8%BD%BD%EF%BC%89"><span class="nav-text">4.3 Lazy Binding（懒加载）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-%E5%8E%8B%E7%BC%A9%E4%BF%A1%E6%81%AF%E6%A0%BC%E5%BC%8F"><span class="nav-text">4.4 压缩信息格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D%E4%B8%8E%E5%8A%A0%E5%AF%86"><span class="nav-text">五、代码签名与加密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E7%AD%BE%E5%90%8D%E7%BB%93%E6%9E%84"><span class="nav-text">5.1 签名结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-FairPlay-%E5%8A%A0%E5%AF%86"><span class="nav-text">5.2 FairPlay 加密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%A4%9A%E6%9E%B6%E6%9E%84%E4%BA%8C%E8%BF%9B%E5%88%B6%EF%BC%88Fat-Binary-Universal-Binary%EF%BC%89"><span class="nav-text">六、多架构二进制（Fat Binary &#x2F; Universal Binary）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%B8%B8%E8%A7%81%E5%B7%A5%E5%85%B7%E4%B8%8E%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95"><span class="nav-text">七、常见工具与调试方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E4%BC%98%E5%8C%96%E4%B8%8E%E7%98%A6%E8%BA%AB"><span class="nav-text">八、优化与瘦身</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%E4%B8%8E-dyld-%E7%9A%84%E8%A7%92%E8%89%B2"><span class="nav-text">九、启动过程与 dyld 的角色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%80%BB%E7%BB%93%EF%BC%9A%E7%BB%93%E6%9E%84-%E2%80%94-%E5%91%BD%E4%BB%A4-%E2%80%94-%E6%AE%B5%E7%9A%84%E5%B1%82%E7%BA%A7%E5%85%B3%E7%B3%BB"><span class="nav-text">十、总结：结构 — 命令 — 段的层级关系</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">317k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:48</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>

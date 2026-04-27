@@ -10,7 +10,20 @@
   <rights>All rights reserved 2026, Eric</rights>
   <subtitle>将来的自己,会感谢现在努力的自己!</subtitle>
   <title>时光书馆</title>
-  <updated>2026-04-27T08:40:46.000Z</updated>
+  <updated>2026-04-27T09:23:18.000Z</updated>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="Hexo" scheme="https://blog.libd.cn/tags/Hexo/"/>
+    <id>https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html</id>
+    <link href="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html"/>
+    <published>2026-04-27T09:23:18.000Z</published>
+    <summary>Mach‑O 是 macOS、iOS、watchOS 等苹果平台上的可执行文件、动态库和对象文件的底层格式。理解它的结构是理解应用启动、动态链接、符号绑定乃至包体积优化的基础。下面从整体布局到各个核心机制逐一拆解。</summary>
+    <title>Mach‑O 文件格式完全解析</title>
+    <updated>2026-04-27T09:23:18.000Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Eric</name>
@@ -264,18 +277,5 @@
     <summary>Xcode中所有LLDB的调试指令，不涵盖组合指令，后续会更新。</summary>
     <title>Xcode调试LLDB</title>
     <updated>2018-06-19T07:20:34.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Eric</name>
-    </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="iOS审核" scheme="https://blog.libd.cn/tags/iOS%E5%AE%A1%E6%A0%B8/"/>
-    <id>https://blog.libd.cn/App-Store-%E5%AE%A1%E6%A0%B8%E6%8C%87%E5%8D%97.html</id>
-    <link href="https://blog.libd.cn/App-Store-%E5%AE%A1%E6%A0%B8%E6%8C%87%E5%8D%97.html"/>
-    <published>2017-12-08T00:56:13.000Z</published>
-    <summary>记录iOS审核指南，最新版需要去官网查看。</summary>
-    <title>App-Store-审核指南</title>
-    <updated>2018-06-13T05:21:05.000Z</updated>
   </entry>
 </feed>
