@@ -10,7 +10,33 @@
   <rights>All rights reserved 2026, Eric</rights>
   <subtitle>将来的自己,会感谢现在努力的自己!</subtitle>
   <title>时光书馆</title>
-  <updated>2026-04-27T09:23:18.000Z</updated>
+  <updated>2026-04-28T10:24:00.000Z</updated>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="优化" scheme="https://blog.libd.cn/tags/%E4%BC%98%E5%8C%96/"/>
+    <id>https://blog.libd.cn/iOS%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%87%8D%E6%8E%92.html</id>
+    <link href="https://blog.libd.cn/iOS%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%87%8D%E6%8E%92.html"/>
+    <published>2026-04-28T10:24:00.000Z</published>
+    <summary>使用二进制重排技术，优化App冷启动速度。</summary>
+    <title>iOS二进制重排</title>
+    <updated>2026-04-28T10:24:00.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="冷启动" scheme="https://blog.libd.cn/tags/%E5%86%B7%E5%90%AF%E5%8A%A8/"/>
+    <id>https://blog.libd.cn/App%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.html</id>
+    <link href="https://blog.libd.cn/App%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.html"/>
+    <published>2026-04-28T10:06:28.000Z</published>
+    <summary>详细描述了App从点击屏幕到启动的过程。</summary>
+    <title>App冷启动过程</title>
+    <updated>2026-04-28T10:06:28.000Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Eric</name>
@@ -49,19 +75,6 @@
     <summary>AutoreleasePool是 Objective‑C 中用于管理临时对象生命周期的语法糖。它能够将对象延迟释放到作用域结束，避免在大量临时对象的场景下频繁创建/释放对象导致性能下降。</summary>
     <title>AutoreleasePool底层原理</title>
     <updated>2026-04-27T08:05:57.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Eric</name>
-    </author>
-    <category term="MarkDown" scheme="https://blog.libd.cn/categories/MarkDown/"/>
-    <category term="MarkDown hoedown 解析" scheme="https://blog.libd.cn/tags/MarkDown-hoedown-%E8%A7%A3%E6%9E%90/"/>
-    <id>https://blog.libd.cn/hoedown%E8%A7%A3%E6%9E%90%E5%9B%B4%E6%A0%8F%E4%BB%A3%E7%A0%81%E5%8E%9F%E7%90%86.html</id>
-    <link href="https://blog.libd.cn/hoedown%E8%A7%A3%E6%9E%90%E5%9B%B4%E6%A0%8F%E4%BB%A3%E7%A0%81%E5%8E%9F%E7%90%86.html"/>
-    <published>2024-07-10T12:39:28.000Z</published>
-    <summary>hoedown解析围栏代码原理</summary>
-    <title>hoedown解析围栏代码原理</title>
-    <updated>2024-07-10T12:39:28.000Z</updated>
   </entry>
   <entry>
     <author>
@@ -263,19 +276,5 @@
     <summary>探索iOS中view的3D变换原理，CATransform3D中每个值代表的意义。</summary>
     <title>CATransform3D详解</title>
     <updated>2018-05-08T02:47:57.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Eric</name>
-    </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="调试" scheme="https://blog.libd.cn/tags/%E8%B0%83%E8%AF%95/"/>
-    <category term="LLDB" scheme="https://blog.libd.cn/tags/LLDB/"/>
-    <id>https://blog.libd.cn/Xcode%E8%B0%83%E8%AF%95LLDB.html</id>
-    <link href="https://blog.libd.cn/Xcode%E8%B0%83%E8%AF%95LLDB.html"/>
-    <published>2018-02-02T03:16:34.000Z</published>
-    <summary>Xcode中所有LLDB的调试指令，不涵盖组合指令，后续会更新。</summary>
-    <title>Xcode调试LLDB</title>
-    <updated>2018-06-19T07:20:34.000Z</updated>
   </entry>
 </feed>

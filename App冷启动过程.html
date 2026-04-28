@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.libd.cn').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.json',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="详细描述了App从点击屏幕到启动的过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="App冷启动过程">
+<meta property="og:url" content="https://blog.libd.cn/App%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="详细描述了App从点击屏幕到启动的过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-28T10:06:28.000Z">
+<meta property="article:modified_time" content="2026-04-28T10:06:28.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="冷启动">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.libd.cn/App%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>App冷启动过程 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.libd.cn/App%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          App冷启动过程
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-04-28 18:06:28" itemprop="dateCreated datePublished" datetime="2026-04-28T18:06:28+08:00">2026-04-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+            <div class="post-description">详细描述了App从点击屏幕到启动的过程。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="iOS-App-冷启动过程详解"><a href="#iOS-App-冷启动过程详解" class="headerlink" title="iOS App 冷启动过程详解"></a>iOS App 冷启动过程详解</h1><p>冷启动（Cold Launch）是指 App 进程不在系统内存中，需要从零开始创建进程、加载可执行文件、链接动态库并初始化运行环境，直至用户可与 App 交互的完整过程。本文将从用户点击图标开始，详细描述 iOS 冷启动的每个阶段，并<strong>明确标识“加载所有镜像”的具体位置与步骤</strong>。</p>
+<hr>
+<h2 id="一、用户交互与内核响应"><a href="#一、用户交互与内核响应" class="headerlink" title="一、用户交互与内核响应"></a>一、用户交互与内核响应</h2><ol>
+<li><p><strong>用户点击 SpringBoard 上的 App 图标</strong><br>SpringBoard 检测触摸事件并识别目标 App。</p>
+</li>
+<li><p><strong>系统内核（XNU）准备</strong>  </p>
+<ul>
+<li>SpringBoard 通过 <code>posix_spawn()</code> 系统调用请求内核创建新进程。</li>
+<li>内核分配虚拟内存空间、进程 ID（PID），建立初始内核结构。</li>
+<li>加载器（<code>execve</code> 路径）开始解析 Mach-O 可执行文件格式。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="二、进程映像加载与动态链接器（dyld）——-加载所有镜像的核心步骤"><a href="#二、进程映像加载与动态链接器（dyld）——-加载所有镜像的核心步骤" class="headerlink" title="二、进程映像加载与动态链接器（dyld）—— 加载所有镜像的核心步骤"></a>二、进程映像加载与动态链接器（dyld）—— <strong>加载所有镜像的核心步骤</strong></h2><h3 id="2-1-exec-与-dyld-接管"><a href="#2-1-exec-与-dyld-接管" class="headerlink" title="2.1 exec() 与 dyld 接管"></a>2.1 <code>exec()</code> 与 dyld 接管</h3><ul>
+<li>内核将 App 的可执行文件（Mach-O）映射到进程地址空间，但不负责链接外部动态库。</li>
+<li>内核在 Mach-O 的 <code>LC_LOAD_DYLINKER</code> 命令指定的路径中找到动态链接器（<code>/usr/lib/dyld</code>），并将控制权交给 dyld。</li>
+<li>dyld 是用户态的第一个代码，负责<strong>加载所有镜像</strong>并完成符号绑定。</li>
+</ul>
+<h3 id="2-2-dyld-启动与“加载所有镜像”的详细分解"><a href="#2-2-dyld-启动与“加载所有镜像”的详细分解" class="headerlink" title="2.2 dyld 启动与“加载所有镜像”的详细分解"></a>2.2 dyld 启动与“加载所有镜像”的详细分解</h3><p>dyld 执行以下步骤（全部发生在 <code>main()</code> 之前）：</p>
+<h4 id="2-2-1-自身初始化"><a href="#2-2-1-自身初始化" class="headerlink" title="2.2.1 自身初始化"></a>2.2.1 自身初始化</h4><p>设置错误处理、内存分配器等。</p>
+<h4 id="2-2-2-解析主可执行文件（第一个镜像）"><a href="#2-2-2-解析主可执行文件（第一个镜像）" class="headerlink" title="2.2.2 解析主可执行文件（第一个镜像）"></a>2.2.2 解析主可执行文件（第一个镜像）</h4><ul>
+<li>读取 Mach-O 头部，遍历加载命令（Load Commands）。</li>
+<li>收集所有 <code>LC_LOAD_DYLIB</code>（显式依赖）、<code>LC_LOAD_WEAK_DYLIB</code>（弱链接）等命令。</li>
+</ul>
+<h4 id="2-2-3-递归加载所有依赖的动态库（生成镜像列表）"><a href="#2-2-3-递归加载所有依赖的动态库（生成镜像列表）" class="headerlink" title="2.2.3 递归加载所有依赖的动态库（生成镜像列表）"></a>2.2.3 递归加载所有依赖的动态库（生成镜像列表）</h4><ul>
+<li>根据上一步收集的依赖，<strong>递归地</strong>打开并映射每个 <code>.dylib</code> 或 <code>.framework</code> 文件到进程地址空间。</li>
+<li>每个被加载的 Mach-O 文件（包括主可执行文件和每个动态库）称为一个<strong>镜像（Image）</strong>。</li>
+<li>这个过程会持续直到所有直接和间接依赖项都被加载。</li>
+</ul>
+<h4 id="2-2-4-处理-dyld-shared-cache（系统库的特殊加载）"><a href="#2-2-4-处理-dyld-shared-cache（系统库的特殊加载）" class="headerlink" title="2.2.4 处理 dyld shared cache（系统库的特殊加载）"></a>2.2.4 处理 dyld shared cache（系统库的特殊加载）</h4><ul>
+<li>iOS 的大部分系统框架（如 UIKit、Foundation）已被预先链接到一个大文件中（dyld shared cache）。</li>
+<li>dyld 检查共享缓存是否已映射到当前进程；若未映射则将其映射到共享地址空间。</li>
+<li><strong>注意</strong>：从概念上讲，这也是“加载镜像”的一部分——只是这些镜像已经预先打包。</li>
+</ul>
+<h4 id="2-2-5-对所有已加载的镜像执行-fixups（地址修正与符号绑定）"><a href="#2-2-5-对所有已加载的镜像执行-fixups（地址修正与符号绑定）" class="headerlink" title="2.2.5 对所有已加载的镜像执行 fixups（地址修正与符号绑定）"></a>2.2.5 对所有已加载的镜像执行 fixups（地址修正与符号绑定）</h4><ul>
+<li><strong>Rebase</strong>：修正内部指针偏移量，因为 ASLR（地址空间布局随机化）导致镜像加载地址与编译时预设地址不同。</li>
+<li><strong>Binding</strong>：将符号引用（如调用 <code>printf</code>）指向真实的函数地址。对 lazy binding 的符号不在此立即绑定（<code>__DATA,__la_symbol_ptr</code> 段保留桩代码）。</li>
+<li>处理弱绑定、延迟绑定等。</li>
+</ul>
+<blockquote>
+<p>✅ <strong>“加载所有镜像”明确定位在步骤 2.2.2 → 2.2.5</strong><br>即：解析主可执行文件 → 递归加载依赖 dylib → 利用共享缓存（系统库） → 对所有镜像执行 rebase&#x2F;binding。</p>
+</blockquote>
+<h3 id="2-3-Objective-C-Runtime-初始化"><a href="#2-3-Objective-C-Runtime-初始化" class="headerlink" title="2.3 Objective-C Runtime 初始化"></a>2.3 Objective-C Runtime 初始化</h3><ul>
+<li>当 dyld 加载包含 Objective-C 类的镜像时，触发 runtime 环境准备：<ul>
+<li>注册类、协议、分类（Category）。</li>
+<li>初始化 <code>read_image</code> 回调：调用 runtime 内部的 <code>_objc_init</code>，为每个镜像执行 <code>map_images</code>。</li>
+<li>处理 <code>__objc_classlist</code>、<code>__objc_catlist</code> 等 section，建立全局类表。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-4-load-方法与静态初始化器"><a href="#2-4-load-方法与静态初始化器" class="headerlink" title="2.4 +load 方法与静态初始化器"></a>2.4 <code>+load</code> 方法与静态初始化器</h3><ul>
+<li>dyld 在完成所有镜像的加载和 fixups 后，遍历所有实现了 <code>+load</code> 方法的类和分类，按依赖顺序调用 <code>+load</code>。</li>
+<li>C++ 静态全局对象构造函数（<code>__attribute__((constructor))</code>）也在此阶段执行。</li>
+<li><strong>注意</strong>：<code>+load</code> 执行完毕后，dyld 阶段结束，控制权转给可执行文件的入口点 <code>main()</code>。</li>
+</ul>
+<hr>
+<h2 id="三、进入-main-函数与-UIKit-初始化"><a href="#三、进入-main-函数与-UIKit-初始化" class="headerlink" title="三、进入 main() 函数与 UIKit 初始化"></a>三、进入 <code>main()</code> 函数与 UIKit 初始化</h2><h3 id="3-1-入口点：main"><a href="#3-1-入口点：main" class="headerlink" title="3.1 入口点：main()"></a>3.1 入口点：<code>main()</code></h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> main(<span class="type">int</span> argc, <span class="type">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">UIApplicationMain</span>(argc, argv, <span class="literal">nil</span>, <span class="built_in">NSStringFromClass</span>([AppDelegate <span class="keyword">class</span>]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>UIApplicationMain</code> 创建 <code>UIApplication</code> 单例、设置 <code>AppDelegate</code>，并启动主 RunLoop。</li>
+</ul>
+<h3 id="3-2-关键内部步骤"><a href="#3-2-关键内部步骤" class="headerlink" title="3.2 关键内部步骤"></a>3.2 关键内部步骤</h3><ul>
+<li>初始化 UIKit 基础设施（屏幕缩放因子、文本系统等）。</li>
+<li>调用 <code>[delegate application:didFinishLaunchingWithOptions:]</code>。</li>
+<li>设置主窗口 <code>UIWindow</code> 及 <code>rootViewController</code>（来自 Storyboard 或代码）。</li>
+<li>窗口 <code>makeKeyAndVisible</code>，触发首帧布局与渲染。</li>
+<li>调用 <code>[delegate applicationDidBecomeActive:]</code>（在 RunLoop 第一个周期中）。</li>
+<li>进入 <code>CFRunLoopRun()</code>，开始处理事件。</li>
+</ul>
+<hr>
+<h2 id="四、RunLoop-与首帧渲染"><a href="#四、RunLoop-与首帧渲染" class="headerlink" title="四、RunLoop 与首帧渲染"></a>四、RunLoop 与首帧渲染</h2><ul>
+<li>主 RunLoop 启动后，Core Animation 提交第一帧到 Render Server，完成首帧显示。</li>
+<li>系统发送 <code>UIApplicationDidBecomeActiveNotification</code>，App 进入可交互状态。</li>
+</ul>
+<hr>
+<h2 id="五、冷启动时间线总结（含加载所有镜像的位置）"><a href="#五、冷启动时间线总结（含加载所有镜像的位置）" class="headerlink" title="五、冷启动时间线总结（含加载所有镜像的位置）"></a>五、冷启动时间线总结（含加载所有镜像的位置）</h2><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>主要任务</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 用户点击图标 → 内核响应</td>
+<td><code>fork/exec</code> 创建进程，映射可执行文件</td>
+<td></td>
+</tr>
+<tr>
+<td>2. <strong>dyld 加载所有镜像</strong></td>
+<td><strong>解析主可执行、递归加载依赖 dylib、处理共享缓存、rebase+binding</strong></td>
+<td><strong>发生在 <code>main()</code> 之前</strong></td>
+</tr>
+<tr>
+<td>3. Runtime 初始化 + <code>+load</code></td>
+<td>注册 ObjC 类、调用 <code>+load</code> 方法</td>
+<td>仍在 <code>main()</code> 之前</td>
+</tr>
+<tr>
+<td>4. <code>main()</code> → <code>UIApplicationMain</code></td>
+<td>进入 App 代码，初始化 UIKit</td>
+<td></td>
+</tr>
+<tr>
+<td>5. <code>didFinishLaunching</code></td>
+<td>业务初始化</td>
+<td></td>
+</tr>
+<tr>
+<td>6. 首帧布局与渲染</td>
+<td>显示第一个界面</td>
+<td></td>
+</tr>
+<tr>
+<td>7. <code>applicationDidBecomeActive</code></td>
+<td>App 可响应事件</td>
+<td></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六、启动优化关键技术点"><a href="#六、启动优化关键技术点" class="headerlink" title="六、启动优化关键技术点"></a>六、启动优化关键技术点</h2><ul>
+<li><strong>减少 <code>+load</code> 方法</strong>：改用 <code>+initialize</code> 或懒加载。</li>
+<li><strong>减少动态库数量</strong>：合并自定义 dylib 或改用静态库。</li>
+<li><strong>二进制重排</strong>：使用 <code>order_file</code> 优化启动时内存页 fault。</li>
+<li><strong>延迟非必要任务</strong>：不要在 <code>didFinishLaunching</code> 中执行耗时操作。</li>
+<li><strong>预热（Prewarming）</strong>：iOS 15+ 系统可能提前启动进程，需正确处理。</li>
+</ul>
+<hr>
+<h2 id="七、验证与检测方法"><a href="#七、验证与检测方法" class="headerlink" title="七、验证与检测方法"></a>七、验证与检测方法</h2><h3 id="7-1-使用-dyld-统计信息"><a href="#7-1-使用-dyld-统计信息" class="headerlink" title="7.1 使用 dyld 统计信息"></a>7.1 使用 dyld 统计信息</h3><p>设置环境变量：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">DYLD_PRINT_STATISTICS</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">DYLD_PRINT_STATISTICS_DETAILS</span> = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>输出示例：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">total</span> pre-main time: <span class="number">220</span>.<span class="number">51</span> ms (<span class="number">100</span>.<span class="number">0</span>%)</span><br><span class="line">         <span class="attribute">dylib</span> loading time:  <span class="number">45</span>.<span class="number">25</span> ms (<span class="number">20</span>.<span class="number">5</span>%)</span><br><span class="line">        <span class="attribute">rebase</span>/binding time: <span class="number">112</span>.<span class="number">37</span> ms (<span class="number">51</span>.<span class="number">0</span>%)</span><br><span class="line">            <span class="attribute">ObjC</span> setup time:  <span class="number">18</span>.<span class="number">88</span> ms ( <span class="number">8</span>.<span class="number">5</span>%)</span><br><span class="line">           <span class="attribute">initializer</span> time:  <span class="number">44</span>.<span class="number">01</span> ms (<span class="number">20</span>.<span class="number">0</span>%)</span><br></pre></td></tr></table></figure>
+<p>其中 <strong>dylib loading time</strong> 对应“递归加载依赖 dylib”部分，<strong>rebase&#x2F;binding time</strong> 对应步骤 2.2.5，两者合起来就是<strong>加载所有镜像</strong>的主要耗时。</p>
+<h3 id="7-2-Instruments-与-MetricKit"><a href="#7-2-Instruments-与-MetricKit" class="headerlink" title="7.2 Instruments 与 MetricKit"></a>7.2 Instruments 与 MetricKit</h3><ul>
+<li>Instruments 的 <code>App Launch</code> 模板精确测量总启动时间。</li>
+<li>MetricKit 收集线上用户的启动数据。</li>
+</ul>
+<hr>
+<h2 id="八、结语"><a href="#八、结语" class="headerlink" title="八、结语"></a>八、结语</h2><p>iOS 冷启动是一个从内核到用户态、从 <code>dyld</code> 到 <code>UIKit</code> 的复杂流程。<strong>“加载所有镜像”明确发生在 dyld 阶段、<code>main()</code> 函数之前</strong>，具体包括：解析主可执行文件、递归加载所有依赖动态库、利用共享缓存映射系统库，并对每个镜像执行 rebase 和 binding。理解这一步骤的输入与输出，是优化启动时间的基础。通过减少动态库数量、优化 <code>+load</code>、延迟初始化等手段，能有效缩短冷启动时间，提升用户体验。</p>
+<hr>
+<p><em>参考：Apple 动态链接器文档、dyld 开源代码、WWDC 启动优化系列 Session</em></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.libd.cn/App%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.html" title="App冷启动过程">https://blog.libd.cn/App冷启动过程.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%B7%E5%90%AF%E5%8A%A8/" rel="tag"># 冷启动</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/iOS%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%87%8D%E6%8E%92.html" rel="prev" title="iOS二进制重排">
+      <i class="fa fa-chevron-left"></i> iOS二进制重排
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html" rel="next" title="Mach‑O 文件格式完全解析">
+      Mach‑O 文件格式完全解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-App-%E5%86%B7%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3"><span class="nav-text">iOS App 冷启动过程详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%94%A8%E6%88%B7%E4%BA%A4%E4%BA%92%E4%B8%8E%E5%86%85%E6%A0%B8%E5%93%8D%E5%BA%94"><span class="nav-text">一、用户交互与内核响应</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%BF%9B%E7%A8%8B%E6%98%A0%E5%83%8F%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%99%A8%EF%BC%88dyld%EF%BC%89%E2%80%94%E2%80%94-%E5%8A%A0%E8%BD%BD%E6%89%80%E6%9C%89%E9%95%9C%E5%83%8F%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A5%E9%AA%A4"><span class="nav-text">二、进程映像加载与动态链接器（dyld）—— 加载所有镜像的核心步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-exec-%E4%B8%8E-dyld-%E6%8E%A5%E7%AE%A1"><span class="nav-text">2.1 exec() 与 dyld 接管</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-dyld-%E5%90%AF%E5%8A%A8%E4%B8%8E%E2%80%9C%E5%8A%A0%E8%BD%BD%E6%89%80%E6%9C%89%E9%95%9C%E5%83%8F%E2%80%9D%E7%9A%84%E8%AF%A6%E7%BB%86%E5%88%86%E8%A7%A3"><span class="nav-text">2.2 dyld 启动与“加载所有镜像”的详细分解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-%E8%87%AA%E8%BA%AB%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">2.2.1 自身初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-%E8%A7%A3%E6%9E%90%E4%B8%BB%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%EF%BC%88%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%95%9C%E5%83%8F%EF%BC%89"><span class="nav-text">2.2.2 解析主可执行文件（第一个镜像）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3-%E9%80%92%E5%BD%92%E5%8A%A0%E8%BD%BD%E6%89%80%E6%9C%89%E4%BE%9D%E8%B5%96%E7%9A%84%E5%8A%A8%E6%80%81%E5%BA%93%EF%BC%88%E7%94%9F%E6%88%90%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%EF%BC%89"><span class="nav-text">2.2.3 递归加载所有依赖的动态库（生成镜像列表）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-4-%E5%A4%84%E7%90%86-dyld-shared-cache%EF%BC%88%E7%B3%BB%E7%BB%9F%E5%BA%93%E7%9A%84%E7%89%B9%E6%AE%8A%E5%8A%A0%E8%BD%BD%EF%BC%89"><span class="nav-text">2.2.4 处理 dyld shared cache（系统库的特殊加载）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-5-%E5%AF%B9%E6%89%80%E6%9C%89%E5%B7%B2%E5%8A%A0%E8%BD%BD%E7%9A%84%E9%95%9C%E5%83%8F%E6%89%A7%E8%A1%8C-fixups%EF%BC%88%E5%9C%B0%E5%9D%80%E4%BF%AE%E6%AD%A3%E4%B8%8E%E7%AC%A6%E5%8F%B7%E7%BB%91%E5%AE%9A%EF%BC%89"><span class="nav-text">2.2.5 对所有已加载的镜像执行 fixups（地址修正与符号绑定）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Objective-C-Runtime-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">2.3 Objective-C Runtime 初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-load-%E6%96%B9%E6%B3%95%E4%B8%8E%E9%9D%99%E6%80%81%E5%88%9D%E5%A7%8B%E5%8C%96%E5%99%A8"><span class="nav-text">2.4 +load 方法与静态初始化器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%BF%9B%E5%85%A5-main-%E5%87%BD%E6%95%B0%E4%B8%8E-UIKit-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">三、进入 main() 函数与 UIKit 初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E5%85%A5%E5%8F%A3%E7%82%B9%EF%BC%9Amain"><span class="nav-text">3.1 入口点：main()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%85%B3%E9%94%AE%E5%86%85%E9%83%A8%E6%AD%A5%E9%AA%A4"><span class="nav-text">3.2 关键内部步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81RunLoop-%E4%B8%8E%E9%A6%96%E5%B8%A7%E6%B8%B2%E6%9F%93"><span class="nav-text">四、RunLoop 与首帧渲染</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%86%B7%E5%90%AF%E5%8A%A8%E6%97%B6%E9%97%B4%E7%BA%BF%E6%80%BB%E7%BB%93%EF%BC%88%E5%90%AB%E5%8A%A0%E8%BD%BD%E6%89%80%E6%9C%89%E9%95%9C%E5%83%8F%E7%9A%84%E4%BD%8D%E7%BD%AE%EF%BC%89"><span class="nav-text">五、冷启动时间线总结（含加载所有镜像的位置）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-text">六、启动优化关键技术点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E9%AA%8C%E8%AF%81%E4%B8%8E%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95"><span class="nav-text">七、验证与检测方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E4%BD%BF%E7%94%A8-dyld-%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF"><span class="nav-text">7.1 使用 dyld 统计信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-Instruments-%E4%B8%8E-MetricKit"><span class="nav-text">7.2 Instruments 与 MetricKit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E7%BB%93%E8%AF%AD"><span class="nav-text">八、结语</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">342k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:11</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>
