@@ -54,15 +54,15 @@
 <meta property="og:site_name" content="时光书馆">
 <meta property="og:description" content="多线程GCD">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-dbeb080ec6b0f86c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2647951-8b89934a89887dcf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://blog.libd.cn/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8BGCD/gcd.webp">
+<meta property="og:image" content="https://blog.libd.cn/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8BGCD/gcd2.webp">
 <meta property="article:published_time" content="2017-03-16T01:07:05.000Z">
 <meta property="article:modified_time" content="2018-06-13T05:21:05.000Z">
 <meta property="article:author" content="Eric">
 <meta property="article:tag" content="GCD">
 <meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/2647951-dbeb080ec6b0f86c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta name="twitter:image" content="https://blog.libd.cn/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8BGCD/gcd.webp">
 
 <link rel="canonical" href="https://blog.libd.cn/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8BGCD.html">
 
@@ -320,7 +320,7 @@
 <li>串行队列：队列中的任务按添加任务顺序执行(Serial Dispatch Queue)</li>
 </ul>
 <p>注：这里说的任务就是GCD中block中的代码。</p>
-<p>这里的关键字一般都是组合用，理解单个是没有意义的，组合后的效果：<br><img data-src="http://upload-images.jianshu.io/upload_images/2647951-dbeb080ec6b0f86c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="注：如果同步执行的时候，不放入新创建的线程中的话，就会在主线程执行。"></p>
+<p>这里的关键字一般都是组合用，理解单个是没有意义的，组合后的效果：<br><img data-src="/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8BGCD/gcd.webp" alt="注：如果同步执行的时候，不放入新创建的线程中的话，就会在主线程执行。"></p>
 <h3 id="2-3、同步的情况下需要注意"><a href="#2-3、同步的情况下需要注意" class="headerlink" title="2.3、同步的情况下需要注意"></a>2.3、同步的情况下需要注意</h3><p><strong>以下两种同步执行的情况都是在主线程执行的：</strong></p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_queue_t</span> concurrentQueue = dispatch_queue_create(<span class="string">&quot;abcd&quot;</span>, DISPATCH_QUEUE_CONCURRENT);<span class="comment">//并发队列</span></span><br><span class="line"><span class="comment">//这里的abcd仅仅作为调试时用的标识符，打印线程属性时并不是name</span></span><br><span class="line"><span class="built_in">dispatch_sync</span>(concurrentQueue, ^&#123;</span><br><span class="line">    [<span class="keyword">self</span> loadImage:@<span class="number">10</span>];</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">dispatch_sync</span>(concurrentQueue, ^&#123;</span><br><span class="line">    [<span class="keyword">self</span> loadImage:@<span class="number">11</span>];</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">dispatch_sync</span>(concurrentQueue, ^&#123;</span><br><span class="line">    [<span class="keyword">self</span> loadImage:@<span class="number">12</span>];</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">dispatch_sync</span>(concurrentQueue, ^&#123;</span><br><span class="line">    [<span class="keyword">self</span> loadImage:@<span class="number">13</span>];</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p>打印log：</p>
@@ -354,7 +354,7 @@
 <li>Main Dispatch Queue就是主线程，因为主线程只有一个，所以Main Dispatch Queue是Serial Dispatch Queue。Main Dispatch Queue的处理在主线程的Runloop中执行。</li>
 </ul>
 <p>相应的，Global Dispatch Queue是系统为我们准备的Concurrent Dispatch Queue。Global Dispatch Queue有四个优先级，应根据需求使用对应优先级。</p>
-<p><img data-src="http://upload-images.jianshu.io/upload_images/2647951-8b89934a89887dcf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="优先级.png"></p>
+<p><img data-src="/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8BGCD/gcd2.webp" alt="优先级.png"></p>
 <figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  high优先级的获取方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">dispatch_queue_t </span>globalHighQueue = <span class="keyword">dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, </span><span class="number">0</span>);</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  default优先级的获取方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">dispatch_queue_t </span>globalDefaultQueue = <span class="keyword">dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, </span><span class="number">0</span>);</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  low优先级的获取方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">dispatch_queue_t </span>globalLowQueue = <span class="keyword">dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, </span><span class="number">0</span>);</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  background优先级的获取方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">dispatch_queue_t </span>globalBackgroundQueue = <span class="keyword">dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, </span><span class="number">0</span>);</span><br></pre></td></tr></table></figure>
 <p><strong>更改队列优先级：dispatch_set_target_queue(dispatch_object_t  _Nonnull object, dispatch_queue_t  _Nullable queue)</strong></p>
 <figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dispatch_queue_t </span>serialQueue = <span class="keyword">dispatch_queue_create(&quot;aa&quot;, </span><span class="keyword">DISPATCH_QUEUE_SERIAL);//串行队列</span></span><br><span class="line"><span class="keyword"></span>   </span><br><span class="line"><span class="keyword">dispatch_queue_t </span>globalBackgroundQueue = <span class="keyword">dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, </span><span class="number">0</span>);</span><br><span class="line">   </span><br><span class="line"><span class="keyword">dispatch_set_target_queue(serialQueue, </span>globalBackgroundQueue)<span class="comment">;将serialQueue指定为globalBackgroundQueue用。</span></span><br></pre></td></tr></table></figure>
@@ -365,7 +365,7 @@
 <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">11</span>:<span class="number">53</span>.<span class="number">029</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13543714</span>] 执行：<span class="number">2</span> 线程信息：&lt;NSThread: <span class="number">0</span>x600000076d80&gt;&#123;number = <span class="number">5</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">11</span>:<span class="number">53</span>.<span class="number">029</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13543650</span>] 执行：<span class="number">0</span> 线程信息：&lt;NSThread: <span class="number">0</span>x600000076d40&gt;&#123;number = <span class="number">3</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">11</span>:<span class="number">53</span>.<span class="number">029</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13543652</span>] 执行：<span class="number">1</span> 线程信息：&lt;NSThread: <span class="number">0</span>x608000066940&gt;&#123;number = <span class="number">4</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">11</span>:<span class="number">53</span>.<span class="number">029</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13543715</span>] 执行：<span class="number">3</span> 线程信息：&lt;NSThread: <span class="number">0</span>x608000071140&gt;&#123;number = <span class="number">6</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">11</span>:<span class="number">58</span>.<span class="number">763</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13544668</span>] 异步栅栏执行：<span class="number">4</span> 线程信息：&lt;NSThread: <span class="number">0</span>x6080000710c0&gt;&#123;number = <span class="number">8</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">12</span>:<span class="number">01</span>.<span class="number">195</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13542941</span>] 同步栅栏执行：<span class="number">4</span> 线程信息：&lt;NSThread: <span class="number">0</span>x600000066500&gt;&#123;number = <span class="number">1</span>, name = main&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">12</span>:<span class="number">03</span>.<span class="number">605</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13543650</span>] 执行：<span class="number">7</span> 线程信息：&lt;NSThread: <span class="number">0</span>x600000076d40&gt;&#123;number = <span class="number">3</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">12</span>:<span class="number">03</span>.<span class="number">605</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13544677</span>] 执行：<span class="number">5</span> 线程信息：&lt;NSThread: <span class="number">0</span>x608000074bc0&gt;&#123;number = <span class="number">9</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">12</span>:<span class="number">03</span>.<span class="number">605</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13544668</span>] 执行：<span class="number">6</span> 线程信息：&lt;NSThread: <span class="number">0</span>x6080000710c0&gt;&#123;number = <span class="number">8</span>, name = (null)&#125;</span><br><span class="line"><span class="attribute">2017</span>-<span class="number">06</span>-<span class="number">28</span> <span class="number">11</span>:<span class="number">12</span>:<span class="number">03</span>.<span class="number">605</span> 多线程GCD[<span class="number">82699</span>:<span class="number">13543714</span>] 执行：<span class="number">8</span> 线程信息：&lt;NSThread: <span class="number">0</span>x600000076d80&gt;&#123;number = <span class="number">5</span>, name = (null)&#125;</span><br></pre></td></tr></table></figure>
 <p>在读取数据时，有时候会出现数据竞争，数据安全问题，比如：当前的写入没有结束，读取操作就开始处理，导致数据错乱。或者读取正在进行，开始写入操作，导致程序崩溃等问题。<br>苹果为我们提供了一个便捷的参数：dispatch_barrier_async（栅栏）。<br><strong>作用</strong>：如上述代码中所表示，只有在1234操作完成时（无序），才会执行写入操作，只有当前写入操作结束后，才会继续向下执行。dispatch_barrier_sync也有同样的效果，但是如果不放入其他线程中的话，会在当前线程即主线程执行，会阻塞线程。</p>
 <p><strong>注意</strong>：dispatch_barrier_async中如果使用全局队列的话，就相当于要等待全局队列里的所有并发任务执行完后，才会执行dispatch_barrier_async中的任务，这样会受其他在全局队列里任务的影响，达不到我们想要的效果。</p>
-<h2 id="三、总结："><a href="#三、总结：" class="headerlink" title="三、总结："></a>三、总结：</h2><p> **<br>并发队列(Concurrent Dispatch Queue)  串行队列(Serial Dispatch Queue) ：<br>负责执行顺序！<br>异步执行 (dispatch_async)  同步执行 (dispatch_sync)：<br>负责选择线程执行！<br>**</p>
+<h2 id="三、总结："><a href="#三、总结：" class="headerlink" title="三、总结："></a>三、总结：</h2><p><strong>并发队列(Concurrent Dispatch Queue)  串行队列(Serial Dispatch Queue) ：负责执行顺序！</strong><br><strong>异步执行 (dispatch_async)  同步执行 (dispatch_sync)： 负责是否立即执行！</strong></p>
 
     </div>
 
@@ -406,8 +406,8 @@
       <i class="fa fa-chevron-left"></i> iOS-文字样式处理总结
     </a></div>
       <div class="post-nav-item">
-    <a href="/iOS%E5%BC%80%E5%8F%91%E7%B3%BB%E5%88%97-%E8%AE%A9%E4%BD%A0%E7%9A%84%E5%BA%94%E7%94%A8%E2%80%9C%E5%8A%A8%E2%80%9D%E8%B5%B7%E6%9D%A5-Core-Animation.html" rel="next" title="iOS开发系列-让你的应用“动”起来--Core-Animation">
-      iOS开发系列-让你的应用“动”起来--Core-Animation <i class="fa fa-chevron-right"></i>
+    <a href="/iOS%E5%BC%80%E5%8F%91%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B.html" rel="next" title="iOS多线程深度解析：NSThread、NSOperation与GCD">
+      iOS多线程深度解析：NSThread、NSOperation与GCD <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -482,7 +482,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -532,12 +532,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">342k</span>
+    <span title="站点总字数">350k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:11</span>
+    <span title="站点阅读时长">5:18</span>
 </div>
 
         
