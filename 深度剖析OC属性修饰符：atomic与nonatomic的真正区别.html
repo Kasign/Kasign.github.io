@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://blog.libd.cn').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: true,
+    lazyload: true,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.json',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="你真的了解atomic与nonatomic么？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度剖析OC属性修饰符：atomic与nonatomic的真正区别">
+<meta property="og:url" content="https://blog.libd.cn/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic%E4%B8%8Enonatomic%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB.html">
+<meta property="og:site_name" content="时光书馆">
+<meta property="og:description" content="你真的了解atomic与nonatomic么？">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-09T06:25:34.000Z">
+<meta property="article:modified_time" content="2026-05-09T06:25:34.000Z">
+<meta property="article:author" content="Eric">
+<meta property="article:tag" content="iOS 属性">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.libd.cn/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic%E4%B8%8Enonatomic%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>深度剖析OC属性修饰符：atomic与nonatomic的真正区别 | 时光书馆</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?852b0b87d350d0ca165928b56d51dc0c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="时光书馆" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">时光书馆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">将来的自己,会感谢现在努力的自己!</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.libd.cn/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic%E4%B8%8Enonatomic%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Eric">
+      <meta itemprop="description" content="记录开发过程中技术点">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="时光书馆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          深度剖析OC属性修饰符：atomic与nonatomic的真正区别
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-05-09 14:25:34" itemprop="dateCreated datePublished" datetime="2026-05-09T14:25:34+08:00">2026-05-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS底层探索系列</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+            <div class="post-description">你真的了解atomic与nonatomic么？</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="深度剖析OC属性修饰符：atomic-与-nonatomic-的真正区别"><a href="#深度剖析OC属性修饰符：atomic-与-nonatomic-的真正区别" class="headerlink" title="深度剖析OC属性修饰符：atomic 与 nonatomic 的真正区别"></a>深度剖析OC属性修饰符：<code>atomic</code> 与 <code>nonatomic</code> 的真正区别</h1><p>作为一名 iOS 开发者，你一定在无数个 <code>.h</code> 文件中敲下过 <code>@property (nonatomic, strong) ...</code>。你也一定知道，如果不写 <code>nonatomic</code>，属性默认就是 <code>atomic</code>。但在现代 iOS 开发的语境下，<code>atomic</code> 几乎已经从我们的代码里销声匿迹。这背后究竟隐藏着怎样的技术现实？本文将从内存模型、汇编指令到线程安全逻辑，严谨而完整地为你理清这对修饰符的本质差异。</p>
+<hr>
+<h2 id="1-基础定义：编译器为属性生成了什么？"><a href="#1-基础定义：编译器为属性生成了什么？" class="headerlink" title="1. 基础定义：编译器为属性生成了什么？"></a>1. 基础定义：编译器为属性生成了什么？</h2><p><code>atomic</code> 与 <code>nonatomic</code> 的核心区别在于：<strong>编译器是否为 getter 和 setter 方法自动生成互斥锁</strong>。</p>
+<ul>
+<li><code>atomic</code>（原子性）：编译器会生成一个自旋锁（历史上是 <code>spinlock</code>，现已优化为更现代的锁），包裹整个 getter &#x2F; setter，保证单次读&#x2F;写操作的原子性。</li>
+<li><code>nonatomic</code>（非原子性）：不生成任何锁，直接进行内存访问。</li>
+</ul>
+<p>简单来说，<code>atomic</code> 比 <code>nonatomic</code> 多了一层同步保障。但这一层保障到底保护了什么？很多人在这里开始产生误解。</p>
+<hr>
+<h2 id="2-“数据完整性”的真实含义：撕裂写入与单指令原子性"><a href="#2-“数据完整性”的真实含义：撕裂写入与单指令原子性" class="headerlink" title="2. “数据完整性”的真实含义：撕裂写入与单指令原子性"></a>2. “数据完整性”的真实含义：撕裂写入与单指令原子性</h2><p>你可能听过这样一句话：“<code>atomic</code> 能够保证数据的完整性。” 这里的“完整性”并不是指数据本身“正确”，也不是文件系统里的数据损坏，而是指<strong>在并发读写时，防止你读到一份“写了一半”的、新旧二进制位混杂的无效临时状态</strong>。</p>
+<p>要理解这一点，我们必须深入到 CPU 指令与内存宽度的层面。</p>
+<h3 id="2-1-单条指令就能完成的读写——nonatomic-也是完整的"><a href="#2-1-单条指令就能完成的读写——nonatomic-也是完整的" class="headerlink" title="2.1 单条指令就能完成的读写——nonatomic 也是完整的"></a>2.1 单条指令就能完成的读写——<code>nonatomic</code> 也是完整的</h3><p>在如今 64 位的 ARM 架构下，对于<strong>指针</strong>以及所有<strong>宽度小于等于 64 位的标量类型</strong>（如 <code>int</code>、<code>long</code>、<code>double</code>、<code>BOOL</code> 等），CPU 的 load &#x2F; store 指令本身就是原子的。即使你修饰为 <code>nonatomic</code>，一个线程正在写入，另一个线程读取，读到的值<strong>必定是一个完整的旧值或完整的新值</strong>，绝不会出现“半个整数”这种荒唐的结果。</p>
+<p>对于这类属性，<code>atomic</code> 与 <code>nonatomic</code> 在<strong>内存读写的完整性上没有任何区别</strong>。<code>atomic</code> 的锁在这里是纯粹的性能开销，提供不了额外价值。</p>
+<h3 id="2-2-需要多条指令才能完成的结构体——atomic-真正的战场"><a href="#2-2-需要多条指令才能完成的结构体——atomic-真正的战场" class="headerlink" title="2.2 需要多条指令才能完成的结构体——atomic 真正的战场"></a>2.2 需要多条指令才能完成的结构体——<code>atomic</code> 真正的战场</h3><p>当属性的类型<strong>内存占用超过了 CPU 单次原子访存的宽度</strong>时，<code>nonatomic</code> 就会产生所谓的“撕裂写入”（Torn Write）或“撕裂读取”。</p>
+<p>最典型的例子是 <code>CGRect</code>。在 ARM64 下，<code>CGRect</code> 包含 4 个 <code>CGFloat</code>（即 <code>double</code>，共 32 字节）。给一个 <code>CGRect</code> 属性赋值，永远不可能是一条指令完成。</p>
+<p>假设有一个被声明为 <code>nonatomic</code> 的属性：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">CGRect</span> hugeFrame;</span><br></pre></td></tr></table></figure>
+
+<p>现在考虑以下并发场景：</p>
+<ol>
+<li>线程 A 正在执行 <code>self.hugeFrame = newRect;</code>。这个写入被拆分成多条指令，逐部分将 32 个字节拷贝进内存。假设它刚写完前 16 个字节（旧的 <code>origin</code>），还有 16 个字节（新的 <code>size</code>）未写。</li>
+<li>恰在此时，线程 B 执行 <code>CGRect myRect = self.hugeFrame;</code>。</li>
+<li>线程 B 读到的 <code>myRect</code>，其 <code>origin</code> 来自旧值，而 <code>size</code> 来自新值。这成了一个<strong>在开发者的语义里从未存在过</strong>的、一半旧一半新拼凑出来的 <code>CGRect</code>。</li>
+</ol>
+<p>这个拼凑出来的值，就是丧失“数据完整性”的典型产物。此时，<code>atomic</code> 的作用就得以体现：它通过加锁，强制整个 getter &#x2F; setter 的代码块作为一个不可分割的整体来执行，<strong>保证绝不出现这种新旧混杂的临时状态</strong>。</p>
+<p><strong>结论修正公式：</strong> <code>atomic</code> 只保证在读写像 <code>CGRect</code> 这类需要多条指令才能完成的大内存结构时，不会出现新旧值拼凑的无效状态；对于标量、指针等单指令类型，它不提供额外的内存完整性收益。</p>
+<hr>
+<h2 id="3-多维对比：一张表看清全部差异"><a href="#3-多维对比：一张表看清全部差异" class="headerlink" title="3. 多维对比：一张表看清全部差异"></a>3. 多维对比：一张表看清全部差异</h2><table>
+<thead>
+<tr>
+<th align="left">对比维度</th>
+<th align="left"><code>atomic</code> （原子性）</th>
+<th align="left"><code>nonatomic</code> （非原子性）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>互斥锁</strong></td>
+<td align="left">✅ 自动生成。getter&#x2F;setter 被互斥锁包裹。</td>
+<td align="left">❌ 不生成任何锁。纯裸内存操作。</td>
+</tr>
+<tr>
+<td align="left"><strong>对单指令类型的完整性</strong></td>
+<td align="left">完整，但锁是多余的。</td>
+<td align="left">完整。指令本身就是原子的。</td>
+</tr>
+<tr>
+<td align="left"><strong>对多指令复合类型的完整性</strong></td>
+<td align="left">✅ 能防止撕裂写&#x2F;读，保证你读到单一完整的旧值或新值。</td>
+<td align="left">❌ 可能产生新旧值拼凑的无效数据。</td>
+</tr>
+<tr>
+<td align="left"><strong>性能</strong></td>
+<td align="left"><strong>差</strong>。频繁加锁&#x2F;解锁的开销巨大。竞争激烈时可能比 <code>nonatomic</code> 慢 20 倍以上。</td>
+<td align="left"><strong>极致</strong>。没有任何额外的软件同步开销，直接访存。</td>
+</tr>
+<tr>
+<td align="left"><strong>默认行为</strong></td>
+<td align="left">Objective-C 的默认选项。若不显式书写 <code>nonatomic</code>，属性即为 <code>atomic</code>。</td>
+<td align="left">必须显式书写。但几乎是所有现代 iOS 项目的事实标准。</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-核心误区：atomic-绝不是线程安全"><a href="#4-核心误区：atomic-绝不是线程安全" class="headerlink" title="4. 核心误区：atomic 绝不是线程安全"></a>4. 核心误区：<code>atomic</code> 绝不是线程安全</h2><p>这是整个讨论里最关键、也最容易被误解的一点。Apple 官方文档早已明确强调：</p>
+<blockquote>
+<p>Atomicity has to do with the integrity of the property’s value, not with the thread-safety of your object’s logic.</p>
+</blockquote>
+<p><strong><code>atomic</code> 属性只保护了这个属性本身的一次读或一次写操作不被破坏，但它与你的应用逻辑是否线程安全几乎是两回事。</strong></p>
+<h3 id="4-1-复合操作无法保护"><a href="#4-1-复合操作无法保护" class="headerlink" title="4.1 复合操作无法保护"></a>4.1 复合操作无法保护</h3><p>假设有一个 <code>atomic</code> 的 <code>NSInteger</code> 属性 <code>count</code>，你执行了这样一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span>.count = <span class="keyword">self</span>.count + <span class="number">1</span>;  <span class="comment">// “读-改-写”复合操作</span></span><br></pre></td></tr></table></figure>
+
+<p>这个操作分为三步：读、加 1、写。<code>atomic</code> 能保证每一步单独的执行是原子的，但<strong>无法保证这三步作为一个整体不被打断</strong>。两个线程同时执行这行代码，最终计数结果依然可能少 1。</p>
+<h3 id="4-2-跨属性逻辑一致性无法保护"><a href="#4-2-跨属性逻辑一致性无法保护" class="headerlink" title="4.2 跨属性逻辑一致性无法保护"></a>4.2 跨属性逻辑一致性无法保护</h3><p>一个 <code>Person</code> 对象有 <code>atomic</code> 的 <code>firstName</code> 和 <code>lastName</code>。线程 A 先改 <code>firstName</code>，再改 <code>lastName</code>。线程 B 同时读取这两个属性。线程 B 完全可能读到一个修改后的新名字和一个修改前的旧姓氏，拼出一个不存在的“新人”。<strong>业务逻辑的完整性，<code>atomic</code> 无能为力。</strong></p>
+<p>因此，开发者如果因为一个属性被标注为 <code>atomic</code> 就产生“这个类已经是线程安全的”这种错觉，反而会埋下更深、更隐蔽的并发漏洞。</p>
+<hr>
+<h2 id="5-实际使用场景分析：真的需要显式使用-atomic-吗？"><a href="#5-实际使用场景分析：真的需要显式使用-atomic-吗？" class="headerlink" title="5. 实际使用场景分析：真的需要显式使用 atomic 吗？"></a>5. 实际使用场景分析：真的需要显式使用 <code>atomic</code> 吗？</h2><p><strong>结论是：在现代 iOS 开发中，几乎找不到一个必须显式使用 <code>atomic</code> 的业务场景。</strong> 它的存在基本上属于历史遗留原因和一些极小众的特殊情况。</p>
+<h3 id="5-1-历史遗产：MRC-时代的底层安全网"><a href="#5-1-历史遗产：MRC-时代的底层安全网" class="headerlink" title="5.1 历史遗产：MRC 时代的底层安全网"></a>5.1 历史遗产：MRC 时代的底层安全网</h3><p>在手动内存管理（MRC）的时代，对象可能在后台线程被 <code>retain</code> &#x2F; <code>release</code>。如果此时属性的 getter 或 setter 不是原子化的，多线程同时访问同一个属性可能会引发引用计数错乱，最终导致对象过早释放（野指针崩溃）。默认的 <code>atomic</code> 相当于一个底层的安全网，防止属性值本身在被读取时出现“部分写入”的对象指针，从而规避了最极端的崩溃。今天在 ARC 下的通用业务代码中，这个理由已经彻底消失。</p>
+<h3 id="5-2-极罕见的单变量“发布”模式"><a href="#5-2-极罕见的单变量“发布”模式" class="headerlink" title="5.2 极罕见的单变量“发布”模式"></a>5.2 极罕见的单变量“发布”模式</h3><p>一个很窄的场景：一个后台线程计算完毕后，更新一个简单的状态标识，主线程只负责读取，且不关心该标识与其他属性之间的逻辑一致性。此时 <code>atomic</code> 可以确保主线程读取到的不是状态标识被“写坏”的中间值。</p>
+<p>但在实际工程中，遇到这种需求时，我们通常也会用 <code>nonatomic</code> + 专用的锁，或者直接使用 GCD 串行队列来管理状态，行为更加可控。</p>
+<h3 id="5-3-你的正确做法：手动模拟原子性"><a href="#5-3-你的正确做法：手动模拟原子性" class="headerlink" title="5.3 你的正确做法：手动模拟原子性"></a>5.3 你的正确做法：手动模拟原子性</h3><p>如果你确实需要为某个属性提供原子性的读写，更推荐的做法是：<strong>坚持使用 <code>nonatomic</code>，然后用 <code>NSLock</code>、<code>@synchronized</code> 等机制，在自定义 getter&#x2F;setter 中显式加锁</strong>。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSString</span> *)myValue &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span>(<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> _myValue;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="type">void</span>)setMyValue:(<span class="built_in">NSString</span> *)newValue &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span>(<span class="keyword">self</span>) &#123;</span><br><span class="line">        _myValue = [newValue <span class="keyword">copy</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样做的优势是：行为完全由你控制，性能瓶颈一目了然，不会像默认的 <code>atomic</code> 那样在你不注意的时候处处加锁、拖慢整体速度。</p>
+<h3 id="5-4-Swift-的视角"><a href="#5-4-Swift-的视角" class="headerlink" title="5.4 Swift 的视角"></a>5.4 Swift 的视角</h3><p>值得留意的是，<code>atomic</code> &#x2F; <code>nonatomic</code> 是 Objective-C 独有的概念。在 Swift 中，所有属性默认行为都等同于 OC 里的 <code>nonatomic</code>，且语言层面根本不提供原子性修饰符。如果你需要原子属性，必须自己用锁实现。苹果自家语言的这种设计，从侧面印证了：<strong>靠属性级别的锁来提供线程安全保证，是一条已经被放弃的老路。</strong></p>
+<hr>
+<h2 id="6-最佳实践"><a href="#6-最佳实践" class="headerlink" title="6. 最佳实践"></a>6. 最佳实践</h2><ul>
+<li><strong>永远显式使用 <code>nonatomic</code></strong>。不要依赖默认行为，除非你在维护一段古老的、MRC 下的基础库代码。</li>
+<li><strong>忘记“默认 <code>atomic</code> 能防崩溃”的谣言</strong>。它只能防极少数的内存撕裂崩溃，却会给你带来强烈的“线程安全”错觉，让你对真正的竞态条件放松警惕。</li>
+<li><strong>把线程安全的关注点向上提</strong>。属性的线程安全不是问题的终点。使用 GCD 的串行队列、<code>NSOperationQueue</code>、高阶锁等机制，在<strong>更高的逻辑层次</strong>上保证并发操作的原子性和一致性。</li>
+<li><strong>性能考量</strong>。UI 相关的所有属性都必须是 <code>nonatomic</code>。在 iOS 的主线程上，每一微秒都值得争取。</li>
+</ul>
+<hr>
+<h2 id="7-结语"><a href="#7-结语" class="headerlink" title="7. 结语"></a>7. 结语</h2><p><code>atomic</code> 与 <code>nonatomic</code> 的区别，从来都不只是一个“加没加锁”的表面问题。它背后涉及 CPU 指令原子性、内存对齐、Objective-C 历史包袱以及线程安全的设计哲学。作为一名追求严谨的 iOS 工程师，理解这些底层细节，能让你写出更高效、更安全的并发代码，也能帮你厘清那些流传多年的说辞。</p>
+<p>现在，你可以在下次代码审查时，清晰而自信地解释：为什么我们要在此处写上 <code>nonatomic</code>，以及为什么那一个悄然保留的默认 <code>atomic</code> 实际上什么也没有保护。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Eric
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.libd.cn/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic%E4%B8%8Enonatomic%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB.html" title="深度剖析OC属性修饰符：atomic与nonatomic的真正区别">https://blog.libd.cn/深度剖析OC属性修饰符：atomic与nonatomic的真正区别.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%B1%9E%E6%80%A7/" rel="tag"># iOS 属性</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/iOS-RunLoop-%E5%BA%95%E5%B1%82%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html" rel="next" title="iOS RunLoop （一） 底层运行原理完全解析">
+      iOS RunLoop （一） 底层运行原理完全解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic-%E4%B8%8E-nonatomic-%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB"><span class="nav-text">深度剖析OC属性修饰符：atomic 与 nonatomic 的真正区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%9F%BA%E7%A1%80%E5%AE%9A%E4%B9%89%EF%BC%9A%E7%BC%96%E8%AF%91%E5%99%A8%E4%B8%BA%E5%B1%9E%E6%80%A7%E7%94%9F%E6%88%90%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">1. 基础定义：编译器为属性生成了什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E2%80%9C%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%95%B4%E6%80%A7%E2%80%9D%E7%9A%84%E7%9C%9F%E5%AE%9E%E5%90%AB%E4%B9%89%EF%BC%9A%E6%92%95%E8%A3%82%E5%86%99%E5%85%A5%E4%B8%8E%E5%8D%95%E6%8C%87%E4%BB%A4%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-text">2. “数据完整性”的真实含义：撕裂写入与单指令原子性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%8D%95%E6%9D%A1%E6%8C%87%E4%BB%A4%E5%B0%B1%E8%83%BD%E5%AE%8C%E6%88%90%E7%9A%84%E8%AF%BB%E5%86%99%E2%80%94%E2%80%94nonatomic-%E4%B9%9F%E6%98%AF%E5%AE%8C%E6%95%B4%E7%9A%84"><span class="nav-text">2.1 单条指令就能完成的读写——nonatomic 也是完整的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E9%9C%80%E8%A6%81%E5%A4%9A%E6%9D%A1%E6%8C%87%E4%BB%A4%E6%89%8D%E8%83%BD%E5%AE%8C%E6%88%90%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E2%80%94%E2%80%94atomic-%E7%9C%9F%E6%AD%A3%E7%9A%84%E6%88%98%E5%9C%BA"><span class="nav-text">2.2 需要多条指令才能完成的结构体——atomic 真正的战场</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%A4%9A%E7%BB%B4%E5%AF%B9%E6%AF%94%EF%BC%9A%E4%B8%80%E5%BC%A0%E8%A1%A8%E7%9C%8B%E6%B8%85%E5%85%A8%E9%83%A8%E5%B7%AE%E5%BC%82"><span class="nav-text">3. 多维对比：一张表看清全部差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%A0%B8%E5%BF%83%E8%AF%AF%E5%8C%BA%EF%BC%9Aatomic-%E7%BB%9D%E4%B8%8D%E6%98%AF%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="nav-text">4. 核心误区：atomic 绝不是线程安全</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E5%A4%8D%E5%90%88%E6%93%8D%E4%BD%9C%E6%97%A0%E6%B3%95%E4%BF%9D%E6%8A%A4"><span class="nav-text">4.1 复合操作无法保护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E8%B7%A8%E5%B1%9E%E6%80%A7%E9%80%BB%E8%BE%91%E4%B8%80%E8%87%B4%E6%80%A7%E6%97%A0%E6%B3%95%E4%BF%9D%E6%8A%A4"><span class="nav-text">4.2 跨属性逻辑一致性无法保护</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%AE%9E%E9%99%85%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E5%88%86%E6%9E%90%EF%BC%9A%E7%9C%9F%E7%9A%84%E9%9C%80%E8%A6%81%E6%98%BE%E5%BC%8F%E4%BD%BF%E7%94%A8-atomic-%E5%90%97%EF%BC%9F"><span class="nav-text">5. 实际使用场景分析：真的需要显式使用 atomic 吗？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E5%8E%86%E5%8F%B2%E9%81%97%E4%BA%A7%EF%BC%9AMRC-%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%95%E5%B1%82%E5%AE%89%E5%85%A8%E7%BD%91"><span class="nav-text">5.1 历史遗产：MRC 时代的底层安全网</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E6%9E%81%E7%BD%95%E8%A7%81%E7%9A%84%E5%8D%95%E5%8F%98%E9%87%8F%E2%80%9C%E5%8F%91%E5%B8%83%E2%80%9D%E6%A8%A1%E5%BC%8F"><span class="nav-text">5.2 极罕见的单变量“发布”模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-%E4%BD%A0%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%81%9A%E6%B3%95%EF%BC%9A%E6%89%8B%E5%8A%A8%E6%A8%A1%E6%8B%9F%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-text">5.3 你的正确做法：手动模拟原子性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-Swift-%E7%9A%84%E8%A7%86%E8%A7%92"><span class="nav-text">5.4 Swift 的视角</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-text">6. 最佳实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E7%BB%93%E8%AF%AD"><span class="nav-text">7. 结语</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Eric</p>
+  <div class="site-description" itemprop="description">记录开发过程中技术点</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Eric</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">362k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:29</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      element.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?5cf840b15aee0b34c18a6f1adbb2aa40";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>

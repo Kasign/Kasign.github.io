@@ -10,7 +10,46 @@
   <rights>All rights reserved 2026, Eric</rights>
   <subtitle>将来的自己,会感谢现在努力的自己!</subtitle>
   <title>时光书馆</title>
-  <updated>2026-04-28T10:24:00.000Z</updated>
+  <updated>2026-05-09T06:25:34.000Z</updated>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
+    <category term="iOS 属性" scheme="https://blog.libd.cn/tags/iOS-%E5%B1%9E%E6%80%A7/"/>
+    <id>https://blog.libd.cn/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic%E4%B8%8Enonatomic%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB.html</id>
+    <link href="https://blog.libd.cn/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90OC%E5%B1%9E%E6%80%A7%E4%BF%AE%E9%A5%B0%E7%AC%A6%EF%BC%9Aatomic%E4%B8%8Enonatomic%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%8C%BA%E5%88%AB.html"/>
+    <published>2026-05-09T06:25:34.000Z</published>
+    <summary>你真的了解atomic与nonatomic么？</summary>
+    <title>深度剖析OC属性修饰符：atomic与nonatomic的真正区别</title>
+    <updated>2026-05-09T06:25:34.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
+    <category term="iOS RunLoop" scheme="https://blog.libd.cn/tags/iOS-RunLoop/"/>
+    <id>https://blog.libd.cn/iOS-RunLoop-%E5%BA%95%E5%B1%82%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html</id>
+    <link href="https://blog.libd.cn/iOS-RunLoop-%E5%BA%95%E5%B1%82%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html"/>
+    <published>2026-05-09T03:56:49.000Z</published>
+    <summary>本文将从数据结构、状态流转、Source 分类、事件协作、使用场景等多维度，对 RunLoop 进行严谨且全面的剖析。</summary>
+    <title>iOS RunLoop （一） 底层运行原理完全解析</title>
+    <updated>2026-05-09T03:56:49.000Z</updated>
+  </entry>
+  <entry>
+    <author>
+      <name>Eric</name>
+    </author>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
+    <category term="RunLoop iOS" scheme="https://blog.libd.cn/tags/RunLoop-iOS/"/>
+    <id>https://blog.libd.cn/iOS-RunLoop-%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%EF%BC%9A%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E9%81%BF%E5%9D%91.html</id>
+    <link href="https://blog.libd.cn/iOS-RunLoop-%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%EF%BC%9A%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E9%81%BF%E5%9D%91.html"/>
+    <published>2026-05-09T02:11:28.000Z</published>
+    <summary>RunLoop 是 iOS 线程并发模型的核心组件，负责线程的休眠唤醒、事件分发和定时器调度。深刻理解 RunLoop 的运行机制，不仅有助于写出高性能的应用，更是卡顿监控、线程保活等进阶操作的基石。本文将系统梳理 RunLoop 的常见使用场景、性能优化手段以及容易被忽略的细节。</summary>
+    <title>iOS RunLoop（二）使用场景、性能优化与避坑</title>
+    <updated>2026-05-09T02:11:28.000Z</updated>
+  </entry>
   <entry>
     <author>
       <name>Eric</name>
@@ -41,7 +80,7 @@
     <author>
       <name>Eric</name>
     </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
     <category term="iOS底层原理" scheme="https://blog.libd.cn/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
     <id>https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html</id>
     <link href="https://blog.libd.cn/Mach%E2%80%91O-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90.html"/>
@@ -54,7 +93,7 @@
     <author>
       <name>Eric</name>
     </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
     <category term="iOS底层原理" scheme="https://blog.libd.cn/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
     <id>https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html</id>
     <link href="https://blog.libd.cn/Weak%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html"/>
@@ -67,7 +106,7 @@
     <author>
       <name>Eric</name>
     </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
+    <category term="iOS底层探索系列" scheme="https://blog.libd.cn/categories/iOS%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%97/"/>
     <category term="iOS底层原理" scheme="https://blog.libd.cn/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"/>
     <id>https://blog.libd.cn/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html</id>
     <link href="https://blog.libd.cn/AutoreleasePool%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86.html"/>
@@ -236,45 +275,5 @@
     <summary>获取iOS设备的一些信息，随着设备的不断更新，有些方法可能会有过时的情况。</summary>
     <title>iOS获取各类基本信息（型号，cpu）</title>
     <updated>2018-06-13T05:21:05.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Eric</name>
-    </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="textField" scheme="https://blog.libd.cn/tags/textField/"/>
-    <id>https://blog.libd.cn/TextField%E6%A0%87%E8%AE%B0%E5%8C%BA%E9%80%89%E6%8B%A9%E5%8C%BA.html</id>
-    <link href="https://blog.libd.cn/TextField%E6%A0%87%E8%AE%B0%E5%8C%BA%E9%80%89%E6%8B%A9%E5%8C%BA.html"/>
-    <published>2018-05-25T03:09:48.000Z</published>
-    <summary>记录iOS中TextField标记区选择区的问题，有时候在编辑文字的时候会用到。</summary>
-    <title>TextField标记区选择区</title>
-    <updated>2018-05-25T03:09:48.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Eric</name>
-    </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="Git" scheme="https://blog.libd.cn/tags/Git/"/>
-    <category term="SSH" scheme="https://blog.libd.cn/tags/SSH/"/>
-    <id>https://blog.libd.cn/Git%E4%B8%ADssh%E9%85%8D%E7%BD%AE%EF%BC%88%E5%AE%8C%E7%BE%8E%E8%A7%A3%E5%86%B3%EF%BC%89.html</id>
-    <link href="https://blog.libd.cn/Git%E4%B8%ADssh%E9%85%8D%E7%BD%AE%EF%BC%88%E5%AE%8C%E7%BE%8E%E8%A7%A3%E5%86%B3%EF%BC%89.html"/>
-    <published>2018-05-23T05:10:02.000Z</published>
-    <summary>有时候更换电脑需要重新配置各种git库，这个时候需要设置ssh，主要是因为方便，以及为了解决同一个库有不同账号带来的冲突，本文能够完美解决这些问题。在此记录一下。</summary>
-    <title>Git中ssh配置（完美解决）</title>
-    <updated>2018-05-23T05:10:02.000Z</updated>
-  </entry>
-  <entry>
-    <author>
-      <name>Eric</name>
-    </author>
-    <category term="iOS开发" scheme="https://blog.libd.cn/categories/iOS%E5%BC%80%E5%8F%91/"/>
-    <category term="3D" scheme="https://blog.libd.cn/tags/3D/"/>
-    <id>https://blog.libd.cn/CATransform3D%E8%AF%A6%E8%A7%A3.html</id>
-    <link href="https://blog.libd.cn/CATransform3D%E8%AF%A6%E8%A7%A3.html"/>
-    <published>2018-05-08T02:47:57.000Z</published>
-    <summary>探索iOS中view的3D变换原理，CATransform3D中每个值代表的意义。</summary>
-    <title>CATransform3D详解</title>
-    <updated>2018-05-08T02:47:57.000Z</updated>
   </entry>
 </feed>

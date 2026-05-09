@@ -217,13 +217,38 @@ NexT.utils = {
   },
 
   registerSidebarTOC: function() {
-    const navItems = document.querySelectorAll('.post-toc li');
-    const sections = [...navItems].map(element => {
-      var link = element.querySelector('a.nav-link');
-      // TOC item animation navigate.
-      link.addEventListener('click', event => {
+    // Hexo 8+ toc helper uses encodeURI() in href; heading id in DOM is raw Unicode.
+    // getElementById(encoded) fails for CJK etc. — decode fragment before lookup.
+    var decodeTocHashId = function(href) {
+      if (!href) return '';
+      var i = href.indexOf('#');
+      var fragment = i === -1 ? href : href.slice(i + 1);
+      try {
+        return decodeURIComponent(fragment);
+      } catch (e) {
+        return fragment;
+      }
+    };
+
+    // Pairs of TOC <li> and matching heading, in true document order (not only tree order
+    // of .post-toc li — avoids rare mismatches). Clicks and scroll-spy share this list.
+    var tocPairs = [];
+    document.querySelectorAll('.post-toc li').forEach(function(li) {
+      var link = li.querySelector('a.nav-link');
+      if (!link) return;
+      var section = document.getElementById(decodeTocHashId(link.getAttribute('href')));
+      if (!section) return;
+      tocPairs.push({ navItem: li, section: section, link: link });
+    });
+    tocPairs.sort(function(a, b) {
+      return a.section.getBoundingClientRect().top - b.section.getBoundingClientRect().top;
+    });
+
+    tocPairs.forEach(function(pair) {
+      pair.link.addEventListener('click', function(event) {
         event.preventDefault();
-        var target = document.getElementById(event.currentTarget.getAttribute('href').replace('#', ''));
+        var target = pair.section;
+        if (!target) return;
         var offset = target.getBoundingClientRect().top + window.scrollY;
         window.anime({
           targets  : document.scrollingElement,
@@ -232,68 +257,82 @@ NexT.utils = {
           scrollTop: offset + 10
         });
       });
-      return document.getElementById(link.getAttribute('href').replace('#', ''));
     });
 
-    var tocElement = document.querySelector('.post-toc-wrap');
-    function activateNavByIndex(target) {
-      if (target.classList.contains('active-current')) return;
+    if (!tocPairs.length) return;
 
-      document.querySelectorAll('.post-toc .active').forEach(element => {
+    var tocElement = document.querySelector('.post-toc-wrap');
+    var lastTocNavActivated = null;
+    function activateNavByIndex(target) {
+      if (!target || !target.classList) return;
+
+      var sameItem = lastTocNavActivated === target;
+      lastTocNavActivated = target;
+
+      document.querySelectorAll('.post-toc li').forEach(function(element) {
         element.classList.remove('active', 'active-current');
       });
       target.classList.add('active', 'active-current');
       var parent = target.parentNode;
-      while (!parent.matches('.post-toc')) {
+      while (parent && !parent.matches('.post-toc')) {
         if (parent.matches('li')) parent.classList.add('active');
         parent = parent.parentNode;
       }
-      // Scrolling to center active TOC element if TOC content is taller then viewport.
-      window.anime({
-        targets  : tocElement,
-        duration : 200,
-        easing   : 'linear',
-        scrollTop: tocElement.scrollTop - (tocElement.offsetHeight / 2) + target.getBoundingClientRect().top - tocElement.getBoundingClientRect().top
-      });
+      if (tocElement && !sameItem) {
+        window.anime({
+          targets  : tocElement,
+          duration : 200,
+          easing   : 'linear',
+          scrollTop: tocElement.scrollTop - (tocElement.offsetHeight / 2) + target.getBoundingClientRect().top - tocElement.getBoundingClientRect().top
+        });
+      }
     }
 
-    function findIndex(entries) {
-      let index = 0;
-      let entry = entries[index];
-      if (entry.boundingClientRect.top > 0) {
-        index = sections.indexOf(entry.target);
-        return index === 0 ? 0 : index - 1;
+    // Only treat top chrome as scrollspy offset when it is fixed/sticky. Using .site-nav
+    // height on Muse/Mist (non-sticky header) shifts the line down and highlights one
+    // section ahead of what the reader sees.
+    function getTocSpyOffset() {
+      var base = 12;
+      var nodes = document.querySelectorAll('.headband, .header, .header-inner');
+      var i;
+      var el;
+      var st;
+      var maxBottom = 0;
+      for (i = 0; i < nodes.length; i++) {
+        el = nodes[i];
+        st = window.getComputedStyle(el);
+        if (st.position !== 'fixed' && st.position !== 'sticky') continue;
+        maxBottom = Math.max(maxBottom, el.getBoundingClientRect().bottom);
       }
-      for (; index < entries.length; index++) {
-        if (entries[index].boundingClientRect.top <= 0) {
-          entry = entries[index];
-        } else {
-          return sections.indexOf(entry.target);
-        }
-      }
-      return sections.indexOf(entry.target);
+      return maxBottom > 0 ? Math.round(maxBottom) + 4 : base;
     }
 
-    function createIntersectionObserver(marginTop) {
-      marginTop = Math.floor(marginTop + 10000);
-      let intersectionObserver = new IntersectionObserver((entries, observe) => {
-        let scrollHeight = document.documentElement.scrollHeight + 100;
-        if (scrollHeight > marginTop) {
-          observe.disconnect();
-          createIntersectionObserver(scrollHeight);
-          return;
-        }
-        let index = findIndex(entries);
-        activateNavByIndex(navItems[index]);
-      }, {
-        rootMargin: marginTop + 'px 0px -100% 0px',
-        threshold : 0
-      });
-      sections.forEach(element => {
-        element && intersectionObserver.observe(element);
-      });
+    var tocSpyTicking = false;
+    function updateSidebarTOCActive() {
+      var line = getTocSpyOffset();
+      var activeIdx = 0;
+      var j;
+      var top;
+      for (j = 0; j < tocPairs.length; j++) {
+        top = tocPairs[j].section.getBoundingClientRect().top;
+        if (top <= line) activeIdx = j;
+      }
+      activateNavByIndex(tocPairs[activeIdx].navItem);
     }
-    createIntersectionObserver(document.documentElement.scrollHeight);
+
+    function onTocSpyScrollOrResize() {
+      if (!tocSpyTicking) {
+        tocSpyTicking = true;
+        window.requestAnimationFrame(function() {
+          updateSidebarTOCActive();
+          tocSpyTicking = false;
+        });
+      }
+    }
+
+    window.addEventListener('scroll', onTocSpyScrollOrResize, { passive: true });
+    window.addEventListener('resize', onTocSpyScrollOrResize);
+    updateSidebarTOCActive();
   },
 
   hasMobileUA: function() {

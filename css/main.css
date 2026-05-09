@@ -1156,7 +1156,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #cb3e04;
+  background: #b5b1fc;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1330,10 +1330,6 @@ pre .javascript .function {
 }
 .post-toc .nav .active-current > .nav-child > .nav-item {
   display: block;
-}
-.post-toc .nav .active > a {
-  border-bottom-color: #87daff;
-  color: #87daff;
 }
 .post-toc .nav .active-current > a {
   color: #87daff;
